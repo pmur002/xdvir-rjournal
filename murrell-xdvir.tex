@@ -1,0 +1,98 @@
+% !TeX root = RJwrapper.tex
+\title{Rendering Typeset Text in R}
+
+
+\author{by Paul Murrell}
+
+\maketitle
+
+\abstract{%
+An abstract of less than 150 words.
+}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+Text labels, titles, and annotations are essential components of
+any data visualisation. Viewers focus a lot of their attention
+on text (Borkin et al. 2016),
+text is the most effective way to communicate some types of
+information (Hearst 2023),
+and the message obtained from a data visualisation can be
+heavily influenced by text (Kong, Liu, and Karahalios 2018).
+
+R provides relatively flexible tools for adding text labels to plots.
+For example, in the \texttt{graphics} package, we can specify an
+overall title and axis titles via the \texttt{main},
+\texttt{xlab}, and \texttt{ylab} arguments to the \texttt{plot()} function
+and we can add text at arbitrary locations on the plot with the \texttt{text()}
+and \texttt{mtext()} functions.
+
+However, these core tools for drawing text are quite limited
+in terms of the formatting of the text.
+For example, there is no facility for emphasising a word with
+a \textbf{bold} or \emph{italic} face within a text label.
+
+The \CRANpkg{gridtext} (Wilke and Wiernik 2022b) and \CRANpkg{ggtext} (Wilke and Wiernik 2022a)
+packages greatly improved the situation by allowing text labels
+to include a small subset of
+markdown and HTML (plus CSS). This allows changes in font face
+and colour within text labels.
+
+More recently, the \CRANpkg{marquee} package (Pedersen and Mitáš 2024)
+improved things a great deal further by providing full support for
+markdown within text labels. This makes it possible to layout
+complex arrangements of text and graphical content within ``text'' labels.
+
+Despite these advances, there are still some text formatting tasks that
+remain out of reach. For example,
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-3-1.png}
+
+(Murrell, Pedersen, and Urbanek 2023)
+
+\hypertarget{background}{%
+\section{Background}\label{background}}
+
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+\hypertarget{references}{%
+\section*{References}\label{references}}
+\addcontentsline{toc}{section}{References}
+
+\hypertarget{refs}{}
+\begin{CSLReferences}{1}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-massvis}{}}%
+Borkin, Michelle A., Zoya Bylinskii, Nam Wook Kim, Constance May Bainbridge, Chelsea S. Yeh, Daniel Borkin, Hanspeter Pfister, and Aude Oliva. 2016. {``Beyond Memorability: Visualization Recognition and Recall.''} \emph{IEEE Transactions on Visualization and Computer Graphics} 22 (1): 519--28. \url{https://doi.org/10.1109/TVCG.2015.2467732}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-hearst}{}}%
+Hearst, Marti A. 2023. {``Show It or Tell It? Text, Visualization, and Their Combination.''} \emph{Commun. ACM} 66 (10): 68--75. \url{https://doi.org/10.1145/3593580}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-kong}{}}%
+Kong, Ha-Kyung, Zhicheng Liu, and Karrie Karahalios. 2018. {``Frames and Slants in Titles of Visualizations on Controversial Topics.''} In \emph{Proceedings of the 2018 CHI Conference on Human Factors in Computing Systems}, 1--12. CHI '18. New York, NY, USA: Association for Computing Machinery. \url{https://doi.org/10.1145/3173574.3174012}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-murrell-pedersen-urbanek-glyphs-2023}{}}%
+Murrell, Paul, Thomas Lin Pedersen, and Simon Urbanek. 2023. {``Rendering Typeset Glyphs in {R} Graphics.''} 2023-01. Department of Statistics, The University of Auckland. \url{https://doi.org/10.17608/k6.auckland.22774079}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-marquee}{}}%
+Pedersen, Thomas Lin, and Martin Mitáš. 2024. \emph{Marquee: Markdown Parser and Renderer for r Graphics}. \url{https://CRAN.R-project.org/package=marquee}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-ggtext}{}}%
+Wilke, Claus O., and Brenton M. Wiernik. 2022a. \emph{Ggtext: Improved Text Rendering Support for 'Ggplot2'}. \url{https://CRAN.R-project.org/package=ggtext}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-gridtext}{}}%
+---------. 2022b. \emph{Gridtext: Improved Text Rendering Support for 'Grid' Graphics}. \url{https://CRAN.R-project.org/package=gridtext}.
+
+\end{CSLReferences}
+
+
+\address{%
+Paul Murrell\\
+The University of Auckland\\%
+Department of Statistics\\ Auckland, New Zealand\\
+%
+\url{https://www.stat.auckland.ac.nz/~paul/}\\%
+\textit{ORCiD: \href{https://orcid.org/0000-0002-3224-8858}{0000-0002-3224-8858}}\\%
+\href{mailto:paul@stat.auckland.ac.nz}{\nolinkurl{paul@stat.auckland.ac.nz}}%
+}
