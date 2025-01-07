@@ -258,77 +258,127 @@ a range of different features and applications of the
 
 # LaTeX text labels
 
-The simplest way to draw typeset text with the `xdvir` package 
+The simplest way to draw LaTeX text with the `xdvir` package 
 is to call the `grid.latex()` function.  The first argument to
 this function is a character value, which is interpreted as
 a fragment of LaTeX code.
 For example, the following code draws a text label that contains
-the LaTeX logo.  Because LaTeX code tends to contain 
+a fragment of the larger annotation from 
+Figure \@ref{fig:typesetting}.  We use just a fragment in order
+to keep the code readable.
+
+Because LaTeX code tends to contain 
 a large number of backslashes, the code below uses the `r"(...)"`
 syntax for raw character constants, so that we do not have to
 escape each backslash with a double backslash.
 The resulting image is shown below the code.
+Although it is not immediately obvious from that image, 
+the text, or rather the glyphs, in the image are rendered by R.
 
-```{r}
+```{r, fragment}
 tex <- r"(We move the original mean to $\bar z_i$)"
 ```
 
-```{r fig.width=3, fig.height=.5}
+```{r grid.latex, fig.width=3, fig.height=.5}
 grid.latex(tex)
 ```
 
-As the function name `grid.latex()` suggests, this is low-level 
+As the function name `grid.latex()` suggests, the code above
+is producing low-level 
 drawing in the `grid` package graphics system.
-The text is drawn relative to the current `grid` viewport.
-We can add this low-level drawing to a plot in a number of ways.
-For example, the following code uses the `grid_panel()` function
-from the \CRANpkg{gggrid} package 
-[@pkg-gggrid] to add a text label to the top-right corner of a 
-\CRANpkg{ggplot2} plot [@pkg-ggplot2].
-The `gg` object contains a description of the main \CRANpkg{ggplot2} 
+The text is just drawn relative to the current `grid` viewport,
+wherever that may be on the page.
+While this is extremely flexible, it is more likely that 
+we want to combine and coordinate the text with a high-level plot
+of some sort.
+There are various ways that low-level `grid` drawing can be combined
+with a high-level plot, but we will leave those demonstrations to
+later sections.
+
+Instead, for now, we will demonstrate a more common scenario:
+drawing LaTeX text labels on a \CRANpkg{ggplot2} plot [@pkg-ggplot2].
+For this purpose, the `xdvir` package provides the
+`element_latex()` function.  This allows us to specify a LaTeX fragment
+as a plot label and indicate the special nature of the label
+via the `ggplot2::theme()` function.
+
+For example, the following code uses the same LaTeX fragment 
+from the example above as the title of a \CRANpkg{ggplot2} plot.
+The resulting plot is shown in Figure \@ref(fig:element.latex).
+
+The `gg` object in the code below
+contains a description of the main \CRANpkg{ggplot2} 
 plot from Figure 
-\@ref(fig:typesetting).  The supplementary materials contains
-full code for generating that object.
-This code shows that we can create an object without drawing it,
-using `latexGrob()`, and there are arguments for positioning 
-the typeset text.  In this case we draw the text top-right justified
-2mm in from the top-right corner of the plot region.
-The object produced by `grid_panel()` is passed to \CRANpkg{ggplot2}
-to be drawn as part of the plot.  
+\@ref(fig:typesetting).  The supplementary materials for this article
+includes full code for generating that `gg` object.
+
+```{r, element.latex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap="A `ggplot2` plot with a title that was specified using a LaTeX fragment."}
+gg +
+    labs(title=tex) +
+    theme(plot.title=element_latex())
+```
+
+The `xdvir` package also provides a `geom_latex()` function for
+drawing text labels based on data, but that will be demonstrated 
+in later sections.
+
+# Under the Hood
+
+The previous section showed that simple usage of the `xdvir` package
+only requires specifying a LaTeX fragment as the text to draw.
+For example, the examples used the LaTeX fragment shown below.
 
 ```{r}
-library(gggrid)
+tex
 ```
 
-```{r, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300}
-gg +
-    grid_panel(latexGrob(tex,
-                         x=unit(1, "npc") - unit(5, "mm"),
-                         y=unit(1, "npc") - unit(5, "mm"),
-                         hjust="right", vjust="top"))
-```
+The `grid.latex()` function has three tasks to perform in order to
+draw that LaTeX fragment in R:
+
+**Authoring:**
+
+: The LaTeX fragment has to be turned into a complete
+  LaTeX document.
+
+: The `xdvir` package provides the function `author()` for this purpose.
+  For example, the following code
+  takes the LaTeX fragment `tex` and produces a complete LaTeX
+  document that is ready to typeset.
 
 ```{r}
-adventor <- fontspecPackage(font="TeX Gyre Adventor")
-texStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
-\fontsize{12}{15}
-\selectfont
-This is \textcolor{Rred}{\LaTeX})"
+doc <- author(tex)
+doc
 ```
 
-```{r, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300}
-gg +
-    grid_panel(latexGrob(texStr,
-                         x=unit(1, "npc") - unit(5, "mm"),
-                         y=unit(1, "npc") - unit(5, "mm"),
-                         hjust="right", vjust="top",
-                         packages=list(adventor, "xcolor")))
+**Typesetting:**
+
+: The LaTeX document has to be typeset to produce a set of 
+  glyphs and their positions.
+
+: The `xdvir` package provides the function `typeset()` for this purpose.
+  For example, the following code takes the LaTeX document `doc` and
+  produces a `"DVI"` object that contains instructions on the fonts to
+  use (lines that contain `x_fnt_def` and `fnt_num` in the output below), 
+  the glyphs to use from those fonts (lines that contain
+  `x_glyph` in the output below), and where to draw those glyphs
+  (lines that contain `down` and `right` and `x_glyph`).
+
+```{r}
+dvi <- typeset(doc)
+dvi
+```  
+
+**Rendering:**
+
+: The result of the typesetting step has to be turned into drawing in R.
+
+: The `xdvir` package provides the `grid.dvi()` function for this purpose.
+  For example, the code below renders the typesetting information in `dvi`
+  in R.
+
+```{r fig.width=3, fig.height=.5}
+grid.dvi(dvi)
 ```
-
-
-# How the package works
-
-# Drawing Figure \@ref(fig:typesetting)
 
 
 # Fancy annotated equation example [@schneider2023]
@@ -404,8 +454,8 @@ registerPackage(tikzNoBBox)
 
 pkgs <- c("xcolor", "tikzNoBBox", "annotate", "roboto")
 
-tex <- author(readLines("schneider.tex"), packages=pkgs)
-dvi <- typeset(tex, texFile="schneider-doc.tex")
+tex <- author(readLines("TeX/schneider.tex"), packages=pkgs)
+dvi <- typeset(tex, texFile="TeX/schneider-doc.tex")
 
 annotation <- function(data, coords) {
     dviGrob(dvi, packages=pkgs,
@@ -455,8 +505,8 @@ Example of grid.dvi() just dumped on top of other drawing
 => motivation for better alignment examples.
 
 ```{r echo=FALSE}
-tex <- author(readLines("longley.tex"), packages="fontspec")
-dvi <- typeset(tex, texFile="longley-doc.tex")
+tex <- author(readLines("TeX/longley.tex"), packages="fontspec")
+dvi <- typeset(tex, texFile="TeX/longley-doc.tex")
 par(mar=c(4, 4, 1, 1))
 barplot(GNP ~ Year, data = longley)
 grid.dvi(dvi,
@@ -474,6 +524,11 @@ Do tikz example that draws arrow to location on plot?
 
 Do example that draws grid arrow to location in tikz picture?
 (needs implementing)
+
+# gggrid
+
+Need a \CRANpkg{gggrid} package 
+[@pkg-gggrid] example.
 
 # Acknowledgements
 

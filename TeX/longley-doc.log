@@ -1,9 +1,9 @@
-This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2024.3.15)  18 DEC 2024 09:29
+This is XeTeX, Version 3.14159265-2.6-0.999991 (TeX Live 2019/Debian) (preloaded format=xelatex 2024.3.15)  7 JAN 2025 15:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**longley-doc.tex
-(./longley-doc.tex
+**TeX/longley-doc.tex
+(./TeX/longley-doc.tex
 LaTeX2e <2020-02-02> patch level 2
 L3 programming layer <2020-02-14> (/usr/share/texlive/texmf-dist/tex/latex/stan
 dalone/standalone.cls
@@ -163,7 +163,7 @@ LaTeX Info: Redefining \] on input line 2860.
 \l__um_primecount_int=\count273
 \g__um_primekern_muskip=\muskip17
 (/usr/share/texlive/texmf-dist/tex/latex/unicode-math/unicode-math-table.tex)))
-(./longley-doc.aux)
+(TeX/longley-doc.aux)
 \openout1 = `longley-doc.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 5.
@@ -391,28 +391,30 @@ Package fontspec Info: Font family 'Economica-Regular.ttf(0)' created for font
 (fontspec)             'Economica-Regular.ttf' with options
 (fontspec)             [Ligatures=TeX,BoldFont=Economica-Bold.ttf,ItalicFont=Ec
 onomica-Italic.ttf,BoldItalicFont=Economica-BoldItalic.ttf,Path=/home/pmur002/F
-iles/Research/Rstuff/DVI/pubs/RJournal/Fonts/].
+iles/Research/Rstuff/DVI/pubs/RJournal/murrell-xdvir/Fonts/].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Regular.ttf]/OT:script=latn;language=dflt;mapping=tex-text;"
-
+al/murrell-xdvir/Fonts/Economica-Regular.ttf]/OT:script=latn;language=dflt;mapp
+ing=tex-text;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Bold.ttf]/OT:script=latn;language=dflt;mapping=tex-text;"
+al/murrell-xdvir/Fonts/Economica-Bold.ttf]/OT:script=latn;language=dflt;mapping
+=tex-text;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Italic.ttf]/OT:script=latn;language=dflt;mapping=tex-text;"
+al/murrell-xdvir/Fonts/Economica-Italic.ttf]/OT:script=latn;language=dflt;mappi
+ng=tex-text;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (b/it) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-BoldItalic.ttf]/OT:script=latn;language=dflt;mapping=tex-tex
-t;"
+al/murrell-xdvir/Fonts/Economica-BoldItalic.ttf]/OT:script=latn;language=dflt;m
+apping=tex-text;"
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 
 
@@ -420,26 +422,27 @@ Package fontspec Info: Font family 'Economica-Regular.ttf(1)' created for font
 (fontspec)             'Economica-Regular.ttf' with options
 (fontspec)             [BoldFont=Economica-Bold.ttf,ItalicFont=Economica-Italic
 .ttf,BoldItalicFont=Economica-BoldItalic.ttf,Path=/home/pmur002/Files/Research/
-Rstuff/DVI/pubs/RJournal/Fonts/].
+Rstuff/DVI/pubs/RJournal/murrell-xdvir/Fonts/].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Regular.ttf]/OT:script=latn;language=dflt;"
+al/murrell-xdvir/Fonts/Economica-Regular.ttf]/OT:script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Bold.ttf]/OT:script=latn;language=dflt;"
+al/murrell-xdvir/Fonts/Economica-Bold.ttf]/OT:script=latn;language=dflt;"
 (fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-Italic.ttf]/OT:script=latn;language=dflt;"
+al/murrell-xdvir/Fonts/Economica-Italic.ttf]/OT:script=latn;language=dflt;"
 (fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (b/it) with NFSS spec.:
 (fontspec)             <->"[/home/pmur002/Files/Research/Rstuff/DVI/pubs/RJourn
-al/Fonts/Economica-BoldItalic.ttf]/OT:script=latn;language=dflt;"
+al/murrell-xdvir/Fonts/Economica-BoldItalic.ttf]/OT:script=latn;language=dflt;"
+
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `normal'
@@ -479,14 +482,14 @@ LaTeX Font Info:    Font shape `TU/latinmodern-math.otf(3)/m/n' will be
 (Font)              scaled to size 4.99947pt on input line 26.
 [1
 
-] (./longley-doc.aux) ) 
+] (TeX/longley-doc.aux) ) 
 Here is how much of TeX's memory you used:
- 8173 strings out of 479819
- 176987 string characters out of 5895846
+ 8174 strings out of 479819
+ 177303 string characters out of 5895846
  729317 words of memory out of 5000000
  25250 multiletter control sequences out of 15000+600000
  534312 words of font info for 55 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 52i,6n,109p,287b,397s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 52i,6n,109p,291b,397s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on ./longley-doc.xdv (1 page, 2024 bytes).
+Output written on TeX/longley-doc.xdv (1 page, 2080 bytes).
