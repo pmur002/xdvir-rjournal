@@ -159,7 +159,7 @@ ggIntro <- ggplot(data.frame(x, y)) +
     theme(text=element_text(family="TeX Gyre Adventor", size=12),
           panel.grid=element_blank())
 
-annotation <- function(data, coords) {
+label <- function(data, coords) {
     latexGrob(texStr, packages=list(adventor, "xcolor"),
               x=max(coords$x), 
               y=max(coords$y),
@@ -169,7 +169,7 @@ annotation <- function(data, coords) {
 }
 
 ggIntro + 
-    grid_panel(annotation, aes(x, y))
+    grid_panel(label, aes(x, y))
 ```
 
 The annotation in Figure \@ref(fig:typesetting)
@@ -451,11 +451,28 @@ doc
   the glyphs to use from those fonts (lines that contain
   `x_glyph` in the output below), and where to draw those glyphs
   (lines that contain `down` and `right` and `x_glyph`).
+  The output has been trimmed to make it easier to read.
 
-```{r}
+```{r typeset, echo=FALSE}
 dvi <- typeset(doc)
+```
+```{r dvi, echo=FALSE, eval=FALSE}
 dvi
 ```  
+```{r eval=FALSE}
+<<typeset>>
+<<dvi>>
+```
+```{r echo=FALSE}
+output <- capture.output(dvi)
+firstDown <- grep("^down", output)[1]
+firstDef <- grep("^x_fnt_def", output)[1]
+firstGlyph <- grep("^x_glyph", output)[1]
+cat(c(output[1:firstDown], 
+      "\n...\n",
+      output[(firstDef - 1):(firstGlyph + 3)],
+      "\n...\n"), sep="\n")
+```
 
 **Rendering:**
 
@@ -519,42 +536,98 @@ grid.rect()
 grid.latex(colourTeX, packages="xcolor")
 ```
 
-The `packages` argument plays two important roles.
-It affects the authoring step to make sure that the package is loaded
-in the LaTeX document.
-
-```{r}
-colourDoc <- author(colourTeX, packages="xcolor")
-colourDoc
-```
-
-Without this, the typesetting step would fail because the LaTeX code
-`\color{red}` would not be recognised.
-The changes in colour can be seen in the `"DVI"` output below
-(lines that contain `xxx` and `color push` or `color pop`).
-
-```{r}
-colourDVI <- typeset(colourDoc)
-colourDVI
-```
-
-The `packages` argument also affects the rendering step to make sure
-that R responds to the `color push` and `color pop` operations.
-
-```{r fig.width=3, fig.height=.5}
-grid.rect()
-grid.dvi(colourDVI, packages="xcolor")
-```
-
-fontspec and xcolor
-
-Show the document created by 
+There are several LaTeX packages with predefined support, including 
+`xcolor` for changes in colour and `fontspec` for changes in font,
+and support can be added for other LaTeX packages with the
+`LaTeXpackage()` function.  We will see an example of the latter 
+in a later section.
 
 # Justifying text
 
-preview
+By default, the LaTeX text is centred upon a specified location.
+For example, the following code draws the `tex` fragment vertically centred
+at a location half-way up the image (as indicated by the grey line).
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(tex, y=.5)
+```
+
+We can specify a different justification using the `vjust` argument.
+For example, the following code draws the same `tex` fragment
+at the same location, but with a bottom-justification.
+Notice that the bottom of the text is based on the bounding box 
+of the text, so the bottom of the text is the bottom of the subscript "i".
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(tex, y=.5, vjust="bottom")
+```
+
+In some situations it will be much more useful to
+justify text relative to the text baseline, as shown by the following code.  
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(tex, y=.5, vjust="baseline")
+```
+
+The `xdvir` package has a very simple algorithm for determining the text 
+baseline, but there is predefined support for the LaTeX package `preview`, 
+which produces a more reliable baseline.  That baseline can be accessed, by
+specifying `vjust="preview-baseline"`.
 
 # Integrating text
+
+```{r, echo=FALSE}
+markStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
+\begin{minipage}{3in}
+We `move' the original population's mean to a new $\bar z_i$ 
+and calculate the average fitness at that new mean phenotype 
+of the population to get the adaptive landscape, $\bar W_i$, 
+then we combine the population mean and the average fitness 
+to get the 
+\textcolor{Rred}{\bf \zsavepos{left}fitness function\zsavepos{right}}.
+\xdvirzmark{left}\xdvirzmark{right}
+\end{minipage})"
+```
+
+```{r, echo=FALSE}
+markTeX <- function(data, coords) {
+    latexGrob(markStr, packages=list(adventor, "xcolor", "zref"),
+              x=max(coords$x), 
+              y=max(coords$y),
+              hjust="right", vjust="top", 
+              gp=NULL,
+              texFile="typesetting.tex")
+}
+
+makeContent.markCurve <- function(x) {
+    curvePos <<- deviceLoc(x$x, x$y)
+    x
+}
+
+markCurve <- function(data, coords) {
+    gTree(x=unit(coords$x[data$x == 4], "npc"),
+          y=unit(coords$y[data$x == 4], "npc"),
+          cl="markCurve")
+}
+
+ggIntro + 
+    grid_panel(markTeX, aes(x, y)) +
+    grid_panel(markCurve, aes(x, y))
+
+left <- getMark("left")
+right <- getMark("right")
+
+grid.lines(unit.c(curvePos$x, left$devx, right$devx),
+           unit.c(curvePos$y, left$devy - unit(1, "mm"),
+                  right$devy - unit(1, "mm")),
+           gp=gpar(col=2))
+```
 
 marks
 

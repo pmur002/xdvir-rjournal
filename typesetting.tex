@@ -1,9 +1,15 @@
-%% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: adventor, xcolor
+%% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: adventor, xcolor, zref
 \documentclass[varwidth]{standalone}
 \usepackage{unicode-math}
 \usepackage{fontspec}
 \setmainfont{TeX Gyre Adventor}
 \usepackage{xcolor}
+
+\usepackage{zref-savepos}
+\newcommand{\xdvirzmark}[1]{\special{xdvir-zref:: mark #1 \zposx{#1} \zposy{#1}}}
+\usepackage{atbegshi}
+\AtBeginShipoutFirst{\zsavepos{zref.origin}\xdvirzmark{zref.origin}}
+
 \begin{document}
 \definecolor{Rred}{RGB}{223,83,107}
 \begin{minipage}{3in}
@@ -11,6 +17,9 @@ We `move' the original population's mean to a new $\bar z_i$
 and calculate the average fitness at that new mean phenotype 
 of the population to get the adaptive landscape, $\bar W_i$, 
 then we combine the population mean and the average fitness 
-to get the \textcolor{Rred}{\bf fitness function}.
+to get the 
+\textcolor{Rred}{\bf \zsavepos{left}fitness function\zsavepos{right}}.
+\xdvirzmark{left}\xdvirzmark{right}
 \end{minipage}
+
 \end{document}
