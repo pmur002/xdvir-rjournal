@@ -24,6 +24,7 @@ bibliography: murrell-xdvir.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+options(xdvir.engine="xetex")
 ```
 
 # Introduction
@@ -132,12 +133,12 @@ drawPlot <- function() {
 
 ```{r, echo=FALSE}
 texStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
-\begin{minipage}{3.3in}
+\begin{minipage}{3in}
 We `move' the original population's mean to a new $\bar z_i$ 
 and calculate the average fitness at that new mean phenotype 
 of the population to get the adaptive landscape, $\bar W_i$, 
 then we combine the population mean and the average fitness 
-to get the \textcolor{Rred}{fitness function}.
+to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 ```
 
@@ -148,7 +149,7 @@ adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
 
 library(gggrid)
 
-gg <- ggplot(data.frame(x, y)) +
+ggIntro <- ggplot(data.frame(x, y)) +
     geom_line(aes(x, y), linewidth=2, colour=2) +
     geom_line(aes(x, y), data=data.frame(x=dens.xy$x, y=dens.xy$y/3),
               linetype="dashed") +
@@ -158,28 +159,17 @@ gg <- ggplot(data.frame(x, y)) +
     theme(text=element_text(family="TeX Gyre Adventor", size=12),
           panel.grid=element_blank())
 
-gg + 
-    grid_panel(latexGrob(texStr, packages=list(adventor, "xcolor"),
-               x=unit(1, "npc") - unit(5, "mm"), 
-               y=unit(1, "npc") - unit(5, "mm"),
-               hjust="right", vjust="top"))
-
-notrun <- function() {
-
-drawPlot()
-
-library(gridGraphics)
-grid.echo()
-downViewport("graphics-window-1-1")
-
-tex <- author(texStr, packages=list(adventor, "xcolor"))
-dviFile <- typeset(tex)
-dvi <- readDVI(dviFile)
-grid.dvi(dvi,
-         x=unit(1, "npc") - unit(5, "mm"), y=unit(1, "npc") - unit(5, "mm"),
-         hjust="right", vjust="top")
-
+annotation <- function(data, coords) {
+    latexGrob(texStr, packages=list(adventor, "xcolor"),
+              x=max(coords$x), 
+              y=max(coords$y),
+              hjust="right", vjust="top", 
+              gp=NULL,
+              texFile="typesetting.tex")
 }
+
+ggIntro + 
+    grid_panel(annotation, aes(x, y))
 ```
 
 The annotation in Figure \@ref(fig:typesetting)
@@ -198,19 +188,22 @@ at first glance, but it harbours several important details:
   particularly pretty.
 
 * The text is not all the same colour; the final two words (but not the full
-  stop) are red.
+  stop) are red.  Furthermore, the final two words are **bold**;
+  they have a different
+  font face compared to the rest of the text.
 
-  The R graphics system can only draw a character value with a single colour.
+  The R graphics system can only draw a character value with a single colour
+  and a single font face.
   The \CRANpkg{gridtext} and 
   \CRANpkg{ggtext} packages make it possible to change colour within
   a character value, but they do not allow a mixture of plain text and
   mathematical expressions.
 
 * The text is broken over multiple lines. Furthermore, the text is fully
-  justified (not ragged-left or ragged-right justified) and two of the words
-  have been split across lines and hyphenated. Although it is not
+  justified (not ragged-left or ragged-right justified) and one word
+  has been split across lines and hyphenated. Although it is not
   obvious from the plot itself, the line breaks were also automatically
-  generated to fit the text into a fixed width (3.3 inches).
+  generated to fit the text into a fixed width (3 inches).
 
   The R graphics system can draw a character value across multiple lines, but
   only if explicit newlines are embedded in the character value (i.e., the line
@@ -252,11 +245,12 @@ The next section describes the basic usage of the `xdvir` package.
 This is followed by a section that breaks down the 
 design of the `xdvir` package to show the steps that are
 required to render LaTeX output in R.
-Subsequent sections present a series of examples that demonstrate
-a range of different features and applications of the
-`xdvir` package.
+Subsequent sections explore several of the complexities 
+that can arise with rendering LaTeX text in R graphics and 
+some of the solutions that 
+the `xdvir` package provides.
 
-# LaTeX text labels
+# LaTeX text labels in R
 
 The simplest way to draw LaTeX text with the `xdvir` package 
 is to call the `grid.latex()` function.  The first argument to
@@ -264,7 +258,7 @@ this function is a character value, which is interpreted as
 a fragment of LaTeX code.
 For example, the following code draws a text label that contains
 a fragment of the larger annotation from 
-Figure \@ref{fig:typesetting}.  We use just a fragment in order
+Figure \@ref(fig:typesetting).  We use just a fragment here in order
 to keep the code readable.
 
 Because LaTeX code tends to contain 
@@ -280,17 +274,45 @@ tex <- r"(We move the original mean to $\bar z_i$)"
 ```
 
 ```{r grid.latex, fig.width=3, fig.height=.5}
+grid.rect()
 grid.latex(tex)
 ```
 
-As the function name `grid.latex()` suggests, the code above
-is producing low-level 
+It is possible to produce something similar to this result using 
+the "plotmath" feature in R, as shown in the following code (and the image
+below the code).  However, this demonstrates that
+one advantage of using `xdvir`, even for a simple
+piece of text like this, is the superior quality of the LaTeX 
+fonts and typesetting for mathematical expressions.
+
+```{r, plotmath}
+plotmath <- expression("We move the original mean to "*bar(italic(z))[i])
+```
+
+```{r, fig.width=3, fig.height=.5}
+grid.rect()
+grid.text(plotmath)
+```
+
+Another immediate benefit of `xdvir` is that we can automatically fit
+the text within a specified width.
+For example, the following code draws the LaTeX fragment `tex`
+again, but this time forces it to fit within a column that is half
+the width of the image.
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.latex(tex, width=.5)
+```
+
+As the function name `grid.latex()` suggests, that function
+produces low-level 
 drawing in the `grid` package graphics system.
 The text is just drawn relative to the current `grid` viewport,
 wherever that may be on the page.
 While this is extremely flexible, it is more likely that 
 we want to combine and coordinate the text with a high-level plot
-of some sort.
+of some sort, like the annotation in Figure \@ref(fig:typesetting).
 There are various ways that low-level `grid` drawing can be combined
 with a high-level plot, but we will leave those demonstrations to
 later sections.
@@ -304,23 +326,87 @@ via the `ggplot2::theme()` function.
 
 For example, the following code uses the same LaTeX fragment 
 from the example above as the title of a \CRANpkg{ggplot2} plot.
-The resulting plot is shown in Figure \@ref(fig:element.latex).
+The resulting plot is shown in Figure \@ref(fig:elementlatex).
+One detail about this result is that the text in this title is larger 
+than the text drawn by the call to `grid.latex()` above.
+A closer inspection reveals that the font is also different.
+This reflects the fact that `grid.latex()` and `element_latex()`
+respect the graphical parameter settings---font families and font sizes---that
+are in effect when the LaTeX fragment is drawn.  In 
+\@ref(fig:elementlatex) that means respecting the theme settings
+of the \CRANpkg{ggplot2} plot.
+This issue is discussed further in the next section.
 
-The `gg` object in the code below
+The `ggIntro` object in the code below
 contains a description of the main \CRANpkg{ggplot2} 
 plot from Figure 
-\@ref(fig:typesetting).  The supplementary materials for this article
-includes full code for generating that `gg` object.
+\@ref(fig:typesetting).
+The code for generating 
+`ggIntro` is not shown in order to keep the code below readable,
+but it is available in the supplementary materials for this article.
 
-```{r, element.latex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap="A `ggplot2` plot with a title that was specified using a LaTeX fragment."}
-gg +
+```{r, elementlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap="A `ggplot2` plot with a title that was specified using a LaTeX fragment."}
+ggIntro +
     labs(title=tex) +
     theme(plot.title=element_latex())
 ```
 
 The `xdvir` package also provides a `geom_latex()` function for
-drawing text labels based on data, but that will be demonstrated 
-in later sections.
+drawing text labels, similar to the standard `ggplot2::geom_text()` function.
+The `label` aesthetic for `geom_latex()` is treated as a fragment of LaTeX
+code.
+For example, the following code draws a plot with a set of red points
+and a set of red labels, one for each point.
+The points are drawn using the standard `ggplot::geom_point()` function,
+but the labels are drawn using `geom_latex()` from the `xdvir` package.
+The result is shown in Figure \@ref(fig:geomlatex).
+
+```{r echo=FALSE}
+samples <- data.frame(x=rnorm(50), sample=rep(1:5, each=10))
+means <- aggregate(samples$x, list(sample=samples$sample), mean)
+means$label <- paste0("$\\bar x_", means$sample, "$")
+xlabel <- r"(\begin{tikzpicture}\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};\end{tikzpicture})"
+```
+
+```{r, echo=FALSE, message=FALSE}
+ggGeom <- ggplot(samples) +
+    geom_vline(xintercept=0, linetype="solid", colour=1, linewidth=.5) +
+    geom_point(aes(x, sample), colour="grey", size=4, alpha=.5) +
+    xlab(NULL) +
+    scale_x_continuous(breaks=0, labels=xlabel) +
+    scale_y_continuous(breaks=1:5, expand=expansion(.25)) +
+    theme_minimal() +
+    theme(axis.text.x=element_latex(size=16, packages="tikz", 
+                                    margin=margin(-3, 0, 0, 0)),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_text(colour="grey"),
+          axis.text.y=element_text(colour="grey"),
+          panel.grid.major.x=element_blank(),
+          panel.grid.minor.x=element_blank(),
+          panel.grid.minor.y=element_blank())
+```
+
+The `ggGeom` object in the code below describes the 
+main plot, consisting of grey dots, horizontal and vertical lines,
+and y-axis labels.
+The code for generating 
+`ggGeom` is not shown in order to keep the code below readable,
+but it is available in the supplementary materials for this article.
+
+```{r, geomlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=3.5, dpi=300, fig.cap="A `ggplot2` plot with text labels drawn using `geom_latex()`."}
+ggGeom +
+    geom_point(aes(x, sample), data=means, colour=2, size=4) +
+    geom_latex(aes(x, sample, label=label), data=means, 
+               size=6, vjust=-.4, colour=2)    
+```
+
+The red labels for the red points in Figure \@ref(fig:geomlatex)
+are small LaTeX fragments that each describe 
+a simple LaTeX mathematical expression, as shown below.
+
+```{r}
+means$label
+```
 
 # Under the Hood
 
@@ -340,10 +426,12 @@ draw that LaTeX fragment in R:
 : The LaTeX fragment has to be turned into a complete
   LaTeX document.
 
-: The `xdvir` package provides the function `author()` for this purpose.
+: The `author()` function in the `xdvir` package 
+  allows us to perform this step separately.
   For example, the following code
   takes the LaTeX fragment `tex` and produces a complete LaTeX
   document that is ready to typeset.
+  
 
 ```{r}
 doc <- author(tex)
@@ -355,7 +443,8 @@ doc
 : The LaTeX document has to be typeset to produce a set of 
   glyphs and their positions.
 
-: The `xdvir` package provides the function `typeset()` for this purpose.
+: The `typeset()` function in the `xdvir` package 
+  allows us to perform this step separately.
   For example, the following code takes the LaTeX document `doc` and
   produces a `"DVI"` object that contains instructions on the fonts to
   use (lines that contain `x_fnt_def` and `fnt_num` in the output below), 
@@ -372,14 +461,106 @@ dvi
 
 : The result of the typesetting step has to be turned into drawing in R.
 
-: The `xdvir` package provides the `grid.dvi()` function for this purpose.
+: The `grid.dvi()` function in the `xdvir` package 
+  allows us to perform this step separately.
   For example, the code below renders the typesetting information in `dvi`
-  in R.
+  in R.  The resulting image is shown below the code.
 
 ```{r fig.width=3, fig.height=.5}
+grid.rect()
 grid.dvi(dvi)
 ```
 
+One detail about the output above is that the rendered text from this
+`grid.dvi()` call is 
+smaller and in a different font from the example in the previous section
+that was produced by a `grid.latex()` call.
+This reflects the fact that `grid.latex()` respects the font family and
+font size that are in effect when the text is rendered.
+By contrast, the `grid.dvi()` call is drawing typeset information 
+from a LaTeX document that just makes use of the default LaTeX font,
+Computer Modern (or to be more precise, a modernised version called
+Latin Modern).
+
+# LaTeX packages
+
+The code examples so far have dealt with relatively simple fragments of 
+LaTeX code that consist of just text plus some simple mathematical expressions.
+LaTeX code can be significantly more complex.  For example, 
+the following fragment makes use of a LaTeX `minipage` environment to 
+set the width of the text (this is actually more accurate than
+setting the `width` argument as we saw in a previous section).
+
+```{r}
+minipage <- paste0(r"(\begin{minipage}{1.5in})",
+                   tex,
+                   r"(\end{minipage})")
+```
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.latex(minipage)
+```
+
+Many additional effects can be obtained with LaTeX code by loading
+LaTeX packages.  As a simple example, changes in text colour
+requires loading the LaTeX package `xcolor`.
+These packages can be loaded using the `packages` argument of the 
+`grid.latex()` function (or the `element_latex()` or `geom_latex()` functions).
+For example, the following code draws text with the last two
+words in red.  
+
+```{r}
+colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+```
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.latex(colourTeX, packages="xcolor")
+```
+
+The `packages` argument plays two important roles.
+It affects the authoring step to make sure that the package is loaded
+in the LaTeX document.
+
+```{r}
+colourDoc <- author(colourTeX, packages="xcolor")
+colourDoc
+```
+
+Without this, the typesetting step would fail because the LaTeX code
+`\color{red}` would not be recognised.
+The changes in colour can be seen in the `"DVI"` output below
+(lines that contain `xxx` and `color push` or `color pop`).
+
+```{r}
+colourDVI <- typeset(colourDoc)
+colourDVI
+```
+
+The `packages` argument also affects the rendering step to make sure
+that R responds to the `color push` and `color pop` operations.
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.dvi(colourDVI, packages="xcolor")
+```
+
+fontspec and xcolor
+
+Show the document created by 
+
+# Justifying text
+
+preview
+
+# Integrating text
+
+marks
+
+# LaTeX graphics
+
+tikz
 
 # Fancy annotated equation example [@schneider2023]
 
@@ -467,36 +648,6 @@ gg +
     grid_panel(annotation, aes(x=x, y=y))
 ```
 
-# ggplot2 example (geom and element)
-
-```{r}
-samples <- data.frame(x=rnorm(50), sample=rep(1:5, each=10))
-means <- aggregate(samples$x, list(sample=samples$sample), mean)
-means$label <- paste0("$\\bar x_", means$sample, "$")
-xlabel <- r"(\begin{tikzpicture}\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};\end{tikzpicture})"
-```
-
-```{r, message=FALSE}
-ggplot(samples) +
-    geom_vline(xintercept=0, linetype="solid", colour=1, linewidth=.5) +
-    geom_point(aes(x, sample), colour="grey", size=4, alpha=.5) +
-    geom_point(aes(x, sample), data=means, colour=2, size=4) +
-    geom_latex(aes(x, sample, label=label), data=means, 
-               size=6, vjust=-.4, colour=2) +
-    xlab(NULL) +
-    scale_x_continuous(breaks=0, labels=xlabel) +
-    scale_y_continuous(breaks=1:5, expand=expansion(.25)) +
-    theme_minimal() +
-    theme(axis.text.x=element_latex(size=16, packages="tikz", 
-                                    margin=margin(-3, 0, 0, 0)),
-          axis.ticks.x=element_blank(),
-          axis.title.y=element_text(colour="grey"),
-          axis.text.y=element_text(colour="grey"),
-          panel.grid.major.x=element_blank(),
-          panel.grid.minor.x=element_blank(),
-          panel.grid.minor.y=element_blank())
-```
-
 # Use dvir-lualatex-float example 
 
 Text typeset within irregular shape.
@@ -524,6 +675,8 @@ Do tikz example that draws arrow to location on plot?
 
 Do example that draws grid arrow to location in tikz picture?
 (needs implementing)
+
+# Anzjs example 
 
 # gggrid
 
