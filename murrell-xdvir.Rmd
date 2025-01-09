@@ -132,7 +132,7 @@ drawPlot <- function() {
 ```
 
 ```{r, echo=FALSE}
-texStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
+annotationTeX <- r"(\definecolor{Rred}{RGB}{223,83,107}
 \begin{minipage}{3in}
 We `move' the original population's mean to a new $\bar z_i$ 
 and calculate the average fitness at that new mean phenotype 
@@ -160,7 +160,7 @@ ggIntro <- ggplot(data.frame(x, y)) +
           panel.grid=element_blank())
 
 label <- function(data, coords) {
-    latexGrob(texStr, packages=list(adventor, "xcolor"),
+    latexGrob(annotationTeX, packages=list(adventor, "xcolor"),
               x=max(coords$x), 
               y=max(coords$y),
               hjust="right", vjust="top", 
@@ -270,12 +270,12 @@ Although it is not immediately obvious from that image,
 the text, or rather the glyphs, in the image are rendered by R.
 
 ```{r, fragment}
-tex <- r"(We move the original mean to $\bar z_i$)"
+simpleTeX <- r"(We move the original mean to $\bar z_i$)"
 ```
 
 ```{r grid.latex, fig.width=3, fig.height=.5}
 grid.rect()
-grid.latex(tex)
+grid.latex(simpleTeX)
 ```
 
 It is possible to produce something similar to this result using 
@@ -302,7 +302,7 @@ the width of the image.
 
 ```{r fig.width=3, fig.height=.5}
 grid.rect()
-grid.latex(tex, width=.5)
+grid.latex(simpleTeX, width=.5)
 ```
 
 As the function name `grid.latex()` suggests, that function
@@ -335,7 +335,6 @@ respect the graphical parameter settings---font families and font sizes---that
 are in effect when the LaTeX fragment is drawn.  In 
 \@ref(fig:elementlatex) that means respecting the theme settings
 of the \CRANpkg{ggplot2} plot.
-This issue is discussed further in the next section.
 
 The `ggIntro` object in the code below
 contains a description of the main \CRANpkg{ggplot2} 
@@ -347,7 +346,7 @@ but it is available in the supplementary materials for this article.
 
 ```{r, elementlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap="A `ggplot2` plot with a title that was specified using a LaTeX fragment."}
 ggIntro +
-    labs(title=tex) +
+    labs(title=simpleTeX) +
     theme(plot.title=element_latex())
 ```
 
@@ -361,11 +360,16 @@ The points are drawn using the standard `ggplot::geom_point()` function,
 but the labels are drawn using `geom_latex()` from the `xdvir` package.
 The result is shown in Figure \@ref(fig:geomlatex).
 
+```{r tikzmu}
+muDot <- r"(%
+\begin{tikzpicture}
+\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};
+\end{tikzpicture})"
+```
 ```{r echo=FALSE}
 samples <- data.frame(x=rnorm(50), sample=rep(1:5, each=10))
 means <- aggregate(samples$x, list(sample=samples$sample), mean)
 means$label <- paste0("$\\bar x_", means$sample, "$")
-xlabel <- r"(\begin{tikzpicture}\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};\end{tikzpicture})"
 ```
 
 ```{r, echo=FALSE, message=FALSE}
@@ -373,7 +377,7 @@ ggGeom <- ggplot(samples) +
     geom_vline(xintercept=0, linetype="solid", colour=1, linewidth=.5) +
     geom_point(aes(x, sample), colour="grey", size=4, alpha=.5) +
     xlab(NULL) +
-    scale_x_continuous(breaks=0, labels=xlabel) +
+    scale_x_continuous(breaks=0, labels=muDot) +
     scale_y_continuous(breaks=1:5, expand=expansion(.25)) +
     theme_minimal() +
     theme(axis.text.x=element_latex(size=16, packages="tikz", 
@@ -415,7 +419,7 @@ only requires specifying a LaTeX fragment as the text to draw.
 For example, the examples used the LaTeX fragment shown below.
 
 ```{r}
-tex
+simpleTeX
 ```
 
 The `grid.latex()` function has three tasks to perform in order to
@@ -434,8 +438,8 @@ draw that LaTeX fragment in R:
   
 
 ```{r}
-doc <- author(tex)
-doc
+simpleDoc <- author(simpleTeX)
+simpleDoc
 ```
 
 **Typesetting:**
@@ -446,25 +450,25 @@ doc
 : The `typeset()` function in the `xdvir` package 
   allows us to perform this step separately.
   For example, the following code takes the LaTeX document `doc` and
-  produces a `"DVI"` object that contains instructions on the fonts to
+  produces a `"DVI"` object that contains instructions that specify the fonts to
   use (lines that contain `x_fnt_def` and `fnt_num` in the output below), 
   the glyphs to use from those fonts (lines that contain
   `x_glyph` in the output below), and where to draw those glyphs
   (lines that contain `down` and `right` and `x_glyph`).
-  The output has been trimmed to make it easier to read.
+  The output shown below has been trimmed to make it easier to read.
 
 ```{r typeset, echo=FALSE}
-dvi <- typeset(doc)
+simpleDVI <- typeset(simpleDoc)
 ```
 ```{r dvi, echo=FALSE, eval=FALSE}
-dvi
+simpleDVI
 ```  
 ```{r eval=FALSE}
 <<typeset>>
 <<dvi>>
 ```
 ```{r echo=FALSE}
-output <- capture.output(dvi)
+output <- capture.output(simpleDVI)
 firstDown <- grep("^down", output)[1]
 firstDef <- grep("^x_fnt_def", output)[1]
 firstGlyph <- grep("^x_glyph", output)[1]
@@ -476,7 +480,7 @@ cat(c(output[1:firstDown],
 
 **Rendering:**
 
-: The result of the typesetting step has to be turned into drawing in R.
+: The result of the typesetting step has to be drawn in R.
 
 : The `grid.dvi()` function in the `xdvir` package 
   allows us to perform this step separately.
@@ -485,7 +489,7 @@ cat(c(output[1:firstDown],
 
 ```{r fig.width=3, fig.height=.5}
 grid.rect()
-grid.dvi(dvi)
+grid.dvi(simpleDVI)
 ```
 
 One detail about the output above is that the rendered text from this
@@ -497,28 +501,15 @@ font size that are in effect when the text is rendered.
 By contrast, the `grid.dvi()` call is drawing typeset information 
 from a LaTeX document that just makes use of the default LaTeX font,
 Computer Modern (or to be more precise, a modernised version called
-Latin Modern).
+Latin Modern) at 10pt.
 
 # LaTeX packages
 
 The code examples so far have dealt with relatively simple fragments of 
 LaTeX code that consist of just text plus some simple mathematical expressions.
-LaTeX code can be significantly more complex.  For example, 
-the following fragment makes use of a LaTeX `minipage` environment to 
-set the width of the text (this is actually more accurate than
-setting the `width` argument as we saw in a previous section).
-
-```{r}
-minipage <- paste0(r"(\begin{minipage}{1.5in})",
-                   tex,
-                   r"(\end{minipage})")
-```
-
-```{r fig.width=3, fig.height=.5}
-grid.rect()
-grid.latex(minipage)
-```
-
+While this is already useful, it barely scratches the surface of 
+what is possible with
+LaTeX code.
 Many additional effects can be obtained with LaTeX code by loading
 LaTeX packages.  As a simple example, changes in text colour
 requires loading the LaTeX package `xcolor`.
@@ -536,22 +527,77 @@ grid.rect()
 grid.latex(colourTeX, packages="xcolor")
 ```
 
-There are several LaTeX packages with predefined support, including 
-`xcolor` for changes in colour and `fontspec` for changes in font,
-and support can be added for other LaTeX packages with the
-`LaTeXpackage()` function.  We will see an example of the latter 
-in a later section.
+The argument `packages="xcolor"` is used in the authoring step to load the
+package in the LaTeX document preamble.  This is demonstrated below
+with an explicit call to the `author()` function, which adds 
+`\usepackage{xcolor}` to the LaTeX document.
+
+```{r}
+colourDoc <- author(colourTeX, packages="xcolor")
+colourDoc
+```
+
+This in turn affects the typesetting step:  without the `xcolor` package, the
+`\color` command would not be recognised;  with the `xcolor` package, 
+the `\color` command produces instructions to change colour 
+in the `"DVI"` output.  This is demonstrated below with an
+explicit call to the `typeset()` function.  An example of the colour-change
+instructions is the line containing `color push` in the output below the code.
+
+```{r colortypeset, echo=FALSE}
+colourDVI <- typeset(colourDoc)
+```
+```{r colordvi, echo=FALSE, eval=FALSE}
+colourDVI
+```  
+```{r eval=FALSE}
+<<colortypeset>>
+<<colordvi>>
+```
+```{r echo=FALSE}
+output <- capture.output(colourDVI)
+firstDef <- grep("^x_fnt_def", output)[1]
+firstRGB <- grep("rgb", output)[1]
+cat(c(output[1:3], 
+      "\n...\n",
+      output[firstDef:(firstDef + 4)],
+      "\n...\n",
+      output[(firstRGB - 1):(firstRGB + 2)],
+      "\n...\n"),
+    sep="\n")
+```
+
+The argument `packages="xcolor"` is also 
+used in the rendering step because, without it,
+the rendering would not take any notice of the instructions to
+change colour.  This is demonstrated below with an explicit
+call to the `grid.dvi()` function.  The resulting image differs from
+the previous one because it uses the default LaTeX font, but we can see the
+change in colour.
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.dvi(colourDVI, packages="xcolor")
+```
+
+There are several LaTeX packages with predefined support in the
+`xdvir` package, including 
+`xcolor` for changes in colour and `fontspec` for changes in font.
+Support can be added for other LaTeX packages with the
+`LaTeXpackage()` function.  We will see an example of defining a new LaTeX
+package in a later section.
 
 # Justifying text
 
-By default, the LaTeX text is centred upon a specified location.
+By default, the LaTeX text drawn by `grid.latex()`
+is centred upon a specified location.
 For example, the following code draws the `tex` fragment vertically centred
 at a location half-way up the image (as indicated by the grey line).
 
 ```{r fig.width=3, fig.height=.5}
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
-grid.latex(tex, y=.5)
+grid.latex(simpleTeX, y=.5)
 ```
 
 We can specify a different justification using the `vjust` argument.
@@ -563,7 +609,7 @@ of the text, so the bottom of the text is the bottom of the subscript "i".
 ```{r fig.width=3, fig.height=.5}
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
-grid.latex(tex, y=.5, vjust="bottom")
+grid.latex(simpleTeX, y=.5, vjust="bottom")
 ```
 
 In some situations it will be much more useful to
@@ -572,15 +618,160 @@ justify text relative to the text baseline, as shown by the following code.
 ```{r fig.width=3, fig.height=.5}
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
-grid.latex(tex, y=.5, vjust="baseline")
+grid.latex(simpleTeX, y=.5, vjust="baseline")
 ```
 
 The `xdvir` package has a very simple algorithm for determining the text 
 baseline, but there is predefined support for the LaTeX package `preview`, 
-which produces a more reliable baseline.  That baseline can be accessed, by
+which produces a more reliable baseline.  That baseline can be accessed,
+assuming the `preview` package is loaded, by
 specifying `vjust="preview-baseline"`.
 
+There is also an `hjust` argument for horizontal justification.
+This accepts the standard values, `"left"`, `"centre"`, and `"right"`, but
+also accepts `"bbleft"`, `"bbcentre"`, and `"bbright"`.
+The latter three are based on a bounding box around the actual ink 
+that is drawn, which does not include space before or after glyphs 
+(left-side bearing and right-side bearing).
+The following code provides a demonstration of the difference
+by drawing the simple LaTeX fragment from previous examples as the title
+of a ggplot2 plot.
+We add a (mathematical) vertical bar to the end of the LaTeX fragment
+and draw the title larger than normal and justify the text against the
+right side of the plot region, using `"right"` justification first and
+then using `"bbright"` justification.
+The output below the code just shows the very top of the plot to save
+space.
+
+```{r}
+rightBearingTeX <- paste0(simpleTeX, "$|$")
+```
+```{r justright, eval=FALSE}
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="right"))
+```
+```{r echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300}
+pushViewport(viewport(height=100, y=1, just="top"))
+gg1 <- 
+<<justright>>
+print(gg1, newpage=FALSE)
+```
+```{r justbbright, eval=FALSE}
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="bbright"))
+```
+```{r echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300}
+pushViewport(viewport(height=100, y=1, just="top"))
+gg2 <- 
+<<justbbright>>
+print(gg2, newpage=FALSE)
+```
+
+The difference between the two plots is that the second vertical bar is
+precisely aligned with the right edge of the plot region whereas the
+first vertical bar is slightly to the left of the right edge of the plot
+region (because of the right-side bearing of the vertical bar glyph).
+This is a very small detail, but it is something that can be visually 
+jarring if we are trying to align components of a plot in order
+to produce a clean design.  This fine level of control is exactly 
+the sort of precision that we are seeking by working with LaTeX typesetting.
+
 # Integrating text
+
+Text justification is a simple example of a larger problem:
+text integration.  For example,
+the text annotation in Figure \@ref(fig:typesetting)
+is integrated with the plot in the sense that it is positioned
+relative to the plot region.  In fact, closer inspection reveals
+that it is carefully top-justified with the maximum y-value of the thick
+red line and right-justified with the maximum x-value of the red line.
+
+Put in terms of *integration* rather than justification, 
+the text annotation in Figure \@ref(fig:typesetting)
+is integrated with the plot because the LaTeX text is drawn at a location
+that is coordinated with the location of other drawing in the plot.
+
+Another example of integration, that reverses the roles, is coordinating
+other drawing with the location of the LaTeX text.
+The following code provides a simple example.
+The LaTeX fragment is the simple one from previous examples with
+two additions:  there are `\savepos` commands to mark specific locations
+within the text and associate them with labels (`"a"` and `"b"`);
+and there are `\xdvirzmark` commands to export those
+locations for R to see.
+
+```{r}
+zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
+\xdvirzmark{a}\xdvirzmark{b})"
+```
+
+If we render this LaTeX fragment, we just get the familiar output.
+The commands that we added to the LaTeX fragment
+are based on the LaTeX package `zref`,
+so we must load that package.
+
+```{r zreftex, eval=FALSE}
+grid.rect()
+grid.latex(zrefTeX, packages="zref")
+```
+
+```{r, echo=FALSE, fig.width=3, fig.height=.5}
+<<zreftex>>
+```
+
+However, we can now access the special locations using the
+`getMark()` function from the `xdvir` package.
+For example, the following code accesses location `"a"` and draws 
+a small red dot at that location.
+
+```{r geta, eval=FALSE}
+a <- getMark("a")
+grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
+```
+
+```{r, echo=FALSE, fig.width=3, fig.height=.5}
+<<zreftex>>
+<<geta>>
+```
+
+The following code accesses location `"b"` and draws a curved arrow
+from `"a"` to `"b"`.
+
+```{r getb, eval=FALSE}
+b <- getMark("b")
+grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
+             unit.c(a$devy, a$devy - unit(3, "mm"), a$devy),
+             shape=-1, gp=gpar(col=2, fill=2),
+             arrow=arrow(length=unit(2, "mm"), type="closed"))
+```
+
+```{r, echo=FALSE, fig.width=3, fig.height=.5}
+<<zreftex>>
+<<geta>>
+<<getb>>
+```
+
+The exported locations also produce "anchors" for justifying 
+the LaTeX text.  For example, the following code
+draws the simple LaTeX fragment with position `"a"` at 
+the centre of the image (which is indicated by grey lines).
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
+grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
+```
+
+Figure \@ref(fig:zref) provides a more realistic demonstration.
+This figure shows the plot from Figure \@ref(fig:typesetting)
+with a line added to visually connect the thick red line with 
+the red part of the LaTeX annotation.
+The code for this plot is not shown for reasons of space, but it 
+makes use of the same basic idea as the code above.
+The full code is available in the supplementary materials for this article.
 
 ```{r, echo=FALSE}
 markStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
@@ -595,7 +786,7 @@ to get the
 \end{minipage})"
 ```
 
-```{r, echo=FALSE}
+```{r, zref, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap="The `ggplot2` plot from Figure 1, including the LaTeX annotation, with a line added relative to marked locations within the LaTeX annotation (and relative to the thick red line)."}
 markTeX <- function(data, coords) {
     latexGrob(markStr, packages=list(adventor, "xcolor", "zref"),
               x=max(coords$x), 
@@ -606,7 +797,10 @@ markTeX <- function(data, coords) {
 }
 
 makeContent.markCurve <- function(x) {
-    curvePos <<- deviceLoc(x$x, x$y)
+    ## Delay this calculation until drawing time so that we
+    ## are in the correct viewport
+    devLoc <- deviceLoc(x$x, x$y)
+    addMark("curve", devLoc$x, devLoc$y)
     x
 }
 
@@ -622,18 +816,95 @@ ggIntro +
 
 left <- getMark("left")
 right <- getMark("right")
+curve <- getMark("curve")
 
-grid.lines(unit.c(curvePos$x, left$devx, right$devx),
-           unit.c(curvePos$y, left$devy - unit(1, "mm"),
+grid.lines(unit.c(curve$devx, left$devx, right$devx),
+           unit.c(curve$devy, left$devy - unit(1, "mm"),
                   right$devy - unit(1, "mm")),
            gp=gpar(col=2))
 ```
 
-marks
-
 # LaTeX graphics
 
-tikz
+The examples so far have demonstrated combining LaTeX text with general
+graphics---lines and circles and so on---drawn by R.
+It is also possible to use LaTeX to draw general graphics,
+in particular the LaTeX package `TikZ` provides very powerful and flexible
+graphics facilities.
+The `xdvir` package provides support for the LaTeX package `TikZ`,
+so we are able to draw `TikZ` graphics in R.
+
+For example, the following LaTeX code describes a `TikZ` picture
+
+```{r tikztex}
+tikzTeX <- r"(%
+\path (0, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (x) {\sffamily{R}} 
+       (3, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (y) {Ti{\it k}Z!};
+\draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
+\draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
+```
+
+The following code draws this `TikZ` picture in R.
+The `packages="tikzPicture"` is necessary to ensure that the `TikZ` package
+is loaded in the authoring step and that R takes notice of the `TiKZ`
+output in the rendering step.
+
+```{r fig.width=3, fig.height=1}
+grid.rect()
+grid.latex(tikzTeX, packages="tikzPicture")
+```
+
+The label on the x-axis of Figure \@ref(fig:geomlatex) 
+is another simple `TikZ` picture that
+uses `TikZ` commands to draw the greek letter mu
+within a circle.
+This example is not completely trivial because it uses the
+LaTeX concept of "phantom" text to make the circle large enough to fit
+a capital "M" even though no such character is drawn.
+This is another example of the detailed typsetting capabilities
+that access to LaTeX provides.
+
+```{r}
+<<tikzmu>>
+```
+
+The LaTeX code this time includes and explicit `\begin{tikzpicture}`
+and `\end{tikzpicture}`, which were implicitly added in the previous
+example because we specified `packages="tikzPicture"`.
+This time, we just specify `packages="tikz"`.
+
+```{r fig.width=3, fig.height=.5}
+grid.rect()
+grid.latex(muDot, packages="tikz")
+```
+
+# Thomas Rahlf example
+
+**Seeking permission to use this in an official article**
+
+(ref:rahlfFigCap) This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book "Data Visualisation with R".
+
+```{r, rahlf, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfFigCap)', fig.keep="last"}
+rahlfTeX <- paste(readLines("TeX/rahlf.tex"), collapse="\n")
+source("scripts/rahlf-plot.R")
+library(gridGraphics)
+grid.echo()
+downViewport("graphics-window-1-1")
+## Add LuaTeX typeset text
+multicolPackage <- LaTeXpackage("multicol",
+                                preamble="\\usepackage{multicol}")
+grid.latex(rahlfTeX, texFile="TeX/rahlf-doc.tex",
+           packages=list(multicolPackage,
+                         fontspecPackage("Lato Light")),
+           x=unit(1, "cm"), y=unit(14000, "native"), 
+           hjust="left", vjust="top", gp=NULL)
+```
+
+uses gp=NULL
+
+fancy 
+
+uses gridGraphics
 
 # Fancy annotated equation example [@schneider2023]
 
@@ -708,8 +979,8 @@ registerPackage(tikzNoBBox)
 
 pkgs <- c("xcolor", "tikzNoBBox", "annotate", "roboto")
 
-tex <- author(readLines("TeX/schneider.tex"), packages=pkgs)
-dvi <- typeset(tex, texFile="TeX/schneider-doc.tex")
+schneiderTeX <- author(readLines("TeX/schneider.tex"), packages=pkgs)
+dvi <- typeset(schneiderTeX, texFile="TeX/schneider-doc.tex")
 
 annotation <- function(data, coords) {
     dviGrob(dvi, packages=pkgs,
@@ -721,50 +992,44 @@ gg +
     grid_panel(annotation, aes(x=x, y=y))
 ```
 
-# Use dvir-lualatex-float example 
+# Anzjs example 
 
-Text typeset within irregular shape.
-Example of more work happening in LaTeX code.
-Example of grid.dvi() just dumped on top of other drawing
-=> motivation for better alignment examples.
-
-```{r echo=FALSE}
-tex <- author(readLines("TeX/longley.tex"), packages="fontspec")
-dvi <- typeset(tex, texFile="TeX/longley-doc.tex")
-par(mar=c(4, 4, 1, 1))
-barplot(GNP ~ Year, data = longley)
-grid.dvi(dvi,
-         x=unit(2.5, "cm"),
-         y=unit(1, "npc") - unit(1, "cm"),
-         hjust="left", vjust="top")
+```{r, anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='Based on Fig 10 from ANZJS'}
+source("scripts/anzjs.R")
 ```
 
 # RTL or Vertical layout example?
-
-# Alignment
-
-Do tikz example that draws arrow to location on plot?
-(like dvir-tikz test)
-
-Do example that draws grid arrow to location in tikz picture?
-(needs implementing)
-
-# Anzjs example 
 
 # gggrid
 
 Need a \CRANpkg{gggrid} package 
 [@pkg-gggrid] example.
 
-# Acknowledgements
+# Customisation
+
+Skip the authoring step by writing LaTeX document yourself
+
+Skip the typesetting step by generating DVI output yourself
+
+Experts only!
+
+# Discussion
 
 Must acknowledge tikzDevice package !!!
+
+Comparison to importing (e.g., the import-svg approach of schneider).
+Can refer way back to including pngs of tex in html!?
 
 Owe big debt to the \CRANpkg{tinytex} package,
 which simplifies the calling of TeX engines, installation
 of TeX packages (and TeX itself),
 and running TeX multiple times when necessary (e.g., for TikZ
 position tracking).
+
+# Acknowledgements
+
+Thanks to Marc-Olivier Beausoleil for permission to base the visualisation
+in Figure \@ref(fig:typesetting) on his work.
 
 # Summary
 
