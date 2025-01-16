@@ -38,7 +38,35 @@ bubble <- function(data, coords) {
     grobTree(line, oval, label, vp=viewport(gp=gpar(lineheight=1)))
 }
 
-ggPlot <- gg + 
+brackets <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- convertWidth(unit(1 - x2, "npc") - unit(1, "mm"), "in")
+    gap <- 15
+    b1l <- unit(x1, "npc") - unit(w, "in")
+    b1r <- unit(x1, "npc") + unit(0, "in")
+    b1t <- unit(0, "npc") - unit(gap, "mm")
+    b1b <- unit(0, "npc") - unit(gap, "mm") - unit(.85, "in")
+    bracket1 <- grobTree(segmentsGrob(x1, unit(0, "npc") - unit(5, "mm"),
+                                      x1, b1t),
+                         segmentsGrob(b1l, b1t, b1r, b1t),
+                         segmentsGrob(b1r, b1t, b1r, b1b),
+                         segmentsGrob(b1l, b1t, b1l, b1t - unit(2, "mm")),
+                         segmentsGrob(b1r, b1b, b1r - unit(2, "mm"), b1b))
+    b2l <- unit(x2, "npc") + unit(0, "mm")
+    b2r <- unit(x2, "npc") + unit(w, "in")
+    b2t <- unit(0, "npc") - unit(gap, "mm")
+    b2b <- unit(0, "npc") - unit(gap, "mm") - unit(.85, "in")
+    bracket2 <- grobTree(segmentsGrob(x2, unit(0, "npc") - unit(5, "mm"), 
+                                      x2, b2t),
+                         segmentsGrob(b2l, b2t, b2r, b2t),
+                         segmentsGrob(b2l, b2t, b2l, b2b),
+                         segmentsGrob(b2r, b2t, b2r, b2t - unit(2, "mm")),
+                         segmentsGrob(b2l, b2b, b2l + unit(2, "mm"), b2b))
+    grobTree(bracket1, bracket2)    
+}
+
+ggANZJS <- gg + 
     coord_cartesian(clip="off") +
     scale_x_continuous(expand=expansion(0)) +
     scale_y_continuous(expand=expansion(0)) +
@@ -81,67 +109,9 @@ ggPlot <- gg +
              hjust=-.02, vjust=1,
              colour="grey") +
     grid_panel(bubble, aes(x=bubbleX, y=bubbleY), data=flights[1,]) +
-    geom_line(aes(date, total), linewidth=1)
-
-label1 <- function(data, coords) {
-    x1 <- coords$x[1]
-    x2 <- coords$x[2]
-    w <- convertWidth(unit(1 - x2, "npc") - unit(1, "mm"), "in")
-    gap <- 15
-    closeTeX <- r"(%
-\fontsize{10}{12}
-\selectfont
-\begin{enumerate}
-\item New Zealand closes its borders to {\it almost} all travellers at
-{\bf 23:59, 19 March 2020 (NZDT)}.
-\end{enumerate})"
-    latex1 <- latexGrob(closeTeX,
-                        x=unit(x1, "npc") - unit(2, "mm"), 
-                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
-                        hjust=1, vjust=1,
-                        width=w)
-    openTeX <- r"(%
-\fontsize{10}{12}
-\selectfont
-\begin{enumerate}\addtocounter{enumi}{1}
-\item New Zealand's international border opens to all visitors from
-{\bf 11:59PM, 31 July 2022 (NZDT)}.
-\end{enumerate})"
-    latex2 <- latexGrob(openTeX,
-                        x=unit(x2, "npc") + unit(2, "mm"),
-                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"), 
-                        hjust=0, vjust=1,
-                        width=w)
-    b1l <- unit(x1, "npc") - unit(w, "in")
-    b1r <- unit(x1, "npc") + unit(0, "in")
-    b1t <- unit(0, "npc") - unit(gap, "mm")
-    b1b <- unit(0, "npc") - unit(gap, "mm") - unit(.85, "in")
-    bracket1 <- grobTree(segmentsGrob(x1, unit(0, "npc") - unit(5, "mm"),
-                                      x1, b1t),
-                         segmentsGrob(b1l, b1t, b1r, b1t),
-                         segmentsGrob(b1r, b1t, b1r, b1b),
-                         segmentsGrob(b1l, b1t, b1l, b1t - unit(2, "mm")),
-                         segmentsGrob(b1r, b1b, b1r - unit(2, "mm"), b1b))
-    b2l <- unit(x2, "npc") + unit(0, "mm")
-    b2r <- unit(x2, "npc") + unit(w, "in")
-    b2t <- unit(0, "npc") - unit(gap, "mm")
-    b2b <- unit(0, "npc") - unit(gap, "mm") - unit(.85, "in")
-    bracket2 <- grobTree(segmentsGrob(x2, unit(0, "npc") - unit(5, "mm"), 
-                                      x2, b2t),
-                         segmentsGrob(b2l, b2t, b2r, b2t),
-                         segmentsGrob(b2l, b2t, b2l, b2b),
-                         segmentsGrob(b2r, b2t, b2r, b2t - unit(2, "mm")),
-                         segmentsGrob(b2l, b2b, b2l + unit(2, "mm"), b2b))
-    grobTree(bracket1, bracket2, latex1, latex2)
-}
-
-ggFinal <- ggPlot +
-    grid_panel(label1,
+    geom_line(aes(date, total), linewidth=1) +
+    grid_panel(brackets,
                aes(x=borders),
                data=data.frame(borders=c(borderClosed, borderOpen)))
 
-grid.newpage()
-pushViewport(viewport(y=1, height=unit(3, "in"), just="top"))
-print(ggFinal, newpage=FALSE)
-popViewport()
 

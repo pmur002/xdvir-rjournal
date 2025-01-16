@@ -1,10 +1,18 @@
-%% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: multicol, Lato Light
+%% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: fontspec, multicol, fontspec
 \documentclass[varwidth]{standalone}
 \usepackage{unicode-math}
+\usepackage{fontspec}
 \usepackage{multicol}
 \usepackage{fontspec}
-\setmainfont{Lato Light}
 \begin{document}
+\setmainfont{texgyreheros-regular.otf}%
+[Path=/usr/share/texmf/fonts/opentype/public/tex-gyre/,
+ BoldFont=texgyreheros-bold.otf,
+ ItalicFont=texgyreheros-italic.otf,
+ BoldItalicFont=texgyreheros-bolditalic.otf]
+\fontsize{12}{14.4}
+\selectfont{}
+\setmainfont{Lato Light}
 \fontsize{12pt}{17pt}\selectfont
 \setlength{\columnsep}{1cm}
 \begin{minipage}[t]{16.25cm}
@@ -22,4 +30,5 @@ violations of human rights - ensured liberalization of trade and
 finance.
 \end{multicols}
 \end{minipage} 
+
 \end{document}

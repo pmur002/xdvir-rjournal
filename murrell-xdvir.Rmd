@@ -253,7 +253,7 @@ some of the solutions that
 the `xdvir` package provides.
 The article ends with several extended examples of rendering LaTeX text in R.
 
-# LaTeX text labels in R
+# LaTeX text labels in R {#userinterface}
 
 The simplest way to draw LaTeX text with the `xdvir` package 
 is to call the `grid.latex()` function.  The first argument to
@@ -271,6 +271,10 @@ escape each backslash with a double backslash.
 The resulting image is shown below the code.
 Although it is not immediately obvious from that image, 
 the text, or rather the glyphs, in the image are rendered by R.
+
+```{r}
+library(xdvir)
+```
 
 ```{r, fragment}
 simpleTeX <- r"(We move the original mean to $\bar z_i$)"
@@ -432,7 +436,7 @@ ggGeom +
                size=6, vjust=-.4, colour=2)    
 ```
 
-# Under the Hood
+# Under the Hood {#underhood}
 
 The previous section showed that simple usage of the `xdvir` package
 only requires specifying a LaTeX fragment as the text to draw.
@@ -529,7 +533,7 @@ from a LaTeX document that just makes use of the default LaTeX font,
 Computer Modern (or to be more precise, a modernised version called
 Latin Modern) at 10pt.
 
-# LaTeX packages
+# LaTeX packages {#packages}
 
 The code examples so far have dealt with relatively simple fragments of 
 LaTeX code that consist of just text plus some simple mathematical expressions.
@@ -948,7 +952,40 @@ grid.latex(muDot, packages="tikz")
 <<tikz>>
 ```
 
-# Thomas Rahlf example
+# Example 1
+
+```{r echo=FALSE}
+source("scripts/rahlf-plot.R")
+```
+```{r rahlfplot, echo=FALSE, eval=FALSE}
+rahlfPlot()
+```
+
+```{r gridgraphics, echo=FALSE, eval=FALSE}
+library(gridGraphics)
+grid.echo()
+```
+
+```{r downvp, echo=FALSE, eval=FALSE}
+downViewport("graphics-window-1-1")
+```
+
+```{r echo=FALSE}
+rahlfTeX <- paste(readLines("TeX/rahlf.tex"), collapse="\n")
+```
+
+```{r multicol, echo=FALSE, eval=FALSE}
+multicol <- LaTeXpackage("multicol",
+                         preamble="\\usepackage{multicol}")
+registerPackage(multicol)
+```
+
+```{r rahlflatex, echo=FALSE, eval=FALSE}
+grid.latex(rahlfTeX, 
+           packages=c("fontspec", "multicol"),
+           x=unit(1, "cm"), y=unit(14000, "native"), 
+           hjust="left", vjust="top")
+```
 
 This section demonstrates a more complete example of rendering LaTeX text
 within a plot.  The plot, shown in Figure \@ref(fig:rahlf), 
@@ -958,27 +995,38 @@ of the plot is not only typeset into two columns,
 but both columns are fully justified and feature several examples of
 hyphenation.
 
-The main plot in this example is drawn with the `graphics` package.
-The details are not relevant to this article so we perform this drawing
-just with a call to a `rahlfPlot()` function that is included in the
-supplementary material for the article.
+This example also demonstrates one way to integrate a
+`grid.latex()` call with a plot that was drawn using functions
+from the `graphics` package.  We will also see a simple 
+demonstration of the `LaTeXpackage()` function to allow use of 
+a LaTeX package that has no predefined support in `xdvir`.
 
-```{r echo=FALSE}
-source("scripts/rahlf-plot.R")
+The details of the code that produces the main plot---everything except
+the two columns of text in the top-left corner---are not relevant 
+to this article so we perform this drawing
+just with a call to a `rahlfPlot()` function that is defined in the
+supplementary material for the article.  The result is shown in
+Figure \@ref(fig:rahlfplain).
+
+```{r eval=FALSE}
+<<rahlfplot>>
 ```
-```{r rahlfplot, eval=FALSE}
-rahlfPlot()
+
+(ref:rahlfplainFigCap) The main plot from Figure \@ref(fig:rahlf) without the two columns of text annotation.  This plot is drawn using functions from the `graphics` package.
+
+```{r, rahlfplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfplainFigCap)'}
+<<rahlfplot>>
 ```
 
 Because the main plot is drawn with the `graphics` package, 
-we need to convert it to equivalent drawing using the `grid` package.
+we need to convert it to an equivalent drawing that uses
+functions from the `grid` package.
 This can be achieved with the `grid.echo()` function from the
 \CRANpkg{gridGraphics} package [@pkg-gridgraphics], as shown below.
- 
-```{r gridgraphics, eval=FALSE}
-library(gridGraphics)
-grid.echo()
-```
+
+```{r eval=FALSE}
+<<gridgraphics>>
+``` 
 
 We want to align the LaTeX text with the main plot.  In particular,
 the top of the text is aligned with the value 14,000 on the y-scale
@@ -988,8 +1036,8 @@ In order to achieve this, we can navigate to the `grid` viewport
 that corresponds to the main plot region, which also has scales 
 that match the plot scales.
 
-```{r downvp, eval=FALSE}
-downViewport("graphics-window-1-1")
+```{r eval=FALSE}
+<<downvp>>
 ```
 
 We are now ready to render the LaTeX text within the plot.
@@ -997,8 +1045,9 @@ The LaTeX code for this example is shown below.
 This is a larger LaTeX fragment than we have previously seen,
 but more importantly it contains a larger number of LaTeX commands 
 to control the typesetting of the text.
-For example, we control the font size and vertical line spacing
-with the `\fontsize` command, 
+For example, we control the font family with a `setmainfont` command,
+we control font size and vertical line spacing
+with a `\fontsize` command, 
 we control the overall width of the text using a `minipage`
 environment, 
 we set the number of columns using a `multicol` environment,
@@ -1006,8 +1055,36 @@ and we control the horizontal spacing between columns with
 a `\setlength` command.
 
 ```{r echo=FALSE}
-rahlfTeX <- paste(readLines("TeX/rahlf.tex"), collapse="\n")
 cat(rahlfTeX)
+```
+
+The `setmainfont` and 
+`fontsize` commands in the LaTeX code require the LaTeX package `fontspec`
+to be loaded, but this is not a problem because there is predefined support
+for `fontspec` in the `xdvir` package.  However, the `multicol` environment
+in the LaTeX code requires the LaTeX package `multicol` and there is no
+predefined support for that in `xdvir`.  The following code uses the
+`LaTeXpackage` to provide support for the LaTeX package `multicol`.
+In a simple case like this, all we have to do is provide a name for the 
+package (`"multicol"`) and use the `preamble` argument to
+provide the LaTeX code that should be added in the
+authoring step to load the LaTeX package.
+We also call `registerPackage()` so that we can refer to this LaTeX
+package by its name.
+
+```{r eval=FALSE}
+<<multicol>>
+```
+
+Finally, we call `grid.latex()` to add the LaTeX text to the plot.
+The object `rahlfTeX` contains the LaTeX code,
+we specify the LaTeX packages that have to be loaded, including
+the `"multicol"` package that we just registered, and
+we position the text 1cm in from the left of the
+the plot viewport and at 14,000 on the y-axis.
+
+```{r eval=FALSE}
+<<rahlflatex>>
 ```
 
 (ref:rahlfFigCap) A plot with a two-column text annoation. This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book "Data Visualisation with R".
@@ -1016,123 +1093,361 @@ cat(rahlfTeX)
 <<rahlfplot>>
 <<gridgraphics>>
 <<downvp>>
-## Add LuaTeX typeset text
-multicolPackage <- LaTeXpackage("multicol",
-                                preamble="\\usepackage{multicol}")
-grid.latex(rahlfTeX, texFile="TeX/rahlf-doc.tex",
-           packages=list(multicolPackage,
-                         fontspecPackage("Lato Light")),
-           x=unit(1, "cm"), y=unit(14000, "native"), 
-           hjust="left", vjust="top", gp=NULL)
+<<multicol>>
+<<rahlflatex>>
 ```
 
+# Example 2
 
-uses gp=NULL
-
-fancy 
-
-uses gridGraphics
-
-# Fancy annotated equation example [@schneider2023]
-
-+ NOTE that this nicely uses {ggtext} for simpler annotations, but
-  has to go to LaTeX for fancy stuff
-  => exactly the justification for {xdvir}
-
-+ NOTE this is also an example of writing new LaTeXpackage()
+This section looks at another more complete example of a plot with
+a LaTeX annotation (Figure \@ref(fig:schneider)).  This example
+demonstrates the sort of effects that are possible by
+combining TikZ graphics with LaTeX typesetting, in this case
+to produce an annotated mathematical equation.
 
 ```{r echo=FALSE}
-library(ggtext)
-library(signs)
+source("scripts/schneider.R")
+```
+```{r schneiderplot, echo=FALSE, eval=FALSE}
+ggSchneider
 ```
 
 ```{r echo=FALSE}
-## Set up "data"
-mu <- 100
-sigma <- 15
-plot_height <- dnorm(mu, mu, sigma)
-lb <- -4 * sigma + mu
-ub <- 4 * sigma + mu
+schneiderLines <- readLines("TeX/schneider.tex")
+schneiderTeX <- paste(schneiderLines, collapse="\n")
 ```
 
-```{r echo=FALSE}
-## Set up main plot
-## NOTE need some data for grid_panel() to be called at all
-gg <- ggplot(data.frame(x=160, y=dnorm(mu, mean=mu, sd=sigma))) +
-    stat_function(fun=function(x) dnorm(x, mean=mu, sd=sigma),
-                  geom="area",
-                  n=1000,
-                  fill="dodgerblue",
-                  alpha=.5) +
-    theme_classic(base_family="Roboto Condensed",
-                  base_size=18) +
-    theme(axis.text.x=element_markdown(),
-          axis.title.x=element_markdown(),
-          axis.line=element_blank())  +
-    scale_x_continuous("Observed Score *X*<br>*z*",
-                       breaks=seq(lb, ub, sigma),
-                       limits=c(lb, ub),
-                       labels=function(x)
-                           paste0(signs(x),
-                                  "<br>",
-                                  ifelse(x == mu,
-                                         "<em>&mu;</em>",
-                                         paste0(signs((x - mu) / sigma,
-                                                      add_plusses=T,
-                                                      label_at_zero="none"),
-                                                "<em>&sigma;</em>")))) +
-    scale_y_continuous(NULL,
-                       limits=c(0, plot_height),
-                       expand=expansion(),
-                       breaks=NULL) 
-```
-
-```{r echo=FALSE}
-## Add {xdvir} annotation
-library(xdvir)
-library(gggrid)
-
+```{r annotateequations, echo=FALSE, eval=FALSE}
 annotateEquations <-
     LaTeXpackage(name="annotate",
-                 preamble="\\usepackage{annotate-equations/annotate-equations}")
+                 preamble="\\usepackage{TeX/annotate-equations}")
 registerPackage(annotateEquations)
+```
+
+```{r tikznobbox, echo=FALSE, eval=FALSE}
+tikzNoBBox <-
+    tikzPackage(name="tikzNoBBox", bbox=FALSE)
+registerPackage(tikzNoBBox)
+```
+
+```{r roboto, echo=FALSE, eval=FALSE}
 roboto <-
     LaTeXpackage(name="roboto",
                  preamble="\\usepackage[sfdefault,condensed]{roboto}")
 registerPackage(roboto)
-tikzNoBBox <-
-    tikzPackage(name="tikzNoBBox", bbox=FALSE)
-registerPackage(tikzNoBBox)
-
-pkgs <- c("xcolor", "tikzNoBBox", "annotate", "roboto")
-
-schneiderTeX <- author(readLines("TeX/schneider.tex"), packages=pkgs)
-dvi <- typeset(schneiderTeX, texFile="TeX/schneider-doc.tex")
-
-annotation <- function(data, coords) {
-    dviGrob(dvi, packages=pkgs,
-            x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
-            y=coords$y, hjust=1, vjust=1)
-}
-
-gg +
-    grid_panel(annotation, aes(x=x, y=y))
 ```
 
-# Anzjs example 
+```{r anneq, echo=FALSE, eval=FALSE}
+library(gggrid)
 
-```{r, anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='Based on Fig 10 from ANZJS'}
+annotation <- function(data, coords) {
+    latexGrob(schneiderTeX, 
+              packages=c("tikzNoBBox", "annotate", "roboto"),
+              x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
+              y=coords$y, hjust=1, vjust=1)
+}
+
+ggSchneider +
+    grid_panel(annotation, 
+               aes(x=x, y=y), 
+               data=data.frame(x=160, y=dnorm(mu, mean=100, sd=15)))
+```
+
+The main plot in this example is a \CRANpkg{ggplot2} plot.
+The details are not particularly relevant to this article, so the
+main plot is described in the object `ggSchneider`, which
+is defined in the supplementary materials for the article.
+One point worth noting is that the labelling on the x-axis, which
+combines italic greek letters with upright digits and signs, is produced
+using the \CRANpkg{ggtext} package.
+In other words, this example combines two levels of text annotation:
+labels on the x-axis that are relatively simple, but still beyond the
+capabilities of core R text drawing;  and much more sophisticated 
+text annotations that require access to a complex system like LaTeX.
+The main plot produced by `ggSchneider` is shown in Figure 
+\@ref(fig:schneiderplain).
+
+```{r eval=FALSE}
+ggSchneider
+```
+
+(ref:schneiderplainFigCap) The main plot from Figure \@ref(fig:schneider) without the annotated mathematical equation. This plot is produced using the packages \CRANpkg{ggplot2} and \CRANpkg{ggtext}.
+
+```{r, schneiderplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderplainFigCap)'}
+ggSchneider
+```
+
+The start of the LaTeX code for the annotated equation is shown below
+(the full code is included in the supplementary materials for this article).
+This is arranged in three blocks: the first block of code defines some colours;
+the second block describes the main mathematical equation, but includes
+some `\eqnmark` commands to save locations within the equation;
+and the third block shows one of the additional equation annotations, which
+refers to one of the saved locations within the equation, in this case
+the "z", and positions a
+label relative to that location, in this case the label "z-score"
+above and to the left of the "z".
+
+
+```{r echo=FALSE}
+ann2 <- grep("[\\]annotate", schneiderLines)[2]
+cat(schneiderLines[1:(ann2 - 1)], sep="\n")
+```
+
+There are several LaTeX packages required by this LaTeX code,
+in particular the `\eqnmark` and `\annotate` commands require the LaTeX 
+package `annotate-equations`.
+As in the previous example, we can add support for this package
+using the `LaTeXpackage()` and `registerPackage()` functions.
+
+```{r eval=FALSE}
+<<annotateequations>>
+```
+
+The LaTeX package `annotate-equations` is built on TikZ graphics.
+We do not need to load the LaTeX package `tikz` because `annotate-equations`
+will do that automatically.  However, `xdvir` by default makes use 
+of the bounding box information from TikZ graphics and, for images with
+saved locations like this, that bounding box is unreliable.
+The predefined support for the LaTeX package `tikz` in the `xdvir` package
+includes a `tikzPackage()` function that allows us to load TikZ, but 
+ignore its bounding boxes, as shown in the following code.
+
+```{r eval=FALSE}
+<<tikznobbox>>
+```
+
+Finally, we will use the LaTeX package `roboto` to access the 
+specific variations of the Roboto font for the text labels
+in the annotated equation.
+
+```{r eval=FALSE}
+<<roboto>>
+```
+
+Rendering the annotated equation on the plot
+requires integrating the LaTeX output with the
+\CRANpkg{ggplot2} plot.  In particular, we align the top of the LaTeX
+output with the top of the density curve and we align the right side
+of the LaTeX output with the right edge of the label "160" on the x-axis.
+
+We saw in Section \@ref(userinterface) 
+how to use `element_latex()` to draw LaTeX text
+in labels such as the plot title on a \CRANpkg{ggplot2} plot
+and how to use `geom_latex()` to draw LaTeX text
+as data symbols.
+In this example, we are adding a single LaTeX annotation at a specific
+position within a \CRANpkg{ggplot2} plot, so 
+we use the \CRANpkg{gggrid} package [@pkg-gggrid].
+This package provides the `grid_panel()` function, to which we pass a
+function, in this case `annotation()`, plus mappings from data to 
+aesthetics like for normal \CRANpkg{ggplot2} geoms. 
+The `annotation()` function creates a `grid` grob for \CRANpkg{ggplot2} 
+to draw, in this case using `latexGrob()`, which is similar to 
+`grid.latex()` except that it creates a description of something to draw
+rather than immediately drawing it.
+We give the call to `latexGrob()` the LaTeX code to draw,
+in `schneiderTeX`, a set of `packages` to load, and arguments that position
+the output relative to the plot.
+
+```{r eval=FALSE}
+<<anneq>>
+```
+
+(ref:schneiderFigCap) A plot with annotated mathematical equation. This plot is an adaptation of the plot in [@schneider2023].
+
+```{r, schneider, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderFigCap)'}
+<<annotateequations>>
+<<tikznobbox>>
+<<roboto>>
+<<anneq>>
+```
+
+# Example 3
+
+This example, shown in Figure \@ref(fig:anzjs),
+provides another demonstration of the range of possibilities from
+LaTeX typesetting, by adding annotations that are formatted as numbered
+list items.
+
+```{r, echo=FALSE}
 source("scripts/anzjs.R")
+```
+
+```{r anzjsplot, echo=FALSE, eval=FALSE}
+pushViewport(viewport(y=1, height=unit(3, "in"), just="top"))
+print(ggANZJS, newpage=FALSE)
+popViewport()
+```
+
+```{r echo=FALSE}
+closeTeX <- r"(%
+\fontsize{10}{12}
+\selectfont
+\begin{enumerate}
+\item New Zealand closes its borders to {\it almost} all travellers at
+{\bf 23:59, 19 March 2020 (NZDT)}.
+\end{enumerate})"
+```
+
+```{r label1, echo=FALSE, eval=FALSE}
+label1 <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- convertWidth(unit(1 - x2, "npc") - unit(1, "mm"), "in")
+    gap <- 15
+    latex1 <- latexGrob(closeTeX,
+                        x=unit(x1, "npc") - unit(2, "mm"), 
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+                        hjust=1, vjust=1,
+                        width=w)
+}
+```
+
+```{r label2, echo=FALSE, eval=FALSE}
+label2 <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- convertWidth(unit(1 - x2, "npc") - unit(1, "mm"), "in")
+    gap <- 15
+    latex1 <- latexGrob(closeTeX,
+                        x=unit(x1, "npc") - unit(2, "mm"), 
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+                        hjust=1, vjust=1,
+                        width=w)
+    openTeX <- r"(%
+\fontsize{10}{12}
+\selectfont
+\begin{enumerate}\addtocounter{enumi}{1}
+\item New Zealand's international border opens to all visitors from
+{\bf 11:59PM, 31 July 2022 (NZDT)}.
+\end{enumerate})"
+    latex2 <- latexGrob(openTeX,
+                        x=unit(x2, "npc") + unit(2, "mm"),
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"), 
+                        hjust=0, vjust=1,
+                        width=w)
+    latex2
+}
+```
+```{r ggenumlist, echo=FALSE, eval=FALSE}
+ggEnumList <- ggANZJS +
+    grid_panel(label1,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen))) +
+    grid_panel(label2,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen)))
+```
+
+```{r enumlistplot, echo=FALSE, eval=FALSE}
+pushViewport(viewport(y=1, height=unit(3, "in"), just="top"))
+print(ggEnumList, newpage=FALSE)
+popViewport()
+```
+
+The main plot is a \CRANpkg{ggplot2} plot with a number of relatively
+simple annotations already added.
+The details of the code are not particularly relevant to this
+article, so the main plot is described in the object `ggANZJS`,
+which is defined in the supplementary materials for the article.
+The plot has lines that extend below the main plot, so the following
+code draws the \CRANpkg{ggplot2} plot within a `grid` viewport 
+that occupies just the top 3 inches of the page.  This leaves room on the page
+for the lines that extend below the plot.
+One point worth noting is that the LaTeX annotations that we will
+be adding are required to fit within the lines that extend below the plot.
+In other words, we will be specifying a width for the LaTeX output
+to fit into.
+The main plot produced by this code is shown in Figure \@ref(fig:anzjsplain).
+
+```{r eval=FALSE}
+<<anzjsplot>>
+```
+
+(ref:anzjsplainFigCap) The main plot from Figure \@ref(fig:anzjs) without the numbered list items as annotations.  This plot is produced using the \CRANpkg{ggplot2} package.
+
+```{r, anzjsplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsplainFigCap)'}
+<<anzjsplot>>
+```
+
+We will focus on the drawing of just one of the LaTeX annotations.
+The LaTeX code for the left-hand label is shown below.
+This includes commands to control the font size and an `enumerate`
+environment that creates a numbered list item.
+
+```{r echo=FALSE}
+cat(closeTeX)
+```
+
+As with the previous example, we have a single annotation that we want
+to position quite carefully, so we define a function that generates 
+a `grid` grob to use with the `grid_panel()` function from the 
+\CRANpkg{gggrid} package.
+The `label1()` function calls `latexGrob()`, gives it the LaTeX code
+to draw, in `closeTeX`, specifies the position for the LaTeX output,
+and specifies a `width` for the output to be typeset within.
+
+```{r eval=FALSE}
+<<label1>>
+```
+
+The following code combines the left-hand label annotation with the
+`ggANZJS` plot, adds a right-hand label as well, then draws the result
+within a `grid` viewport in the top 3 inches of the page.
+
+```{r eval=FALSE}
+<<ggenumlist>>
+<<enumlistplot>>
+```
+
+(ref:anzjsFigCap) A plot with numbered list items as annotations. This plot is an adaptation of Figure 10 from [@anzjs2025].
+
+```{r, anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsFigCap)'}
+<<label1>>
+<<label2>>
+<<ggenumlist>>
+<<enumlistplot>>
 ```
 
 # RTL or Vertical layout example?
 
-# gggrid
-
-Need a \CRANpkg{gggrid} package 
-[@pkg-gggrid] example.
-
 # Customisation
+
+Most of the examples in this article take a fragment of LaTeX code
+and feed it to the `grid.latex()` function, which performs an
+authoring step, a typesetting step, and a rendering step.
+We saw in  Section \@ref(underhood) that there are functions
+`author()`, `typeset()`, and `grid.dvi()`
+that allow us to perform these steps separately.
+The authoring step involves generating a complete LaTeX document
+from the LaTeX fragment that we pass as the first argument to `grid.latex()`.
+For example, the following code and output shows the LaTeX fragment 
+`colourTeX` from Section \@ref(packages) plus the LaTeX document that
+is produced from that fragment by the `author()` function.
+
+```{r}
+colourTeX
+author(colourTeX)
+```
+
+We can influence the additional content that is produced 
+by the `author()` function through its arguments.
+For example, the following call to the `author()` function adds
+LaTeX code to load the LaTeX package `xcolor`
+in the preamble of the LaTeX document.
+
+```{r}
+author(colourTeX, packages="xcolor")
+```
+
+However, the arguments to the `author()` function are only
+designed to provide convenience for straightforward situations;
+they do not provide
+fine control over the contents 
+of the LaTeX document.
+
+For example ... use option [gray] for grayscale version ???
 
 Skip the authoring step by writing LaTeX document yourself
 
@@ -1147,13 +1462,13 @@ Must acknowledge tikzDevice package !!!
 Comparison to importing (e.g., the import-svg approach of schneider).
 Can refer way back to including pngs of tex in html!?
 
+# Acknowledgements
+
 Owe big debt to the \CRANpkg{tinytex} package,
 which simplifies the calling of TeX engines, installation
 of TeX packages (and TeX itself),
 and running TeX multiple times when necessary (e.g., for TikZ
 position tracking).
-
-# Acknowledgements
 
 Thanks to Marc-Olivier Beausoleil for permission to base the visualisation
 in Figure \@ref(fig:typesetting) on his work.
@@ -1161,6 +1476,8 @@ in Figure \@ref(fig:typesetting) on his work.
 Thanks to Thomas Rahlf for permission to base the visualisation in 
 Figure \@ref(fig:rahlf) on Figure 4.1 from his book
 "Data Visualisation with R".
+
+Thanks to Joel Schneider for publishing his work in an open format.
 
 # Summary
 
