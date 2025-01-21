@@ -70,7 +70,7 @@ ggANZJS <- gg +
     coord_cartesian(clip="off") +
     scale_x_continuous(expand=expansion(0)) +
     scale_y_continuous(expand=expansion(0)) +
-    theme(plot.margin=unit(c(4, 0, 4, 0), "mm"),
+    theme(plot.margin=unit(c(0, 0, 1.5, 0), "in"),
           plot.title=element_text(family="Impact", size=18),
           panel.background=element_blank(),
           axis.text=element_blank(),
