@@ -2,31 +2,31 @@
 # Please edit murrell-xdvir.Rmd to modify this file
 
 ## ----setup, include=FALSE-----------------------------------------------------
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
-library(kableExtra)
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+options(xdvir.engine="xetex")
 
 
 ## ----echo=FALSE---------------------------------------------------------------
 ## Parameter for plotting
 ## Set x variable for the fitness function 
-x = seq(-1, 7.5, by = .01)
+x <- seq(-1, 7.5, by = .01)
 
 ## Math parameters for Fitness function 
-s = .5
-m = 1.5
-t = 1.7
-u = 3.4
-div1 = 2.4
-div2 = 3.5
+s <- .5
+m <- 1.5
+t <- 1.7
+u <- 3.4
+div1 <- 2.4
+div2 <- 3.5
 
 ## Set population parameters
 ## NB individuals, try with 10, and 1000 
-n = 1000 
+n <- 1000 
 ## Get fake phenotypes
 ## Phenotypes for the population
-pheno = rnorm(n = n, mean = 3.2, sd = 0.5) 
+pheno <- rnorm(n = n, mean = 3.2, sd = 0.5) 
 ## Make y height just for vizualisation purpose 
-fit = rnorm(length(pheno), mean = .12, sd =.01)
+fit <- rnorm(length(pheno), mean = .12, sd =.01)
 
 
 ## Load functions ----------------------------------------------------------
@@ -36,11 +36,12 @@ fit.function  <- function(x, s, m, t, u, div1 = 2, div2 = 2.5) {
     exp(-s^(-2)*(x-m)^(2))/div1+exp(-t^(-2)*(x-u)^(2))/div2
 }
 
+y <- fit.function(x = x,s = s, m = m,t = t,u = u, div1 = div1, div2 = div2)
+
 main.plot <- function(mar = c(3, 3, .25, .25), col = 2) {
     ## Set parameter of plotting area 
     par(mar = mar)
     ## Plot fitness function 
-    y = fit.function(x = x,s = s, m = m,t = t,u = u, div1 = div1, div2 = div2)
     plot(y ~ x, 
          xlim = c(-0.5, 7),
          ylim = c(0, .7),
@@ -52,47 +53,937 @@ main.plot <- function(mar = c(3, 3, .25, .25), col = 2) {
     box()
 }
 
+dens.xy <- density(x = pheno, n = 512, adjust = 2) # Adjust to make it smoother 
+
 ## Make a fake population 
-add.fake.pop =  function(x = pheno, y = fit,  alp = 1) {
+add.fake.pop <-  function(x = dens.xy, y = fit,  alp = 1) {
     ## Line at the mean 
     ## abline(v = mean(x), lty = 3)
     ## Calculate the density of the population 
-    dens.xy = density(x = x, n = 512, adjust = 2) # Adjust to make it smoother 
     ## Add density 
     lines(x = dens.xy$x, y = dens.xy$y/3, lty = 2)
 }
 
+drawPlot <- function() {
+    par(family="TeX Gyre Adventor", mgp=c(2, .7, 0))
+    main.plot()
+    add.fake.pop(alp = .1)
+}
+
 
 ## ----echo=FALSE---------------------------------------------------------------
-texStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
-\fontsize{12}{15}
-\selectfont
-\begin{minipage}{3.5in}
+annotationTeX <- r"(\definecolor{Rred}{RGB}{223,83,107}
+\begin{minipage}{3in}
 We `move' the original population's mean to a new $\bar z_i$ 
 and calculate the average fitness at that new mean phenotype 
 of the population to get the adaptive landscape, $\bar W_i$, 
 then we combine the population mean and the average fitness 
-to get the \textcolor{Rred}{fitness function}.
+to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 
 
-## ----echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.keep="last"----
-par(family="TeX Gyre Adventor", mgp=c(2, .7, 0))
-main.plot();
-add.fake.pop(alp = .1); 
-
-library(gridGraphics)
-grid.echo()
-downViewport("graphics-window-1-1")
+## ----typesetting, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."----
 
 library(xdvir)
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
-registerPackage(adventor)
 
-tex <- author(texStr, packages=list(adventor, "xcolor"))
-dviFile <- typeset(tex)
-dvi <- readDVI(dviFile)
-grid.dvi(dvi,
-         x=unit(1, "npc") - unit(5, "mm"), y=unit(1, "npc") - unit(5, "mm"),
-         hjust="right", vjust="top")
+library(gggrid)
+
+ggIntro <- ggplot(data.frame(x, y)) +
+    geom_line(aes(x, y), linewidth=2, colour=2) +
+    geom_line(aes(x, y), data=data.frame(x=dens.xy$x, y=dens.xy$y/3),
+              linetype="dashed") +
+    xlab("Phenotypes") +
+    ylab("Fitness") +
+    theme_bw() +
+    theme(text=element_text(family="TeX Gyre Adventor", size=12),
+          panel.grid=element_blank())
+
+label <- function(data, coords) {
+    latexGrob(annotationTeX, packages=list(adventor, "xcolor"),
+              x=max(coords$x), 
+              y=max(coords$y),
+              hjust="right", vjust="top", 
+              gp=NULL,
+              texFile="typesetting.tex")
+}
+
+ggIntro + 
+    grid_panel(label, aes(x, y))
+
+
+## -----------------------------------------------------------------------------
+library(xdvir)
+
+
+## ----fragment-----------------------------------------------------------------
+simpleTeX <- r"(We move the original mean to $\bar z_i$)"
+
+
+## ----rect, eval=FALSE, echo=FALSE---------------------------------------------
+# grid.rect()
+
+## ----gridlatex, eval=FALSE----------------------------------------------------
+# grid.latex(simpleTeX)
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(simpleTeX)
+
+
+## -----------------------------------------------------------------------------
+plotmath <- expression("We move the original mean to "*bar(italic(z))[i])
+
+## ----plotmathexpr, eval=FALSE-------------------------------------------------
+# grid.text(plotmath)
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.text(plotmath)
+
+
+## ----width, eval=FALSE--------------------------------------------------------
+# grid.latex(simpleTeX, width=.5)
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(simpleTeX, width=.5)
+
+
+## -----------------------------------------------------------------------------
+library(ggplot2)
+
+
+## ----elementlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:elementlatexFigCap)'----
+ggIntro +
+    labs(title=simpleTeX) +
+    theme(plot.title=element_latex())
+
+
+## ----tikzmu, echo=FALSE-------------------------------------------------------
+muDot <- r"(%
+\begin{tikzpicture}
+\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};
+\end{tikzpicture})"
+
+## ----echo=FALSE---------------------------------------------------------------
+samples <- data.frame(x=rnorm(50), sample=rep(1:5, each=10))
+means <- aggregate(samples$x, list(sample=samples$sample), mean)
+means$label <- paste0("$\\bar x_", means$sample, "$")
+
+
+## -----------------------------------------------------------------------------
+means$label
+
+
+## ----echo=FALSE, message=FALSE------------------------------------------------
+ggGeom <- ggplot(samples) +
+    geom_vline(xintercept=0, linetype="solid", colour=1, linewidth=.5) +
+    geom_point(aes(x, sample), colour="grey", size=4, alpha=.5) +
+    xlab(NULL) +
+    scale_x_continuous(breaks=0, labels=muDot) +
+    scale_y_continuous(breaks=1:5, expand=expansion(.25)) +
+    theme_minimal() +
+    theme(axis.text.x=element_latex(size=16, packages="tikz", 
+                                    margin=margin(-3, 0, 0, 0)),
+          axis.ticks.x=element_blank(),
+          axis.title.y=element_text(colour="grey"),
+          axis.text.y=element_text(colour="grey"),
+          panel.grid.major.x=element_blank(),
+          panel.grid.minor.x=element_blank(),
+          panel.grid.minor.y=element_blank())
+
+
+## ----geomlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=3.5, dpi=300, fig.cap="A `ggplot2` plot with text labels drawn using `geom_latex()`."----
+ggGeom +
+    geom_point(aes(x, sample), data=means, colour=2, size=4) +
+    geom_latex(aes(x, sample, label=label), data=means, 
+               size=6, vjust=-.4, colour=2)    
+
+
+## -----------------------------------------------------------------------------
+simpleTeX
+
+
+## -----------------------------------------------------------------------------
+simpleDoc <- author(simpleTeX)
+simpleDoc
+
+
+## ----typeset, echo=FALSE------------------------------------------------------
+simpleDVI <- typeset(simpleDoc)
+
+## ----dvi, echo=FALSE, eval=FALSE----------------------------------------------
+# simpleDVI
+
+## ----eval=FALSE---------------------------------------------------------------
+# simpleDVI <- typeset(simpleDoc)
+# simpleDVI
+
+## ----echo=FALSE---------------------------------------------------------------
+output <- capture.output(simpleDVI)
+firstDown <- grep("^down", output)[1]
+firstDef <- grep("^x_fnt_def", output)[1]
+firstGlyph <- grep("^x_glyph", output)[1]
+cat(c(output[1:firstDown], 
+      "\n...\n",
+      output[(firstDef - 1):(firstGlyph + 3)],
+      "\n...\n"), sep="\n")
+
+
+## ----simpledvi, eval=FALSE----------------------------------------------------
+# render(simpleDVI)
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+render(simpleDVI)
+
+
+## -----------------------------------------------------------------------------
+colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+
+
+## ----colourtex, eval=FALSE----------------------------------------------------
+# grid.latex(colourTeX, packages="xcolor")
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(colourTeX, packages="xcolor")
+
+
+## -----------------------------------------------------------------------------
+colourDoc <- author(colourTeX, packages="xcolor")
+colourDoc
+
+
+## ----colortypeset, echo=FALSE-------------------------------------------------
+colourDVI <- typeset(colourDoc)
+
+## ----colordvi, echo=FALSE, eval=FALSE-----------------------------------------
+# colourDVI
+
+## ----eval=FALSE---------------------------------------------------------------
+# colourDVI <- typeset(colourDoc)
+# colourDVI
+
+## ----echo=FALSE---------------------------------------------------------------
+output <- capture.output(colourDVI)
+firstDef <- grep("^x_fnt_def", output)[1]
+firstRGB <- grep("rgb", output)[1]
+cat(c(output[1:3], 
+      "\n...\n",
+      output[firstDef:(firstDef + 4)],
+      "\n...\n",
+      output[(firstRGB - 1):(firstRGB + 2)],
+      "\n...\n"),
+    sep="\n")
+
+
+## ----colourdvi, eval=FALSE----------------------------------------------------
+# render(colourDVI, packages="xcolor")
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+render(colourDVI, packages="xcolor")
+
+
+## ----horiz, echo=FALSE, eval=FALSE--------------------------------------------
+# grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+
+## ----justcentre, eval=FALSE---------------------------------------------------
+# grid.latex(simpleTeX, y=.5)
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(simpleTeX, y=.5)
+
+
+## ----justbottom, eval=FALSE---------------------------------------------------
+# grid.latex(simpleTeX, y=.5, vjust="bottom")
+
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(simpleTeX, y=.5, vjust="bottom")
+
+
+## ----justbaseline, eval=FALSE-------------------------------------------------
+# grid.latex(simpleTeX, y=.5, vjust="baseline")
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.latex(simpleTeX, y=.5, vjust="baseline")
+
+
+## -----------------------------------------------------------------------------
+rightBearingTeX <- paste0(simpleTeX, "$|$")
+
+## ----justright, eval=FALSE----------------------------------------------------
+# ggIntro +
+#     labs(title=rightBearingTeX) +
+#     theme(plot.title=element_latex(size=20, hjust="right"))
+
+## ----echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300----
+pushViewport(viewport(height=100, y=1, just="top"))
+gg1 <- 
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="right"))
+print(gg1, newpage=FALSE)
+
+## ----justbbright, eval=FALSE--------------------------------------------------
+# ggIntro +
+#     labs(title=rightBearingTeX) +
+#     theme(plot.title=element_latex(size=20, hjust="bbright"))
+
+## ----echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300----
+pushViewport(viewport(height=100, y=1, just="top"))
+gg2 <- 
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="bbright"))
+print(gg2, newpage=FALSE)
+
+
+## -----------------------------------------------------------------------------
+zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
+\xdvirzmark{a}\xdvirzmark{b})"
+
+
+## ----zreftex, eval=FALSE------------------------------------------------------
+# grid.latex(zrefTeX, packages="zref")
+
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(zrefTeX, packages="zref")
+
+
+## ----geta, eval=FALSE---------------------------------------------------------
+# a <- getMark("a")
+# grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
+
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(zrefTeX, packages="zref")
+a <- getMark("a")
+grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
+
+
+## ----getb, eval=FALSE---------------------------------------------------------
+# b <- getMark("b")
+# grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
+#              unit.c(a$devy, a$devy - unit(3, "mm"), a$devy),
+#              shape=-1, gp=gpar(col=2, fill=2),
+#              arrow=arrow(length=unit(2, "mm"), type="closed"))
+
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(zrefTeX, packages="zref")
+a <- getMark("a")
+grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
+b <- getMark("b")
+grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
+             unit.c(a$devy, a$devy - unit(3, "mm"), a$devy),
+             shape=-1, gp=gpar(col=2, fill=2),
+             arrow=arrow(length=unit(2, "mm"), type="closed"))
+
+
+## ----justanchor, eval=FALSE---------------------------------------------------
+# grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
+
+## ----vert, echo=FALSE, eval=FALSE---------------------------------------------
+# grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
+grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
+grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
+
+
+## ----echo=FALSE---------------------------------------------------------------
+markStr <- r"(\definecolor{Rred}{RGB}{223,83,107}
+\begin{minipage}{3in}
+We `move' the original population's mean to a new $\bar z_i$ 
+and calculate the average fitness at that new mean phenotype 
+of the population to get the adaptive landscape, $\bar W_i$, 
+then we combine the population mean and the average fitness 
+to get the 
+\textcolor{Rred}{\bf \zsavepos{left}fitness function\zsavepos{right}}.
+\xdvirzmark{left}\xdvirzmark{right}
+\end{minipage})"
+
+
+## ----zref, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:zrefFigCap)'----
+markTeX <- function(data, coords) {
+    latexGrob(markStr, packages=list(adventor, "xcolor", "zref"),
+              x=max(coords$x), 
+              y=max(coords$y),
+              hjust="right", vjust="top", 
+              gp=NULL,
+              texFile="typesetting.tex")
+}
+
+makeContent.markCurve <- function(x) {
+    ## Delay this calculation until drawing time so that we
+    ## are in the correct viewport
+    devLoc <- deviceLoc(x$x, x$y)
+    addMark("curve", devLoc$x, devLoc$y)
+    x
+}
+
+markCurve <- function(data, coords) {
+    gTree(x=unit(coords$x[data$x == 4], "npc"),
+          y=unit(coords$y[data$x == 4], "npc"),
+          cl="markCurve")
+}
+
+ggIntro + 
+    grid_panel(markTeX, aes(x, y)) +
+    grid_panel(markCurve, aes(x, y))
+
+left <- getMark("left")
+right <- getMark("right")
+curve <- getMark("curve")
+
+grid.lines(unit.c(curve$devx, left$devx, right$devx),
+           unit.c(curve$devy, left$devy - unit(1, "mm"),
+                  right$devy - unit(1, "mm")),
+           gp=gpar(col=2))
+
+
+## ----tikztex------------------------------------------------------------------
+tikzTeX <- r"(%
+\path (0, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (x) {\sffamily{R}} 
+       (3, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (y) {Ti{\it k}Z!};
+\draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
+\draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
+
+
+## ----tikzpicture, eval=FALSE--------------------------------------------------
+# grid.latex(tikzTeX, packages="tikzPicture")
+
+## ----echo=FALSE, fig.width=3, fig.height=1------------------------------------
+grid.rect()
+grid.latex(tikzTeX, packages="tikzPicture")
+
+
+## -----------------------------------------------------------------------------
+muDot <- r"(%
+\begin{tikzpicture}
+\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};
+\end{tikzpicture})"
+
+
+## ----tikz, eval=FALSE---------------------------------------------------------
+# grid.latex(muDot, packages="tikz")
+
+## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+grid.rect()
+grid.latex(muDot, packages="tikz")
+
+
+## ----diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."----
+knitr::include_graphics("diagram/diag.pdf")
+
+
+## ----diagsvg, eval=knitr::is_html_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."----
+# ## Create the sort of structure that knitr::include_graphics() returns
+# structure("diagram/diag.svg",
+#           class= c("knit_image_paths", "knit_asis"),
+#           dpi=NULL)
+
+
+## ----echo=FALSE---------------------------------------------------------------
+source("scripts/rahlf-plot.R")
+
+## ----rahlfplot, echo=FALSE, eval=FALSE----------------------------------------
+# rahlfPlot()
+
+
+## ----gridgraphics, echo=FALSE, eval=FALSE-------------------------------------
+# library(gridGraphics)
+# grid.echo()
+
+
+## ----downvp, echo=FALSE, eval=FALSE-------------------------------------------
+# downViewport("graphics-window-1-1")
+
+
+## ----echo=FALSE---------------------------------------------------------------
+rahlfTeX <- paste(readLines("TeX/rahlf.tex"), collapse="\n")
+
+
+## ----multicol, echo=FALSE, eval=FALSE-----------------------------------------
+# multicol <- LaTeXpackage("multicol",
+#                          preamble="\\usepackage{multicol}")
+# registerPackage(multicol)
+
+
+## ----rahlflatex, echo=FALSE, eval=FALSE---------------------------------------
+# grid.latex(rahlfTeX,
+#            packages=c("fontspec", "multicol"),
+#            x=unit(1, "cm"), y=unit(14000, "native"),
+#            hjust="left", vjust="top")
+
+
+## ----rahlf, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfFigCap)', fig.keep="last"----
+rahlfPlot()
+library(gridGraphics)
+grid.echo()
+downViewport("graphics-window-1-1")
+multicol <- LaTeXpackage("multicol",
+                         preamble="\\usepackage{multicol}")
+registerPackage(multicol)
+grid.latex(rahlfTeX, 
+           packages=c("fontspec", "multicol"),
+           x=unit(1, "cm"), y=unit(14000, "native"), 
+           hjust="left", vjust="top")
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# rahlfPlot()
+
+
+## ----rahlfplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfplainFigCap)'----
+rahlfPlot()
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# library(gridGraphics)
+# grid.echo()
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# downViewport("graphics-window-1-1")
+
+
+## ----echo=FALSE---------------------------------------------------------------
+cat(rahlfTeX)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# multicol <- LaTeXpackage("multicol",
+#                          preamble="\\usepackage{multicol}")
+# registerPackage(multicol)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# grid.latex(rahlfTeX,
+#            packages=c("fontspec", "multicol"),
+#            x=unit(1, "cm"), y=unit(14000, "native"),
+#            hjust="left", vjust="top")
+
+
+## ----echo=FALSE---------------------------------------------------------------
+source("scripts/schneider.R")
+
+## ----schneiderplot, echo=FALSE, eval=FALSE------------------------------------
+# ggSchneider
+
+
+## ----echo=FALSE---------------------------------------------------------------
+schneiderLines <- readLines("TeX/schneider.tex")
+schneiderTeX <- paste(schneiderLines, collapse="\n")
+
+
+## ----annotateequations, echo=FALSE, eval=FALSE--------------------------------
+# annotateEquations <-
+#     LaTeXpackage(name="annotate",
+#                  preamble="\\usepackage{TeX/annotate-equations}")
+# registerPackage(annotateEquations)
+
+
+## ----tikznobbox, echo=FALSE, eval=FALSE---------------------------------------
+# tikzNoBBox <-
+#     tikzPackage(name="tikzNoBBox", bbox=FALSE)
+# registerPackage(tikzNoBBox)
+
+
+## ----roboto, echo=FALSE, eval=FALSE-------------------------------------------
+# roboto <-
+#     LaTeXpackage(name="roboto",
+#                  preamble="\\usepackage[sfdefault,condensed]{roboto}")
+# registerPackage(roboto)
+
+
+## ----anneq, echo=FALSE, eval=FALSE--------------------------------------------
+# library(gggrid)
+# 
+# annotation <- function(data, coords) {
+#     latexGrob(schneiderTeX,
+#               packages=c("tikzNoBBox", "annotate", "roboto"),
+#               x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
+#               y=coords$y, hjust=1, vjust=1)
+# }
+# 
+# ggSchneider +
+#     grid_panel(annotation,
+#                aes(x=x, y=y),
+#                data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
+
+
+## ----schneider, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderFigCap)'----
+annotateEquations <-
+    LaTeXpackage(name="annotate",
+                 preamble="\\usepackage{TeX/annotate-equations}")
+registerPackage(annotateEquations)
+tikzNoBBox <-
+    tikzPackage(name="tikzNoBBox", bbox=FALSE)
+registerPackage(tikzNoBBox)
+roboto <-
+    LaTeXpackage(name="roboto",
+                 preamble="\\usepackage[sfdefault,condensed]{roboto}")
+registerPackage(roboto)
+library(gggrid)
+
+annotation <- function(data, coords) {
+    latexGrob(schneiderTeX, 
+              packages=c("tikzNoBBox", "annotate", "roboto"),
+              x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
+              y=coords$y, hjust=1, vjust=1)
+}
+
+ggSchneider +
+    grid_panel(annotation, 
+               aes(x=x, y=y), 
+               data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# ggSchneider
+
+
+## ----schneiderplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderplainFigCap)'----
+ggSchneider
+
+
+## ----echo=FALSE---------------------------------------------------------------
+ann2 <- grep("[\\]annotate", schneiderLines)[2]
+cat(schneiderLines[1:(ann2 - 1)], sep="\n")
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# annotateEquations <-
+#     LaTeXpackage(name="annotate",
+#                  preamble="\\usepackage{TeX/annotate-equations}")
+# registerPackage(annotateEquations)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# tikzNoBBox <-
+#     tikzPackage(name="tikzNoBBox", bbox=FALSE)
+# registerPackage(tikzNoBBox)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# roboto <-
+#     LaTeXpackage(name="roboto",
+#                  preamble="\\usepackage[sfdefault,condensed]{roboto}")
+# registerPackage(roboto)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# library(gggrid)
+# 
+# annotation <- function(data, coords) {
+#     latexGrob(schneiderTeX,
+#               packages=c("tikzNoBBox", "annotate", "roboto"),
+#               x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
+#               y=coords$y, hjust=1, vjust=1)
+# }
+# 
+# ggSchneider +
+#     grid_panel(annotation,
+#                aes(x=x, y=y),
+#                data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
+
+
+## ----echo=FALSE---------------------------------------------------------------
+source("scripts/anzjs.R")
+
+
+## ----anzjsplot, echo=FALSE, eval=FALSE----------------------------------------
+# ggANZJS
+
+
+## ----echo=FALSE---------------------------------------------------------------
+closeTeX <- r"(%
+\fontsize{10}{12}
+\selectfont
+\begin{enumerate}
+\item New Zealand closes its borders to {\it almost} all travellers at
+{\bf 23:59, 19 March 2020 (NZDT)}.
+\end{enumerate})"
+
+
+## ----labelLeft, echo=FALSE, eval=FALSE----------------------------------------
+# labelLeft <- function(data, coords) {
+#     x1 <- coords$x[1]
+#     x2 <- coords$x[2]
+#     w <- unit(1 - x2, "npc") - unit(1, "mm")
+#     gap <- 15
+#     latex1 <- latexGrob(closeTeX,
+#                         x=unit(x1, "npc") - unit(2, "mm"),
+#                         y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+#                         hjust=1, vjust=1,
+#                         width=w)
+# }
+
+
+## ----labelRight, echo=FALSE, eval=FALSE---------------------------------------
+# labelRight <- function(data, coords) {
+#     x1 <- coords$x[1]
+#     x2 <- coords$x[2]
+#     w <- unit(1 - x2, "npc") - unit(1, "mm")
+#     gap <- 15
+#     latex1 <- latexGrob(closeTeX,
+#                         x=unit(x1, "npc") - unit(2, "mm"),
+#                         y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+#                         hjust=1, vjust=1,
+#                         width=w)
+#     openTeX <- r"(%
+# \fontsize{10}{12}
+# \selectfont
+# \begin{enumerate}\addtocounter{enumi}{1}
+# \item New Zealand's international border opens to all visitors from
+# {\bf 11:59PM, 31 July 2022 (NZDT)}.
+# \end{enumerate})"
+#     latex2 <- latexGrob(openTeX,
+#                         x=unit(x2, "npc") + unit(2, "mm"),
+#                         y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+#                         hjust=0, vjust=1,
+#                         width=w)
+#     latex2
+# }
+
+## ----ggenumlist, echo=FALSE, eval=FALSE---------------------------------------
+# ggANZJS +
+#     grid_panel(labelLeft,
+#                aes(x=borders),
+#                data=data.frame(borders=c(borderClosed, borderOpen))) +
+#     grid_panel(labelRight,
+#                aes(x=borders),
+#                data=data.frame(borders=c(borderClosed, borderOpen)))
+
+
+## ----anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsFigCap)'----
+labelLeft <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- unit(1 - x2, "npc") - unit(1, "mm")
+    gap <- 15
+    latex1 <- latexGrob(closeTeX,
+                        x=unit(x1, "npc") - unit(2, "mm"), 
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+                        hjust=1, vjust=1,
+                        width=w)
+}
+labelRight <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- unit(1 - x2, "npc") - unit(1, "mm")
+    gap <- 15
+    latex1 <- latexGrob(closeTeX,
+                        x=unit(x1, "npc") - unit(2, "mm"), 
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+                        hjust=1, vjust=1,
+                        width=w)
+    openTeX <- r"(%
+\fontsize{10}{12}
+\selectfont
+\begin{enumerate}\addtocounter{enumi}{1}
+\item New Zealand's international border opens to all visitors from
+{\bf 11:59PM, 31 July 2022 (NZDT)}.
+\end{enumerate})"
+    latex2 <- latexGrob(openTeX,
+                        x=unit(x2, "npc") + unit(2, "mm"),
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"), 
+                        hjust=0, vjust=1,
+                        width=w)
+    latex2
+}
+ggANZJS +
+    grid_panel(labelLeft,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen))) +
+    grid_panel(labelRight,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen)))
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# ggANZJS
+
+
+## ----anzjsplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsplainFigCap)'----
+ggANZJS
+
+
+## ----echo=FALSE---------------------------------------------------------------
+cat(closeTeX)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# labelLeft <- function(data, coords) {
+#     x1 <- coords$x[1]
+#     x2 <- coords$x[2]
+#     w <- unit(1 - x2, "npc") - unit(1, "mm")
+#     gap <- 15
+#     latex1 <- latexGrob(closeTeX,
+#                         x=unit(x1, "npc") - unit(2, "mm"),
+#                         y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+#                         hjust=1, vjust=1,
+#                         width=w)
+# }
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# ggANZJS +
+#     grid_panel(labelLeft,
+#                aes(x=borders),
+#                data=data.frame(borders=c(borderClosed, borderOpen))) +
+#     grid_panel(labelRight,
+#                aes(x=borders),
+#                data=data.frame(borders=c(borderClosed, borderOpen)))
+
+
+## ----echo=FALSE---------------------------------------------------------------
+library(lattice)
+library(latticeExtra)
+
+
+## ----yaml, echo=FALSE---------------------------------------------------------
+yaml <- "
+---
+mainfont: TeX Gyre Heros
+header-includes:
+- \\pagestyle{empty}
+- \\usepackage{geometry}
+- \\geometry{textwidth=1.8in}
+---
+"
+
+
+## ----mdleft, echo=FALSE-------------------------------------------------------
+mdLeft <- "
+1. New Zealand closes its borders to *almost* all travellers
+   at **23:59, 19 March 2020 (NZDT)**.
+"
+
+
+## ----mdright, echo=FALSE------------------------------------------------------
+mdRight <- "
+2. New Zealand's international border opens to all visitors
+   from **11:59PM, 31 July 2022**.
+"
+
+
+## ----pandocleft, echo=FALSE---------------------------------------------------
+oldwd <- setwd("Markdown")
+writeLines(c(yaml, mdLeft), "labelLeft.md")
+rmarkdown::pandoc_convert("labelLeft.md", 
+                          output="labelLeft.tex",
+                          options="--standalone")
+latexLeft <- readLines("labelLeft.tex")
+setwd(oldwd)
+
+
+## ----pandocright, echo=FALSE--------------------------------------------------
+oldwd <- setwd("Markdown")
+writeLines(c(yaml, mdRight), "labelRight.md")
+rmarkdown::pandoc_convert("labelRight.md", 
+                          output="labelRight.tex",
+                          options="--standalone")
+latexRight <- readLines("labelRight.tex")
+setwd(oldwd)
+
+
+## ----typesetleft, echo=FALSE--------------------------------------------------
+dviLeft <- typeset(latexLeft)
+
+
+## ----typesetright, echo=FALSE-------------------------------------------------
+dviRight <- typeset(latexRight)
+
+
+## ----lattice, echo=FALSE------------------------------------------------------
+latticeFlights <- 
+    xyplot(total ~ date, flights, type="l", 
+           main=list(label="Total flights into and out of Auckland",
+                     x=0, hjust=0),
+           xlab="", ylab=NULL,
+           ylim=c(0, 1800000), family="Lato Light", 
+           scales=list(y=list(at=c(0, 500000, 1000000),
+                              labels=c("0", "500,000", "1,000,000"))),
+           panel=function(...) {
+                     panel.xyplot(...)
+                     panel.abline(v=c(borderClosed, borderOpen), lty="dashed")
+                 })
+
+
+## ----latticeflights, echo=FALSE, eval=FALSE-----------------------------------
+# latticeFlights +
+#     latticeExtra::layer(render(dviLeft,
+#                                x=unit(borderClosed, "native") - unit(2, "mm"),
+#                                y=unit(1, "npc") - unit(2, "mm"),
+#                                hjust="right", vjust="top"))
+
+
+## ----latticefinal, echo=FALSE-------------------------------------------------
+temp <- 
+latticeFlights + 
+    latticeExtra::layer(render(dviLeft, 
+                               x=unit(borderClosed, "native") - unit(2, "mm"),
+                               y=unit(1, "npc") - unit(2, "mm"),
+                               hjust="right", vjust="top"))
+latticeFinal <- temp + 
+    latticeExtra::layer(grid.dvi(dviRight, 
+                   x=unit(borderOpen, "native") + unit(2, "mm"),
+                   y=unit(1, "npc") - unit(2, "mm"),
+                   hjust="left", vjust="top"))
+
+
+## ----latticemd, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'----
+latticeFinal
+
+
+## ----latticemdplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'----
+latticeFlights
+
+
+## ----echo=FALSE---------------------------------------------------------------
+cat(mdLeft)
+
+
+## ----echo=FALSE---------------------------------------------------------------
+cat(yaml)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# oldwd <- setwd("Markdown")
+# writeLines(c(yaml, mdLeft), "labelLeft.md")
+# rmarkdown::pandoc_convert("labelLeft.md",
+#                           output="labelLeft.tex",
+#                           options="--standalone")
+# latexLeft <- readLines("labelLeft.tex")
+# setwd(oldwd)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# dviLeft <- typeset(latexLeft)
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# latticeFlights +
+#     latticeExtra::layer(render(dviLeft,
+#                                x=unit(borderClosed, "native") - unit(2, "mm"),
+#                                y=unit(1, "npc") - unit(2, "mm"),
+#                                hjust="right", vjust="top"))
 

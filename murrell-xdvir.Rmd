@@ -6,7 +6,7 @@ abstract: >
   LaTeX code as labels, annotations, and
   data symbols in R plots.  There are convenient high-level
   functions for rendering simple LaTeX fragments, including
-  as labels on `ggplot2` plots, plus lower-level
+  labels on `ggplot2` plots, plus lower-level
   functions for more fine control over the authoring,
   typesetting, and rendering of LaTeX code.
   There is support for making use of LaTeX packages,
@@ -971,14 +971,18 @@ We will see a more complex example of TikZ output in a later section.
 # Customisation and debugging
  
 Most of the examples in this article take a fragment of LaTeX code
-and feed it to the `grid.latex()` function, which performs an
+and pass it to the `grid.latex()` function, which performs an
 authoring step, a typesetting step, and a rendering step.
-
 We saw in a previous section that there are functions
 `author()`, `typeset()`, and `render()`
 that allow us to perform these steps separately
 (see Figure 
 \@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
+This provides more control over the individual steps and allows
+us to inspect the results of the individual steps, which can be
+useful for debugging.
+In this section, we explore further options for controlling the 
+authoring, typesetting, and rendering steps.
 
 ```{r diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
 knitr::include_graphics("diagram/diag.pdf")
@@ -995,7 +999,7 @@ complete LaTeX document.  Although there are arguments to the `author()`
 function that allow some control over that transformation,
 e.g., the `packages` argument, it does not allow full control
 over the composition of the LaTeX document.
-However, a LaTeX document within R is essentially just a character vector,
+Fortunately, a LaTeX document within R is essentially just a character vector,
 so another way to author a LaTeX document is to create an external text file
 and read that into R.  This allows complete control over the content
 of the LaTeX document.
@@ -1108,6 +1112,7 @@ Figure \@ref(fig:rahlfplain).
 ```
 
 Because the main plot is drawn with the `graphics` package, 
+in order to integrate the output from `grid.latex()` with the plot,
 we need to convert it to an equivalent drawing that uses
 functions from the `grid` package.
 This can be achieved with the `grid.echo()` function from the
@@ -1153,12 +1158,12 @@ to be loaded, but this is not a problem because there is predefined support
 for `fontspec` in the `xdvir` package.  However, the `multicol` environment
 in the LaTeX code requires the LaTeX package `multicol` and there is no
 predefined support for that in `xdvir`.  The following code uses the
-`LaTeXpackage` to provide support for the LaTeX package `multicol`.
+`LaTeXpackage()` function to provide support for the LaTeX package `multicol`.
 In a simple case like this, all we have to do is provide a name for the 
 package (`"multicol"`) and use the `preamble` argument to
 provide the LaTeX code that should be added in the
 authoring step to load the LaTeX package.
-We also call `registerPackage()` so that we can refer to this LaTeX
+We also call the `registerPackage()` function so that we can refer to this LaTeX
 package by its name.
 
 ```{r eval=FALSE}
@@ -1182,7 +1187,7 @@ The final result is shown in Figure \@ref(fig:rahlf).
 
 This section looks at another more complete example of a plot with
 a LaTeX annotation (Figure \@ref(fig:schneider)).  This example
-demonstrates the sort of effects that are possible by
+demonstrates the sophisticated effects that are possible by
 combining TikZ graphics with LaTeX typesetting, in this case
 to produce an annotated mathematical equation.
 
@@ -1277,7 +1282,8 @@ and the third block shows one of the additional equation annotations, which
 refers to one of the saved locations within the main mathematical 
 equation, in this case
 the "z", and positions a
-label relative to that location, in this case the label "z-score"
+label relative to that location, in this case the label "z-score",
+which is positioned
 above and to the left of the "z".
 
 
@@ -1350,10 +1356,9 @@ The final result is shown in Figure \@ref(fig:schneider).
 
 # Example 3
 
-This example, shown in Figure \@ref(fig:anzjs),
-provides another demonstration of the range of possibilities from
+This provides another demonstration of the range of possibilities from
 LaTeX typesetting, by adding annotations that are formatted as numbered
-list items.
+list items, as shown in Figure \@ref(fig:anzjs).
 
 ```{r, echo=FALSE}
 source("scripts/anzjs.R")
@@ -1485,11 +1490,11 @@ The final result is shown in Figure \@ref(fig:anzjs).
 
 # Example 4
 
-This section provides an example of using other software to generate
-LaTeX code, rather than writing it directly.  
+This section provides an example, shown in
+Figure \@ref(fig:latticemd), of using other software to generate
+LaTeX code, rather than writing it directly.
 It also demonstrates integrating `grid.latex()` output
 with a \CRANpkg{lattice} plot [@pkg-lattice].
-The final image is shown in \@ref(fig:latticemd).
 
 ```{r echo=FALSE}
 library(lattice)
@@ -1596,6 +1601,10 @@ relevant to this article, so the main plot is described in the object
 The main plot produced by `latticeFlights` is shown in 
 Figure \@ref(fig:latticemdplain).
  
+```{r eval=FALSE}
+latticeFlights
+```
+
 (ref:latticemdplainFigCap) The main plot from Figure \@ref(fig:latticemd).  This plot is produced using the \CRANpkg{lattice} package.
 
 ```{r, latticemdplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'}
@@ -1604,9 +1613,10 @@ latticeFlights
 
 The annotations in Figure \@ref(fig:latticemd) are enumerated list items,
 similar to those in Figure \@ref(fig:anzjs).  However, in this plot
-instead of writing explicit LaTeX code, we use the arguably-simpler
+instead of writing explicit LaTeX code, we use
 Markdown syntax to 
-describe the list item.  We will just focus on the left annotation;
+describe the list item, as shown below.
+We will just focus on the left annotation;
 the right annotation is added in a very similar fashion.
 
 ```{r echo=FALSE}
@@ -1615,7 +1625,7 @@ cat(mdLeft)
 
 We can
 use `pandoc_convert()` from the \CRANpkg{rmarkdown} package [@pkg:rmarkdown]
-to convert the Markdown to LaTeX code.
+to convert the Markdown to LaTeX code, as shown below.
 Because we want the enumerated list to be constrained to a narrow width
 and because we want the font to match the main plot font, we
 have to add a YAML header to the markdown.
@@ -1644,7 +1654,8 @@ LaTeX document rather than just a LaTeX fragment.
 We cannot pass a complete document to `grid.latex()`;
 instead, 
 we pass the LaTeX document to `typeset()` to generate
-a `"DVI"` object.
+a `"DVI"` object (see Figure 
+\@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
 
 ```{r eval=FALSE}
 <<typesetleft>>
@@ -1653,9 +1664,11 @@ a `"DVI"` object.
 The following code demonstrates that we can render
 this `"DVI"` object within the \CRANpkg{lattice} plot
 using the `layer()` function from the 
-\CRANpkg{latticeExtra} package [@pkg:latticeExtra],
-to which we provide a call to the `render()` function
-from the `xdvir` package.
+\CRANpkg{latticeExtra} package [@pkg:latticeExtra].
+The first argument to that function is code that produces
+output to add to the \CRANpkg{lattice} plot.
+We provide a call to the `render()` function
+from the `xdvir` package to draw the output described in `dviLeft`.
 Similar code is used to generate and add the second list item.
 
 ```{r eval=FALSE}
@@ -1696,31 +1709,47 @@ A final major limitation of `xdvir` is that it only currently supports two
 TeX engines:  XeTeX and recent LuaTeX.  The package start-up message 
 reports on whether these are available.  An implicit limitation is that
 `xdvir` requires a TeX installation, though that is simplified 
-through a dependency on the `tinytex` package [@pkg:tinytex].
+through a dependency on the \CRANpkg{tinytex} package [@pkg:tinytex].
 
 Given these limitations, it is worth discussing alternative approaches.
 The first section of this article mentioned \CRANpkg{gridtext},
 \CRANpkg{ggtext}, and \CRANpkg{marquee}.  These packages
 provide alternative ways to render non-trivial text labels, but 
 do so through Markdown and/or HTML rather than LaTeX.
-The advantage of `xdvir` by comparison is that it is possible to
-produce more advanced typesetting results with LaTeX.
+There are, in addition, a number of packages that perform specific
+text-placement tasks, for example \CRANpkg{geomtextpath} [@pkg:geomtextpath],
+which can arrange text along an arbitrary path, and
+\CRANpkg{directlabels} [@pkg:directlabels] and 
+\CRANpkg{ggforce} [@pkg:ggforce], which provide functions for adding
+text annotations.
+The advantage of `xdvir` by comparison with these packages
+is that it is possible to
+produce more advanced typesetting results thanks to having access to LaTeX.
 
 The \CRANpkg{tikzDevice} package [@pkg:tikzDevice] is an interesting
 alternative because, where `xdvir` integrates LaTeX text with R graphics, 
-\CRANpkg{tikzDevice} integrates R graphics with LaTeX.
+\CRANpkg{tikzDevice} reverses the process and integrates R graphics with LaTeX.
 The \CRANpkg{tikzDevice} package provides an R graphics device that
 converts R plots into TikZ pictures so that R plots can include labels with 
 LaTeX fragments and R plots can be 
 deeply integrated with LaTeX documents.
 The main difference with this package is the destination:
-where `xdvir` ends up with LaTeX output within an R plot, 
-\CRANpkg{tikzDevice} ends up with an R plot within LaTeX output.
+if we use `xdvir`, we end up with LaTeX output within an R plot;
+if we use \CRANpkg{tikzDevice} we end up with an R plot within LaTeX output.
 If the final destination is a LaTeX document, 
 then the \CRANpkg{tikzDevice} may provide more convenience
 and greater control. However, if the final destination is 
 more general, or unknown, then `xdvir` may be the more appropriate
 solution.
+
+The \CRANpkg{latex2exp} package [@pkg:latex2exp] is another package
+that works in the opposite direction to `xdvir`.  This package
+takes a LaTeX fragment and converts it to an R "plotmath" expression.
+This allows users familiar with LaTeX to access R's math-drawing facility
+whereas `xdvir` allows users to access LaTeX's math-drawing facility,
+which is far superior.  The advantage of \CRANpkg{latex2exp}, as with
+many of these alternative approaches, is that it does not have any
+system dependencies, whereas `xdvir` requires a TeX installation.
 
 Another alternative approach to including LaTeX output in R plots
 is to import an image of the LaTeX output.
@@ -1729,7 +1758,7 @@ LaTeX mathematical expressions in web pages by generating PNG images
 from LaTeX fragments.
 However, more modern technologies, such as SVG mean that this
 approach can yield a much higher-quality result, as 
-demonstrated by @schneider.
+demonstrated by @schneider2023.
 One simple advantage of the `xdvir` approach is the level of convenience
 that it provides by automating the authoring and typesetting steps.
 The `xdvir` package also provides more possibilities to integrate
@@ -1745,7 +1774,7 @@ future work.
 
 The `xdvir` package depends on the \CRANpkg{tinytex} package
 for the typesetting step.  This package makes it much
-simpler make use of TeX engines, 
+simpler to make use of TeX engines, 
 including performing multiple runs when necessary, and much easier
 to install
 LaTeX packages (and TeX itself).

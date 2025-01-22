@@ -1,5 +1,5 @@
 % !TeX root = RJwrapper.tex
-\title{Rendering Typeset Text in R}
+\title{Rendering LaTeX in R}
 
 
 \author{by Paul Murrell}
@@ -7,7 +7,7 @@
 \maketitle
 
 \abstract{%
-An abstract of less than 150 words.
+The \texttt{xdvir} package provides functions for rendering LaTeX code as labels, annotations, and data symbols in R plots. There are convenient high-level functions for rendering simple LaTeX fragments, including as labels on \texttt{ggplot2} plots, plus lower-level functions for more fine control over the authoring, typesetting, and rendering of LaTeX code. There is support for making use of LaTeX packages, including TikZ graphics. The rendered LaTeX output is fully integrated with R graphics output in the sense that LaTeX output can be positioned relative to R graphics output and vice versa.
 }
 
 \hypertarget{introduction}{%
@@ -28,34 +28,1411 @@ overall title and axis titles via the \texttt{main},
 and we can add text at arbitrary locations on the plot with the \texttt{text()}
 and \texttt{mtext()} functions.
 
-However, these core tools for drawing text are quite limited
+Unfortunately, these core tools for drawing text are quite limited
 in terms of the formatting of the text.
-For example, there is no facility for emphasising a word with
+For example, there is no facility for emphasising an individual word using
 a \textbf{bold} or \emph{italic} face within a text label.
 
 The \CRANpkg{gridtext} (Wilke and Wiernik 2022b) and \CRANpkg{ggtext} (Wilke and Wiernik 2022a)
 packages greatly improved the situation by allowing text labels
 to include a small subset of
-markdown and HTML (plus CSS). This allows changes in font face
+markdown and HTML (plus CSS). This allowed changes in font face
 and colour within text labels.
 
 More recently, the \CRANpkg{marquee} package (Pedersen and Mitáš 2024)
 improved things a great deal further by providing full support for
-markdown within text labels. This makes it possible to layout
+markdown within text labels. This made it possible to layout more
 complex arrangements of text and graphical content within ``text'' labels.
 
-Despite these advances, there are still some text formatting tasks that
-remain out of reach. For example,
+However, despite these advances, there are still some text formatting tasks that
+remain out of reach. For example, Figure \ref{fig:typesetting}
+shows a plot with a text annotation in the top-right corner that contains
+a combination of features that cannot be produced using the
+available text-drawing tools.
 
-\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-3-1.png}
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/typesetting-1.png}
+\caption{\label{fig:typesetting}A plot with a text annotation that contains several typesetting challenges: in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation.}
+\end{figure}
 
-(Murrell, Pedersen, and Urbanek 2023)
+The annotation in Figure \ref{fig:typesetting}
+may not appear to be particularly special nor particularly complicated
+at first glance, but it harbours several important details:
 
-\hypertarget{background}{%
-\section{Background}\label{background}}
+\begin{itemize}
+\item
+  The text is a mixture of plain text and mathematical expressions (like
+  \(\bar{z}_i\)). Furthermore, the mathematical expressions use a different font
+  (Latin Modern) than the plain text (TeX Gyre Adventor).
 
-\hypertarget{summary}{%
-\section{Summary}\label{summary}}
+  The R graphics system can draw mathematical expressions (Murrell and Ihaka 2000)
+  and that includes a mixture of plain text and mathematical expressions,
+  but it can only use the same font for the entire mixture.
+  There is also the problem
+  that the typesetting of mathematical expressions in R graphics is not
+  of a very high quality.
+\item
+  The text is not all the same colour; the final two words (but not the full
+  stop) are red. Furthermore, the final two words are \textbf{bold};
+  they have a different
+  font face compared to the rest of the text.
+
+  The R graphics system can only draw a character value with a single colour
+  and a single font face.
+  The \CRANpkg{gridtext} and
+  \CRANpkg{ggtext} packages make it possible to change colour within
+  a character value, but they do not allow a mixture of plain text and
+  mathematical expressions.
+\item
+  The text is broken over multiple lines. Furthermore, the text is fully
+  justified (not ragged-left or ragged-right justified) and one word
+  has been split across lines and hyphenated. Although it is not
+  obvious from the plot itself, the line breaks were also automatically
+  generated to fit the text into a fixed width (3 inches).
+
+  The R graphics system can draw a character value across multiple lines, but
+  only if explicit newlines are embedded in the character value (i.e., the line
+  breaks are manual). The \CRANpkg{gridtext} and
+  \CRANpkg{ggtext} packages can calculate simple
+  automated line breaks, but they will not break a word across lines (or
+  hyphenate) and they cannot fully justify the resulting text. The
+  \CRANpkg{marquee} package can automate line breaks and fully justify
+  text, but it cannot hyphenate nor can it produce mathematical equations.
+\end{itemize}
+
+The features outlined above are all examples of \emph{typesetting}; determining an
+arrangement of individual characters and symbols (glyphs) that could be as
+simple as placing one character after another (from left to right), but could
+also be as complex as arranging mathematical symbols, splitting text into
+multiple columns, or writing text vertically from top to bottom.
+
+From R 4.3.0, it has been
+possible to draw text from a set of typeset glyphs using the
+functions \texttt{grDevices::glyphInfo()} and \texttt{grid::grid.glyph()}
+(Murrell, Pedersen, and Urbanek 2023). This facility
+offers the promise of being able to render arbitrary typeset text
+in R. However, it
+presupposes that we are able to generate a set of typeset glyphs.
+
+The \CRANpkg{marquee} package provides an example of a package
+that can generate typeset glyphs. It is capable of converting
+markdown input into a set of glyphs and their positions, which are
+then rendered in R.
+
+This article describes the \texttt{xdvir} package, which is another example
+of a package that can generate typeset glyphs.
+In this case, the input is LaTeX, a TeX engine is used to
+generate a set of glyphs and their positions, and then the
+result is rendered in R.
+The benefit of the \texttt{xdvir} package is that it provides access to the
+typesetting capabilities of LaTeX, which includes hyphenation,
+fully justified text, mixtures of plain text and mathematical equations---all
+of the features demonstrated in Figure \ref{fig:typesetting} and much more.
+
+The next section describes the basic usage of the \texttt{xdvir} package.
+This is followed by a section that breaks down the
+design of the \texttt{xdvir} package to show the steps that are
+required to render LaTeX output in R.
+Subsequent sections explore several of the complexities
+that can arise with rendering LaTeX text in R graphics and
+some of the solutions that
+the \texttt{xdvir} package provides.
+The article ends with several extended examples of rendering LaTeX text in R.
+
+\hypertarget{userinterface}{%
+\section{LaTeX text labels in R}\label{userinterface}}
+
+The simplest way to draw LaTeX text with the \texttt{xdvir} package
+is to call the \texttt{grid.latex()} function. The first argument to
+this function is a character value, which is interpreted as
+a fragment of LaTeX code.
+For example, the following code draws a text label that contains
+a fragment of the larger annotation from
+Figure \ref{fig:typesetting}. We use just a fragment here in order
+to keep the code readable.
+
+Because LaTeX code tends to contain
+a large number of backslashes, the code below uses the \texttt{r"(...)"}
+syntax for raw character constants, so that we do not have to
+escape each backslash with a double backslash.
+The resulting image is shown below the code.
+Although it is not immediately obvious from that image,
+the text, or rather the glyphs, in the image are rendered by R.
+
+\begin{verbatim}
+library(xdvir)
+\end{verbatim}
+
+\begin{verbatim}
+simpleTeX <- r"(We move the original mean to $\bar z_i$)"
+\end{verbatim}
+
+\begin{verbatim}
+grid.latex(simpleTeX)
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+It is possible to produce something similar to this result using
+the ``plotmath'' feature in R, as shown in the following code (and the image
+below the code). However, this demonstrates that
+one advantage of using \texttt{xdvir}, even for a simple
+piece of text like this, is the superior quality of the LaTeX
+fonts and typesetting for mathematical expressions.
+
+\begin{verbatim}
+plotmath <- expression("We move the original mean to "*bar(italic(z))[i])
+\end{verbatim}
+
+\begin{verbatim}
+grid.text(plotmath)
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+Another immediate benefit of \texttt{xdvir} is that we can automatically fit
+the text within a specified width.
+For example, the following code draws the LaTeX fragment \texttt{tex}
+again, but this time forces it to fit within a column that is half
+the width of the image.
+
+\begin{verbatim}
+grid.latex(simpleTeX, width=.5)
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-7-1.pdf}
+
+As the function name \texttt{grid.latex()} suggests, that function
+produces low-level
+drawing in the \texttt{grid} package graphics system.
+The text is just drawn relative to the current \texttt{grid} viewport,
+wherever that may be on the page.
+While this is extremely flexible, it is more likely that
+we want to combine and coordinate the text with a high-level plot
+of some sort, like the annotation in Figure \ref{fig:typesetting}.
+There are various ways that low-level \texttt{grid} drawing can be combined
+with a high-level plot, but we will leave those demonstrations to
+later sections.
+
+Instead, for now, we will demonstrate a more common scenario:
+drawing LaTeX text labels on a \CRANpkg{ggplot2} plot (Wickham 2016).
+For this purpose, the \texttt{xdvir} package provides the
+\texttt{element\_latex()} function. This allows us to specify a LaTeX fragment
+as a plot label and indicate the special nature of the label
+via the \texttt{ggplot2::theme()} function.
+
+For example, the following code uses the same LaTeX fragment
+from the example above as the title of a \CRANpkg{ggplot2} plot.
+The resulting plot is shown in Figure \ref{fig:elementlatex}.
+One detail about this result is that the text in this title is larger
+than the text drawn by the call to \texttt{grid.latex()} above.
+A closer inspection reveals that the font is also different.
+This reflects the fact that \texttt{grid.latex()} and \texttt{element\_latex()}
+respect the graphical parameter settings---font families and font sizes---that
+are in effect when the LaTeX fragment is drawn. In Figure
+\ref{fig:elementlatex} that means respecting the theme settings
+of the \CRANpkg{ggplot2} plot.
+
+The \texttt{ggIntro} object in the code below
+contains a description of the main \CRANpkg{ggplot2}
+plot from Figure
+\ref{fig:typesetting}.
+The code for generating
+\texttt{ggIntro} is not shown in order to keep the code below readable,
+but it is available in the supplementary materials for this article.
+
+\begin{verbatim}
+library(ggplot2)
+\end{verbatim}
+
+
+
+\begin{verbatim}
+ggIntro +
+    labs(title=simpleTeX) +
+    theme(plot.title=element_latex())
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/elementlatex-1.png}
+\caption{\label{fig:elementlatex}The \texttt{ggplot2} plot from Figure \ref{fig:typesetting}, without the text annotation, but with a title that was specified using a LaTeX fragment and the function \texttt{element\_latex()}.}
+\end{figure}
+
+The \texttt{xdvir} package also provides a \texttt{geom\_latex()} function for
+drawing text labels, similar to the standard \texttt{ggplot2::geom\_text()} function.
+The values specified for the
+\texttt{label} aesthetic for \texttt{geom\_latex()} are treated as fragments of LaTeX
+code.
+For example, the following code draws a plot with a set of red points
+and a set of red labels, one for each point.
+The result is shown in Figure \ref{fig:geomlatex}.
+
+The points are drawn using the standard \texttt{ggplot::geom\_point()} function,
+but the labels are drawn using \texttt{geom\_latex()} from the \texttt{xdvir} package.
+The red labels for the red points in Figure \ref{fig:geomlatex}
+are small LaTeX fragments that each describe
+a simple LaTeX mathematical expression, as shown below.
+
+\begin{verbatim}
+means$label
+\end{verbatim}
+
+\begin{verbatim}
+#> [1] "$\\bar x_1$" "$\\bar x_2$" "$\\bar x_3$" "$\\bar x_4$" "$\\bar x_5$"
+\end{verbatim}
+
+The \texttt{ggGeom} object in the code below describes the
+main plot, consisting of grey dots, horizontal and vertical lines,
+and y-axis labels.
+The code for generating
+\texttt{ggGeom} is not shown in order to keep the code below readable,
+but it is available in the supplementary materials for this article.
+
+\begin{verbatim}
+ggGeom +
+    geom_point(aes(x, sample), data=means, colour=2, size=4) +
+    geom_latex(aes(x, sample, label=label), data=means, 
+               size=6, vjust=-.4, colour=2)    
+\end{verbatim}
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/geomlatex-1.png}
+\caption{\label{fig:geomlatex}A \texttt{ggplot2} plot with text labels drawn using \texttt{geom\_latex()}.}
+\end{figure}
+
+\hypertarget{underhood}{%
+\section{Under the Hood}\label{underhood}}
+
+The previous section showed that simple usage of the \texttt{xdvir} package
+only requires specifying a LaTeX fragment as the text to draw.
+For example, the examples used the LaTeX fragment shown below.
+
+\begin{verbatim}
+simpleTeX
+\end{verbatim}
+
+\begin{verbatim}
+#> [1] "We move the original mean to $\\bar z_i$"
+\end{verbatim}
+
+The \texttt{grid.latex()} function has three tasks to perform in order to
+draw that LaTeX fragment in R:
+
+\begin{description}
+\item[\textbf{Authoring:}]
+The LaTeX fragment has to be turned into a complete
+LaTeX document.
+
+The \texttt{author()} function in the \texttt{xdvir} package
+allows us to perform this step separately.
+For example, the following code
+takes the LaTeX fragment \texttt{simpleTeX} and produces a complete LaTeX
+document that is ready to typeset.
+\end{description}
+
+\begin{verbatim}
+simpleDoc <- author(simpleTeX)
+simpleDoc
+\end{verbatim}
+
+\begin{verbatim}
+#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: 
+#> \documentclass[varwidth]{standalone}
+#> \usepackage{unicode-math}
+#> \begin{document}
+#> We move the original mean to $\bar z_i$
+#> \end{document}
+\end{verbatim}
+
+\begin{description}
+\item[\textbf{Typesetting:}]
+The LaTeX document has to be typeset to produce a set of
+glyphs and their positions.
+
+The \texttt{typeset()} function in the \texttt{xdvir} package
+allows us to perform this step separately.
+For example, the following code takes the LaTeX document \texttt{doc} and
+produces a \texttt{"DVI"} object that contains instructions that specify the fonts to
+use (lines that contain \texttt{x\_fnt\_def} and \texttt{fnt\_num} in the output below),
+the glyphs to use from those fonts (lines that contain
+\texttt{x\_glyph} in the output below), and where to draw those glyphs
+(lines that contain \texttt{down} and \texttt{right} and \texttt{x\_glyph}).
+The output shown below has been trimmed to make it easier to read.
+\end{description}
+
+\begin{verbatim}
+simpleDVI <- typeset(simpleDoc)
+simpleDVI
+\end{verbatim}
+
+\begin{verbatim}
+#> pre          version=7, num=25400000, den=473628672, mag=1000,
+#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: 
+#> bop          counters=1 0 0 0 0 0 0 0 0 0, p=-1
+#> xxx1         k=47
+#>              x=pdf:pagesize width 143.26802pt height 9.48027pt
+#> down3        a=-4114988
+#> 
+#> ...
+#> 
+#> right3       b=-4736287
+#> x_fnt_def    fontnum=24, ptsize=655360
+#>              fontname=/usr/share/texmf/fonts/opentype/public/lm/lmroman10-regular.otf [0]
+#> fnt_num_24
+#> x_glyph      id=113, x=0, y=0
+#> x_glyph      id=50, x=619315, y=0 
+#> w3           b=218235 
+#> x_glyph      id=75, x=0, y=0
+#> 
+#> ...
+\end{verbatim}
+
+\begin{description}
+\item[\textbf{Rendering:}]
+The result of the typesetting step has to be drawn in R.
+
+The \texttt{render()} function in the \texttt{xdvir} package
+allows us to perform this step separately.
+For example, the code below renders the typesetting information from
+the \texttt{simpleDVI} object
+in R. The resulting image is shown below the code.
+\end{description}
+
+\begin{verbatim}
+render(simpleDVI)
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+One detail about the output above is that the rendered text from this
+\texttt{render()} call is
+smaller and in a different font compared to the example from
+the previous section,
+which was produced by a \texttt{grid.latex()} call.
+This reflects the fact that \texttt{grid.latex()},
+in the authoring step, respects the font family and
+font size that are in effect when the text is rendered.
+By contrast, the \texttt{render()} call is drawing typeset information
+from a LaTeX document that just makes use of the default LaTeX font,
+Computer Modern (or to be more precise, a modernised version called
+Latin Modern) at 10pt.
+
+\hypertarget{packages}{%
+\section{LaTeX packages}\label{packages}}
+
+The code examples so far have dealt with relatively simple fragments of
+LaTeX code that consist of just text plus some simple mathematical expressions.
+While this is already useful, it barely scratches the surface of
+what is possible with
+LaTeX code.
+
+Many additional effects can be obtained with LaTeX code by loading
+LaTeX packages. As a simple example, changes in text colour
+requires loading the LaTeX package \texttt{xcolor}.
+These LaTeX packages can be loaded using the \texttt{packages} argument of the
+\texttt{grid.latex()} function (or the \texttt{element\_latex()} or \texttt{geom\_latex()} functions).
+For example, the following code draws text with the last two
+words in red.
+
+\begin{verbatim}
+colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+\end{verbatim}
+
+\begin{verbatim}
+grid.latex(colourTeX, packages="xcolor")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-18-1.pdf}
+
+The argument \texttt{packages="xcolor"} is used in the authoring step to load the
+package in the LaTeX document preamble. This is demonstrated below
+with an explicit call to the \texttt{author()} function. We can see that
+\texttt{\textbackslash{}usepackage\{xcolor\}} has been added to the LaTeX document.
+
+\begin{verbatim}
+colourDoc <- author(colourTeX, packages="xcolor")
+colourDoc
+\end{verbatim}
+
+\begin{verbatim}
+#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: xcolor
+#> \documentclass[varwidth]{standalone}
+#> \usepackage{unicode-math}
+#> \usepackage{xcolor}
+#> \begin{document}
+#> We combine to get the \color{red}{Fitness Function}
+#> \end{document}
+\end{verbatim}
+
+This in turn affects the typesetting step: without the \texttt{xcolor} package, the
+\texttt{\textbackslash{}color} command would not be recognised; with the \texttt{xcolor} package,
+the \texttt{\textbackslash{}color} command produces instructions to change colour
+in the \texttt{"DVI"} output. This is demonstrated below with an
+explicit call to the \texttt{typeset()} function. An example of the colour-change
+instructions is the line containing \texttt{color\ push} in the output below the code.
+
+\begin{verbatim}
+colourDVI <- typeset(colourDoc)
+colourDVI
+\end{verbatim}
+
+\begin{verbatim}
+#> pre          version=7, num=25400000, den=473628672, mag=1000,
+#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.999991; packages: xcolor
+#> bop          counters=1 0 0 0 0 0 0 0 0 0, p=-1
+#> 
+#> ...
+#> 
+#> x_fnt_def    fontnum=24, ptsize=655360
+#>              fontname=/usr/share/texmf/fonts/opentype/public/lm/lmroman10-regular.otf [0]
+#> fnt_num_24
+#> x_glyph      id=113, x=0, y=0
+#> x_glyph      id=50, x=619315, y=0 
+#> 
+#> ...
+#> 
+#> xxx1         k=20
+#>              x=color push rgb 1 0 0
+#> x_glyph      id=54, x=0, y=0
+#> x_glyph      id=66, x=427950, y=0
+#> 
+#> ...
+\end{verbatim}
+
+The argument \texttt{packages="xcolor"} is also
+used in the rendering step because, without it,
+the rendering would not take any notice of the instructions to
+change colour. This is demonstrated below with an explicit
+call to the \texttt{render()} function. The resulting image differs from
+the previous one because it uses the default LaTeX font, but we can see the
+same change in colour for the last two words.
+
+\begin{verbatim}
+render(colourDVI, packages="xcolor")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+There are several LaTeX packages with predefined support in the
+\texttt{xdvir} package, including
+\texttt{xcolor} for changes in colour and \texttt{fontspec} for changes in font.
+Support can be added for other LaTeX packages with the
+\texttt{LaTeXpackage()} function. We will see other predefined packages
+and an example of defining a new LaTeX
+package in later sections.
+
+\hypertarget{justifying-text}{%
+\section{Justifying text}\label{justifying-text}}
+
+By default, the LaTeX text drawn by \texttt{grid.latex()}
+is centred upon a specified location.
+For example, the following code draws the \texttt{tex} fragment vertically centred
+at a location half-way up the image (as indicated by the grey line).
+
+\begin{verbatim}
+grid.latex(simpleTeX, y=.5)
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+We can specify a different justification using the \texttt{vjust} argument.
+For example, the following code draws the same \texttt{tex} fragment
+at the same location, but with a bottom-justification.
+Notice that the bottom of the text is based on the bounding box
+of the text, so the bottom of the text is the bottom of the subscript ``i''.
+
+\begin{verbatim}
+grid.latex(simpleTeX, y=.5, vjust="bottom")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+In some situations it will be much more useful to
+justify text relative to the text baseline, as shown by the following code.
+
+\begin{verbatim}
+grid.latex(simpleTeX, y=.5, vjust="baseline")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+The \texttt{xdvir} package has a very simple algorithm for determining the text
+baseline, but there is also predefined support for the LaTeX package \texttt{preview},
+which produces a more reliable baseline. That baseline can be accessed,
+assuming the \texttt{preview} package is loaded, by
+specifying \texttt{vjust="preview-baseline"}.
+
+There is also an \texttt{hjust} argument for horizontal justification.
+This accepts the standard values, \texttt{"left"}, \texttt{"centre"}, and \texttt{"right"}, but
+also accepts \texttt{"bbleft"}, \texttt{"bbcentre"}, and \texttt{"bbright"}.
+The latter three are based on a bounding box around the actual ink
+that is drawn, which does not include space before or after glyphs
+(left-side bearing and right-side bearing).
+The following code provides a demonstration of the difference
+by drawing the simple LaTeX fragment from previous examples as the title
+of a ggplot2 plot.
+We add a (mathematical) vertical bar to the end of the LaTeX fragment
+and draw the title larger than normal and justify the text against the
+right side of the plot region, using \texttt{"right"} justification first and
+then using \texttt{"bbright"} justification.
+The output below the code just shows the very top of the plot in order to save
+space.
+
+\begin{verbatim}
+rightBearingTeX <- paste0(simpleTeX, "$|$")
+\end{verbatim}
+
+\begin{verbatim}
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="right"))
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-27-1.png}
+
+\begin{verbatim}
+ggIntro + 
+    labs(title=rightBearingTeX) +
+    theme(plot.title=element_latex(size=20, hjust="bbright"))
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-28-1.png}
+
+The difference between the two plots is that the second vertical bar is
+precisely aligned with the right edge of the plot region whereas the
+first vertical bar is slightly to the left of the right edge of the plot
+region (because of the right-side bearing of the vertical bar glyph).
+This is a very small detail, but it is something that can be visually
+jarring if we are trying to align components of a plot in order
+to produce a clean design. This fine level of control is exactly
+the sort of precision that we are seeking by working with LaTeX typesetting.
+
+\hypertarget{integrating-text}{%
+\section{Integrating text}\label{integrating-text}}
+
+Justifying LaTeX text is a simple example of a larger problem:
+integrating LaTeX text. For example,
+the text annotation in Figure \ref{fig:typesetting}
+is integrated with the plot in the sense that it is positioned
+relative to the plot region. In fact, closer inspection reveals
+that it is carefully top-justified with the maximum y-value of the thick
+red line and right-justified with the maximum x-value of the red line.
+
+Put in terms of \emph{integration} rather than justification,
+the text annotation in Figure \ref{fig:typesetting}
+is integrated with the plot because the LaTeX text is drawn at a location
+that is coordinated with the location of other drawing in the plot.
+
+Another example of integration, that reverses the roles, is coordinating
+other drawing with the location of the LaTeX text.
+The following code provides a simple example.
+The LaTeX fragment is the simple one from previous examples with
+two additions: there are \texttt{\textbackslash{}savepos} commands to mark specific locations
+within the text and associate them with labels (\texttt{"a"} and \texttt{"b"});
+and there are \texttt{\textbackslash{}xdvirzmark} commands to export those
+locations for R to see.
+
+\begin{verbatim}
+zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
+\xdvirzmark{a}\xdvirzmark{b})"
+\end{verbatim}
+
+If we render this LaTeX fragment, we just get the familiar output.
+The commands that we added to the LaTeX fragment
+are based on the LaTeX package \texttt{zref},
+so we must load that package.
+
+\begin{verbatim}
+grid.latex(zrefTeX, packages="zref")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-30-1.pdf}
+
+However, we can now access the special locations in the LaTeX output using the
+\texttt{getMark()} function from the \texttt{xdvir} package.
+For example, the following code accesses location \texttt{"a"}, just after
+the word ``original'', and draws
+a small red dot at that location.
+
+\begin{verbatim}
+a <- getMark("a")
+grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-31-1.pdf}
+
+The following code accesses location \texttt{"b"}, just before the letter ``z'',
+and draws a curved arrow
+from \texttt{"a"} to \texttt{"b"}.
+
+\begin{verbatim}
+b <- getMark("b")
+grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
+             unit.c(a$devy, a$devy - unit(3, "mm"), a$devy),
+             shape=-1, gp=gpar(col=2, fill=2),
+             arrow=arrow(length=unit(2, "mm"), type="closed"))
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-32-1.pdf}
+
+The exported locations also produce ``anchors'' for justifying
+the LaTeX text. For example, the following code
+draws the simple LaTeX fragment with position \texttt{"a"} at
+the centre of the image (which is indicated by grey lines).
+
+\begin{verbatim}
+grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-33-1.pdf}
+
+Figure \ref{fig:zref} provides a more realistic demonstration.
+This figure shows the plot from Figure \ref{fig:typesetting}
+with a line added to visually connect the thick red line with
+the red part of the LaTeX annotation.
+The code for this plot is not shown for reasons of space, but it
+makes use of the same basic idea as the code above by saving locations within
+the LaTeX output and then accessing them with the \texttt{getMark()} function.
+The full code is available in the supplementary materials for this article.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/zref-1.png}
+\caption{\label{fig:zref}The \texttt{ggplot2} plot from Figure \ref{fig:typesetting}, including the LaTeX annotation, with a line added relative to marked locations within the LaTeX annotation (and relative to the thick red line).}
+\end{figure}
+
+\hypertarget{latex-graphics}{%
+\section{LaTeX graphics}\label{latex-graphics}}
+
+The examples so far have demonstrated using LaTeX code to describe
+text labels, combined with using R to draw general
+graphics---lines and circles and so on.
+It is also possible to use LaTeX to draw general graphics.
+In particular, the LaTeX package \texttt{TikZ} provides very powerful and flexible
+graphics facilities.
+The \texttt{xdvir} package provides support for the LaTeX package \texttt{TikZ},
+so we are able to render \texttt{TikZ} graphics in R.
+
+For example, the following LaTeX code describes a \texttt{TikZ} picture
+consisting of two text labels enclosed within blue circles, with
+arrows connecting the circles.
+
+\begin{verbatim}
+tikzTeX <- r"(%
+\path (0, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (x) {\sffamily{R}} 
+       (3, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (y) {Ti{\it k}Z!};
+\draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
+\draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
+\end{verbatim}
+
+The following code draws this \texttt{TikZ} picture in R.
+The argument
+\texttt{packages="tikzPicture"} is necessary to ensure that the \texttt{TikZ} package
+is loaded in the authoring step, that TikZ output is produced in the
+typesetting step, and that R takes notice of the \texttt{TiKZ}
+output in the rendering step.
+
+\begin{verbatim}
+grid.latex(tikzTeX, packages="tikzPicture")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-35-1.pdf}
+
+The label on the x-axis of Figure \ref{fig:geomlatex}
+is another simple \texttt{TikZ} picture that
+uses \texttt{TikZ} commands to draw the greek letter mu
+within a circle.
+This example is not completely trivial because it uses the
+LaTeX concept of ``phantom'' text to make the circle large enough to fit
+a capital ``M'' even though no such character is drawn.
+This is another example of the detailed typsetting capabilities
+that access to LaTeX provides.
+
+\begin{verbatim}
+muDot <- r"(%
+\begin{tikzpicture}
+\node[draw,circle,thick,inner sep=0.5mm]{\vphantom{M}$\mu$};
+\end{tikzpicture})"
+\end{verbatim}
+
+The LaTeX code this time includes an explicit \texttt{\textbackslash{}begin\{tikzpicture\}}
+and \texttt{\textbackslash{}end\{tikzpicture\}}, which were implicitly added in the previous
+example because we specified \texttt{packages="tikzPicture"}.
+This time, we just specify \texttt{packages="tikz"}.
+
+\begin{verbatim}
+grid.latex(muDot, packages="tikz")
+\end{verbatim}
+
+\includegraphics{murrell-xdvir_files/figure-latex/unnamed-chunk-37-1.pdf}
+
+We will see a more complex example of TikZ output in a later section.
+
+\hypertarget{customisation-and-debugging}{%
+\section{Customisation and debugging}\label{customisation-and-debugging}}
+
+Most of the examples in this article take a fragment of LaTeX code
+and feed it to the \texttt{grid.latex()} function, which performs an
+authoring step, a typesetting step, and a rendering step.
+
+We saw in a previous section that there are functions
+\texttt{author()}, \texttt{typeset()}, and \texttt{render()}
+that allow us to perform these steps separately
+(see Figure
+\ref{fig:diagpdf}).
+
+\begin{figure}
+\centering
+\includegraphics{diagram/diag.pdf}
+\caption{\label{fig:diagpdf}The design of the \texttt{xdvir} package.}
+\end{figure}
+
+The \texttt{author()} function transforms a LaTeX fragment into a
+complete LaTeX document. Although there are arguments to the \texttt{author()}
+function that allow some control over that transformation,
+e.g., the \texttt{packages} argument, it does not allow full control
+over the composition of the LaTeX document.
+However, a LaTeX document within R is essentially just a character vector,
+so another way to author a LaTeX document is to create an external text file
+and read that into R. This allows complete control over the content
+of the LaTeX document.
+Another possibility is that we want to use a LaTeX document that
+we did not create, for example, if we write Markdown code and
+convert it to LaTeX code. We will see an example of this in a later section.
+
+The \texttt{typeset()} function transforms a LaTeX document into a \texttt{"DVI"} object
+that contains a set of typeset glyphs. There is limited control over this
+process as well, with only the \texttt{engine} argument allowing us to select between
+\texttt{"xetex"} or \texttt{"luatex"}. Again, one option to
+obtain greater control is to
+performing this step outside of R by running
+a TeX engine, e.g., \texttt{xelatex}, on an external text file to produce a DVI
+file. The \texttt{xdvir} package provides the \texttt{readDVI()} function
+to read external DVI files into R and these can then be passed to
+the \texttt{render()} function for drawing.
+
+One important caveat is that a \texttt{"LaTeXdocument"} object that is produced by
+the \texttt{author()} function, and a \texttt{"DVI"} object that is produced by the
+\texttt{typeset()} function, contains information about how it was created,
+for example, the TeX \texttt{engine} that was specified.
+The \texttt{typeset()} function checks this information and warns if we ask
+to typeset a \texttt{"LaTeXdocument"} that was produced for a different TeX engine.
+Similarly, the \texttt{render()} function, which also has an \texttt{engine} argument,
+checks and warns if we ask to render a
+\texttt{"DVI"} object that was produced using a different TeX engine.
+
+External LaTeX documents and DVI files do not (explicitly) contain this
+information so it is up to the user to ensure that the TeX engine,
+and any LaTeX packages, are consistent with the arguments provided
+to the functions \texttt{typeset()} and \texttt{render()}.
+In some situations, even with the appropriate level of care,
+it will be impossible to avoid warnings.
+
+\hypertarget{example-1}{%
+\section{Example 1}\label{example-1}}
+
+This section demonstrates a more complete example of rendering LaTeX text
+within a plot. The plot, shown in Figure \ref{fig:rahlf},
+provides a clear example of the more advanced typesetting
+capabilities of LaTeX; the text annotation in the top-left corner
+of the plot is not only typeset into two columns,
+but both columns are fully justified and feature several examples of
+hyphenation.
+
+This example also demonstrates one way to integrate a
+\texttt{grid.latex()} call with a plot that was drawn using functions
+from the \texttt{graphics} package. We will also see a simple
+demonstration of the \texttt{LaTeXpackage()} function to allow use of
+a LaTeX package that has no predefined support in \texttt{xdvir}.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/rahlf-1.png}
+\caption{\label{fig:rahlf}A plot with a two-column text annoation. This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book ``Data Visualisation with R'' (Rahlf 2017).}
+\end{figure}
+
+The details of the code that produces the main plot---everything except
+the two columns of text in the top-left corner---are not relevant
+to this article so we perform this drawing
+just with a call to a \texttt{rahlfPlot()} function that is defined in the
+supplementary material for the article. The result is shown in
+Figure \ref{fig:rahlfplain}.
+
+\begin{verbatim}
+rahlfPlot()
+\end{verbatim}
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/rahlfplain-1.png}
+\caption{\label{fig:rahlfplain}The main plot from Figure \ref{fig:rahlf} without the two columns of text annotation. This plot is drawn using functions from the \texttt{graphics} package.}
+\end{figure}
+
+Because the main plot is drawn with the \texttt{graphics} package,
+we need to convert it to an equivalent drawing that uses
+functions from the \texttt{grid} package.
+This can be achieved with the \texttt{grid.echo()} function from the
+\CRANpkg{gridGraphics} package (Murrell and Wen 2020), as shown below.
+
+\begin{verbatim}
+library(gridGraphics)
+grid.echo()
+\end{verbatim}
+
+We want to align the LaTeX text with the main plot. In particular, we want
+the top of the text to be aligned with the value 14,000 on the y-scale
+of the plot. There is also a 1cm gap between the left of the text
+and the y-axis line.
+In order to achieve this, we can navigate to the \texttt{grid} viewport
+that corresponds to the main plot region, which also has scales
+that match the plot scales.
+
+\begin{verbatim}
+downViewport("graphics-window-1-1")
+\end{verbatim}
+
+We are now ready to render the LaTeX text within the plot.
+The LaTeX code for this example is shown below.
+This is a larger LaTeX fragment than we have previously seen,
+but more importantly it contains a larger number of LaTeX commands
+to control the typesetting of the text.
+For example, we control the font family with a \texttt{\textbackslash{}setmainfont} command,
+we control font size and vertical line spacing
+with a \texttt{\textbackslash{}fontsize} command,
+we control the overall width of the text using a \texttt{minipage}
+environment,
+we set the number of columns using a \texttt{multicol} environment,
+and we control the horizontal spacing between columns with
+a \texttt{\textbackslash{}setlength} command.
+
+\begin{verbatim}
+#> \setmainfont{Lato Light}
+#> \fontsize{12pt}{17pt}\selectfont
+#> \setlength{\columnsep}{1cm}
+#> \begin{minipage}[t]{16.25cm}
+#> \begin{multicols}{2} 
+#> From a general and economic policy perspective, the entire period from
+#> 1820 to 1930 can be described as a relatively liberal period. With the
+#> "Pacific War", as a result of which the nitrate mines were awarded to
+#> Chile, the economy experienced a profound upswing. The period from
+#> 1940 to 1973 is generally seen as a phase in which the government
+#> increasingly intervened in the economy and Chile was isolated
+#> internationally. During the Allende regime (1971 to 1973), this policy
+#> was exaggerated and the economy practically became a central
+#> economy. The military regime (1973 to 1990) - despite numerous
+#> violations of human rights - ensured liberalization of trade and
+#> finance.
+#> \end{multicols}
+#> \end{minipage}
+\end{verbatim}
+
+The \texttt{\textbackslash{}setmainfont} and
+\texttt{\textbackslash{}fontsize} commands in the LaTeX code require the LaTeX package \texttt{fontspec}
+to be loaded, but this is not a problem because there is predefined support
+for \texttt{fontspec} in the \texttt{xdvir} package. However, the \texttt{multicol} environment
+in the LaTeX code requires the LaTeX package \texttt{multicol} and there is no
+predefined support for that in \texttt{xdvir}. The following code uses the
+\texttt{LaTeXpackage} to provide support for the LaTeX package \texttt{multicol}.
+In a simple case like this, all we have to do is provide a name for the
+package (\texttt{"multicol"}) and use the \texttt{preamble} argument to
+provide the LaTeX code that should be added in the
+authoring step to load the LaTeX package.
+We also call \texttt{registerPackage()} so that we can refer to this LaTeX
+package by its name.
+
+\begin{verbatim}
+multicol <- LaTeXpackage("multicol",
+                         preamble="\\usepackage{multicol}")
+registerPackage(multicol)
+\end{verbatim}
+
+Finally, we call \texttt{grid.latex()} to add the LaTeX text to the plot.
+The object \texttt{rahlfTeX} contains the LaTeX code,
+we specify the LaTeX packages that have to be loaded, including
+the \texttt{"multicol"} package that we just registered, and
+we position the text 1cm in from the left of the
+the plot viewport and at 14,000 on the y-axis.
+
+\begin{verbatim}
+grid.latex(rahlfTeX, 
+           packages=c("fontspec", "multicol"),
+           x=unit(1, "cm"), y=unit(14000, "native"), 
+           hjust="left", vjust="top")
+\end{verbatim}
+
+The final result is shown in Figure \ref{fig:rahlf}.
+
+\hypertarget{example-2}{%
+\section{Example 2}\label{example-2}}
+
+This section looks at another more complete example of a plot with
+a LaTeX annotation (Figure \ref{fig:schneider}). This example
+demonstrates the sort of effects that are possible by
+combining TikZ graphics with LaTeX typesetting, in this case
+to produce an annotated mathematical equation.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/schneider-1.png}
+\caption{\label{fig:schneider}A plot with annotated mathematical equation. This plot is an adaptation of the plot in Schneider (2023).}
+\end{figure}
+
+The main plot in this example is a \CRANpkg{ggplot2} plot.
+The details of the code that generates the main plot
+are not particularly relevant to this article, so the
+main plot is described in the object \texttt{ggSchneider}, which
+is defined in the supplementary materials for the article.
+One point worth noting is that the labelling on the x-axis, which
+combines italic greek letters with upright digits and signs, is produced
+using the \CRANpkg{ggtext} package.
+In other words, this example combines two levels of text annotation:
+labels on the x-axis that are relatively simple, but still beyond the
+capabilities of core R text drawing; and much more sophisticated
+text annotations that require access to a complex system like LaTeX.
+The main plot produced by \texttt{ggSchneider} is shown in Figure
+\ref{fig:schneiderplain}.
+
+\begin{verbatim}
+ggSchneider
+\end{verbatim}
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/schneiderplain-1.png}
+\caption{\label{fig:schneiderplain}The main plot from Figure \ref{fig:schneider} without the annotated mathematical equation. This plot is produced using the packages \CRANpkg{ggplot2} and \CRANpkg{ggtext}.}
+\end{figure}
+
+The start of the LaTeX code for the annotated equation is shown below
+(the full code is included in the supplementary materials for this article).
+This is arranged in three blocks: the first block of code defines some colours;
+the second block describes the main mathematical equation, but includes
+some \texttt{\textbackslash{}eqnmark} commands to save locations within the equation;
+and the third block shows one of the additional equation annotations, which
+refers to one of the saved locations within the main mathematical
+equation, in this case
+the ``z'', and positions a
+label relative to that location, in this case the label ``z-score''
+above and to the left of the ``z''.
+
+\begin{verbatim}
+#> \definecolor{myviolet}{HTML}{440154}
+#> \definecolor{myblue}{HTML}{3B528B}
+#> \definecolor{myindigo}{HTML}{21908C}
+#> \definecolor{mygreen}{HTML}{5DC863}
+#>     
+#> \huge$
+#> \eqnmark[myviolet]{z}{z} = 
+#> \frac{
+#>     \eqnmark[myblue]{x}{X}-
+#>     \eqnmark[myindigo]{mu}{\mu}}{
+#>     \eqnmark[mygreen]{sigma}{\sigma}}
+#> $
+#> 
+#> \annotate[
+#>     yshift=1em, 
+#>     myviolet,
+#>     align=right]
+#>     {above, left}
+#>     {z}
+#>     {$z$-score}
+#> 
+\end{verbatim}
+
+There are several LaTeX packages required by this LaTeX code,
+in particular the \texttt{\textbackslash{}eqnmark} and \texttt{\textbackslash{}annotate} commands require the LaTeX
+package \texttt{annotate-equations}.
+As in the previous example, we can add support for this package
+using the \texttt{LaTeXpackage()} and \texttt{registerPackage()} functions.
+
+\begin{verbatim}
+annotateEquations <-
+    LaTeXpackage(name="annotate",
+                 preamble="\\usepackage{TeX/annotate-equations}")
+registerPackage(annotateEquations)
+\end{verbatim}
+
+The LaTeX package \texttt{annotate-equations} is built on TikZ graphics.
+We do not need to load the LaTeX package \texttt{tikz} because \texttt{annotate-equations}
+will do that automatically. However, \texttt{xdvir} by default makes use
+of the bounding box information from TikZ graphics and, for images with
+saved locations like this, that bounding box is unreliable.
+The predefined support for the LaTeX package \texttt{tikz} in the \texttt{xdvir} package
+includes a \texttt{tikzPackage()} function that allows us to load TikZ, but
+ignore its bounding boxes, as shown in the following code.
+
+\begin{verbatim}
+tikzNoBBox <-
+    tikzPackage(name="tikzNoBBox", bbox=FALSE)
+registerPackage(tikzNoBBox)
+\end{verbatim}
+
+Finally, we will use the LaTeX package \texttt{roboto} to access
+specific variations of the Roboto font for the text labels
+in the annotated equation.
+
+\begin{verbatim}
+roboto <-
+    LaTeXpackage(name="roboto",
+                 preamble="\\usepackage[sfdefault,condensed]{roboto}")
+registerPackage(roboto)
+\end{verbatim}
+
+Rendering the annotated equation on the plot
+requires integrating the LaTeX output with the
+\CRANpkg{ggplot2} plot. In particular, we want to align the top of the LaTeX
+output with the top of the density curve and we want to align the right side
+of the LaTeX output with the right edge of the label ``160'' on the x-axis.
+
+We saw in an earlier section
+how to use \texttt{element\_latex()} to draw LaTeX text
+in labels such as the plot title on a \CRANpkg{ggplot2} plot
+and how to use \texttt{geom\_latex()} to draw LaTeX text
+as data symbols.
+In this example, we are adding a single LaTeX annotation at a specific
+position within a \CRANpkg{ggplot2} plot, so
+we use the \CRANpkg{gggrid} package (Murrell 2022).
+This package provides the \texttt{grid\_panel()} function, to which we pass a
+function, in this case \texttt{annotation()}, plus mappings from data to
+aesthetics like for normal \CRANpkg{ggplot2} geoms.
+The \texttt{annotation()} function creates a \texttt{grid} grob for \CRANpkg{ggplot2}
+to draw, in this case using \texttt{latexGrob()}, which is similar to
+\texttt{grid.latex()} except that it creates a description of something to draw
+rather than immediately drawing it.
+We give the call to \texttt{latexGrob()} the LaTeX code to draw (\texttt{schneiderTeX}),
+a set of \texttt{packages} to load, and arguments that position
+the output relative to the plot.
+
+\begin{verbatim}
+library(gggrid)
+
+annotation <- function(data, coords) {
+    latexGrob(schneiderTeX, 
+              packages=c("tikzNoBBox", "annotate", "roboto"),
+              x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
+              y=coords$y, hjust=1, vjust=1)
+}
+
+ggSchneider +
+    grid_panel(annotation, 
+               aes(x=x, y=y), 
+               data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
+\end{verbatim}
+
+The final result is shown in Figure \ref{fig:schneider}.
+
+\hypertarget{example-3}{%
+\section{Example 3}\label{example-3}}
+
+This example, shown in Figure \ref{fig:anzjs},
+provides another demonstration of the range of possibilities from
+LaTeX typesetting, by adding annotations that are formatted as numbered
+list items.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/anzjs-1.png}
+\caption{\label{fig:anzjs}A plot with numbered list items as annotations. This plot is an adaptation of Figure 10 from Murrell (2025).}
+\end{figure}
+
+The main plot is a \CRANpkg{ggplot2} plot with a number of relatively
+simple annotations already added.
+The details of the code are not particularly relevant to this
+article, so the main plot is described in the object \texttt{ggANZJS},
+which is defined in the supplementary materials for the article.
+One point worth noting is that the LaTeX annotations that we will
+be adding are required to fit within the lines that extend below the plot.
+In other words, we will be specifying a width for the LaTeX output
+to fit into.
+The main plot produced by \texttt{ggANZJS} is shown in Figure \ref{fig:anzjsplain}.
+
+\begin{verbatim}
+ggANZJS
+\end{verbatim}
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/anzjsplain-1.png}
+\caption{\label{fig:anzjsplain}The main plot from Figure \ref{fig:anzjs} without the numbered list items as annotations. This plot is produced using the \CRANpkg{ggplot2} package.}
+\end{figure}
+
+We will focus on drawing just the left-hand LaTeX annotation.
+The LaTeX code is shown below.
+This includes commands to control the font size and an \texttt{enumerate}
+environment that creates a numbered list item.
+
+\begin{verbatim}
+#> %
+#> \fontsize{10}{12}
+#> \selectfont
+#> \begin{enumerate}
+#> \item New Zealand closes its borders to {\it almost} all travellers at
+#> {\bf 23:59, 19 March 2020 (NZDT)}.
+#> \end{enumerate}
+\end{verbatim}
+
+As with the previous example, we have a single annotation that we want
+to position quite carefully, so we define a function that generates
+a \texttt{grid} grob to use with the \texttt{grid\_panel()} function from the
+\CRANpkg{gggrid} package.
+The \texttt{labelLeft()} function calls \texttt{latexGrob()}, gives it the LaTeX code
+to draw (\texttt{closeTeX}), specifies the position for the LaTeX output,
+and specifies a \texttt{width} for the output to be typeset within.
+
+\begin{verbatim}
+labelLeft <- function(data, coords) {
+    x1 <- coords$x[1]
+    x2 <- coords$x[2]
+    w <- unit(1 - x2, "npc") - unit(1, "mm")
+    gap <- 15
+    latex1 <- latexGrob(closeTeX,
+                        x=unit(x1, "npc") - unit(2, "mm"), 
+                        y=unit(0, "npc") - unit(gap, "mm") - unit(2, "mm"),
+                        hjust=1, vjust=1,
+                        width=w)
+}
+\end{verbatim}
+
+The following code combines the left-hand label annotation,
+and a very similar right-hand label annotation, with the
+\texttt{ggANZJS} plot.
+
+\begin{verbatim}
+ggANZJS +
+    grid_panel(labelLeft,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen))) +
+    grid_panel(labelRight,
+               aes(x=borders),
+               data=data.frame(borders=c(borderClosed, borderOpen)))
+\end{verbatim}
+
+The final result is shown in Figure \ref{fig:anzjs}.
+
+\hypertarget{example-4}{%
+\section{Example 4}\label{example-4}}
+
+This section provides an example of using other software to generate
+LaTeX code, rather than writing it directly.\\
+It also demonstrates integrating \texttt{grid.latex()} output
+with a \CRANpkg{lattice} plot (Sarkar 2008).
+The final image is shown in \ref{fig:latticemd}.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/latticemd-1.png}
+\caption{\label{fig:latticemd}A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.}
+\end{figure}
+
+The main plot is a \CRANpkg{lattice} plot, with some annotations
+already in place. The details of the code for this plot are not
+relevant to this article, so the main plot is described in the object
+\texttt{latticeFlights}, which is defined in the supplementary material.
+The main plot produced by \texttt{latticeFlights} is shown in
+Figure \ref{fig:latticemdplain}.
+
+
+
+\begin{figure}
+\centering
+\includegraphics{murrell-xdvir_files/figure-latex/latticemdplain-1.png}
+\caption{\label{fig:latticemdplain}A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.}
+\end{figure}
+
+The annotations in Figure \ref{fig:latticemd} are enumerated list items,
+similar to those in Figure \ref{fig:anzjs}. However, in this plot
+instead of writing explicit LaTeX code, we use the arguably-simpler
+Markdown syntax to
+describe the list item. We will just focus on the left annotation;
+the right annotation is added in a very similar fashion.
+
+\begin{verbatim}
+#> 
+#> 1. New Zealand closes its borders to *almost* all travellers
+#>    at **23:59, 19 March 2020 (NZDT)**.
+\end{verbatim}
+
+We can
+use \texttt{pandoc\_convert()} from the \CRANpkg{rmarkdown} package (Xie, Allaire, and Grolemund 2018)
+to convert the Markdown to LaTeX code.
+Because we want the enumerated list to be constrained to a narrow width
+and because we want the font to match the main plot font, we
+have to add a YAML header to the markdown.
+
+\begin{verbatim}
+#> 
+#> ---
+#> mainfont: TeX Gyre Heros
+#> header-includes:
+#> - \pagestyle{empty}
+#> - \usepackage{geometry}
+#> - \geometry{textwidth=1.8in}
+#> ---
+\end{verbatim}
+
+The following code combines the YAML header with the Markdown code,
+writes the result to a file, converts the Markdown to LaTeX, and
+reads the resulting LaTeX back into R.
+
+\begin{verbatim}
+oldwd <- setwd("Markdown")
+writeLines(c(yaml, mdLeft), "labelLeft.md")
+rmarkdown::pandoc_convert("labelLeft.md", 
+                          output="labelLeft.tex",
+                          options="--standalone")
+latexLeft <- readLines("labelLeft.tex")
+setwd(oldwd)
+\end{verbatim}
+
+These extra steps
+somewhat undermine the relative simplicity of using Markdown code,
+but the example still demonstrates the general idea of
+generating LaTeX code from other sources rather than writing
+it explicitly ourselves.
+
+We now have LaTeX code to render in R, but a further complication
+is that this is a complete
+LaTeX document rather than just a LaTeX fragment.
+We cannot pass a complete document to \texttt{grid.latex()};
+instead,
+we pass the LaTeX document to \texttt{typeset()} to generate
+a \texttt{"DVI"} object.
+
+\begin{verbatim}
+dviLeft <- typeset(latexLeft)
+\end{verbatim}
+
+The following code demonstrates that we can render
+this \texttt{"DVI"} object within the \CRANpkg{lattice} plot
+using the \texttt{layer()} function from the
+\CRANpkg{latticeExtra} package (Sarkar and Andrews 2022),
+to which we provide a call to the \texttt{render()} function
+from the \texttt{xdvir} package.
+Similar code is used to generate and add the second list item.
+
+\begin{verbatim}
+latticeFlights + 
+    latticeExtra::layer(render(dviLeft, 
+                               x=unit(borderClosed, "native") - unit(2, "mm"),
+                               y=unit(1, "npc") - unit(2, "mm"),
+                               hjust="right", vjust="top"))
+\end{verbatim}
+
+The final result is shown in Figure \ref{fig:latticemd}.
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+The \texttt{xdvir} package provides convenient high-level functions for
+rendering LaTeX fragments as labels, annotations, or data symbols on
+R plots. The package also provides lower-level functions that
+allow more fine control over the authoring, typesetting, and
+rendering of LaTeX code in R.
+
+The benefit of the \texttt{xdvir} package is access to the typesetting capabilities
+of LaTeX. This ranges from relatively simple features like changes in
+font family, font weight, and font style, and automatic line breaks,
+to intermediate features like full justification, hyphenation, and high-quality
+mathematical formulas and equations, and more advanced features like
+enumerated lists, multiple columns, and TikZ graphics.
+
+One limitation of the \texttt{xdvir} package is that rendering LaTeX
+fragments is noticeably slower than rendering simple character values.
+This is mainly because the typesetting
+step requires running a TeX engine to produce a DVI file.
+The \texttt{xdvir} package performs some caching in order to minimise the problem,
+but the time cost can still be quite large.
+
+Another limitation of the \texttt{xdvir} package is that it requires a
+graphics device that can render typeset glyphs. This currently includes
+the \texttt{pdf()} and \texttt{quartz()} devices, plus all devices based on the
+Cairo graphics library (Packard, Worth, and Esfahbod 2025), and graphics devices
+provided by the \texttt{ragg} package (Pedersen and Shemanarev 2024).
+
+A final major limitation of \texttt{xdvir} is that it only currently supports two
+TeX engines: XeTeX and recent LuaTeX. The package start-up message
+reports on whether these are available. An implicit limitation is that
+\texttt{xdvir} requires a TeX installation, though that is simplified
+through a dependency on the \texttt{tinytex} package (Xie 2024).
+
+Given these limitations, it is worth discussing alternative approaches.
+The first section of this article mentioned \CRANpkg{gridtext},
+\CRANpkg{ggtext}, and \CRANpkg{marquee}. These packages
+provide alternative ways to render non-trivial text labels, but
+do so through Markdown and/or HTML rather than LaTeX.
+The advantage of \texttt{xdvir} by comparison is that it is possible to
+produce more advanced typesetting results with LaTeX.
+
+The \CRANpkg{tikzDevice} package (\textbf{pkg:tikzDevice?}) is an interesting
+alternative because, where \texttt{xdvir} integrates LaTeX text with R graphics,
+\CRANpkg{tikzDevice} integrates R graphics with LaTeX.
+The \CRANpkg{tikzDevice} package provides an R graphics device that
+converts R plots into TikZ pictures so that R plots can include labels with
+LaTeX fragments and R plots can be
+deeply integrated with LaTeX documents.
+The main difference with this package is the destination:
+where \texttt{xdvir} ends up with LaTeX output within an R plot,
+\CRANpkg{tikzDevice} ends up with an R plot within LaTeX output.
+If the final destination is a LaTeX document,
+then the \CRANpkg{tikzDevice} may provide more convenience
+and greater control. However, if the final destination is
+more general, or unknown, then \texttt{xdvir} may be the more appropriate
+solution.
+
+Another alternative approach to including LaTeX output in R plots
+is to import an image of the LaTeX output.
+This approach harks back to early solutions for including
+LaTeX mathematical expressions in web pages by generating PNG images
+from LaTeX fragments.
+However, more modern technologies, such as SVG mean that this
+approach can yield a much higher-quality result, as
+demonstrated by (\textbf{schneider?}).
+One simple advantage of the \texttt{xdvir} approach is the level of convenience
+that it provides by automating the authoring and typesetting steps.
+The \texttt{xdvir} package also provides more possibilities to integrate
+LaTeX output with other drawing in R through anchors and saved positions.
+
+Some of the limitations of \texttt{xdvir} may also be overcome by further
+development. For example, it may be possible to extend support
+to more TeX engines and to more graphics devices. Providing support
+for more LaTeX packages is another area for
+future work.
+
+\hypertarget{acknowledgements}{%
+\section{Acknowledgements}\label{acknowledgements}}
+
+The \texttt{xdvir} package depends on the \CRANpkg{tinytex} package
+for the typesetting step. This package makes it much
+simpler make use of TeX engines,
+including performing multiple runs when necessary, and much easier
+to install
+LaTeX packages (and TeX itself).
+
+The author owes a debt of gratitude to Marc-Olivier Beausoleil
+(Figure \ref{fig:typesetting}),
+Thomas Rahlf (Figure \ref{fig:rahlf}),
+and Joel Schneider (Figure \ref{fig:schneider})
+for sharing their work and for
+for permission to base several of the examples in this article
+on their work.
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
@@ -72,17 +1449,56 @@ Hearst, Marti A. 2023. {``Show It or Tell It? Text, Visualization, and Their Com
 \leavevmode\vadjust pre{\hypertarget{ref-kong}{}}%
 Kong, Ha-Kyung, Zhicheng Liu, and Karrie Karahalios. 2018. {``Frames and Slants in Titles of Visualizations on Controversial Topics.''} In \emph{Proceedings of the 2018 CHI Conference on Human Factors in Computing Systems}, 1--12. CHI '18. New York, NY, USA: Association for Computing Machinery. \url{https://doi.org/10.1145/3173574.3174012}.
 
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-gggrid}{}}%
+Murrell, Paul. 2022. \emph{{gggrid}: Draw with 'Grid' in 'Ggplot2'}. \url{https://CRAN.R-project.org/package=gggrid}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-anzjs2025}{}}%
+---------. 2025. {``Text in {R} Graphics.''} \emph{Australian \& New Zealand Journal of Statistics} TBA (TBA): TBA. \url{https://doi.org/TBA}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-plotmath}{}}%
+Murrell, Paul, and Ross Ihaka. 2000. {``An Approach to Providing Mathematical Annotation in Plots.''} \emph{Journal of Computational and Graphical Statistics} 9 (3): 582--99. \url{https://doi.org/10.1080/10618600.2000.10474900}.
+
 \leavevmode\vadjust pre{\hypertarget{ref-murrell-pedersen-urbanek-glyphs-2023}{}}%
 Murrell, Paul, Thomas Lin Pedersen, and Simon Urbanek. 2023. {``Rendering Typeset Glyphs in {R} Graphics.''} 2023-01. Department of Statistics, The University of Auckland. \url{https://doi.org/10.17608/k6.auckland.22774079}.
 
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-gridgraphics}{}}%
+Murrell, Paul, and Zhijian Wen. 2020. \emph{gridGraphics: Redraw Base Graphics Using 'Grid' Graphics}. \url{https://CRAN.R-project.org/package=gridGraphics}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-cairo}{}}%
+Packard, Keith, Carl Worth, and Behdad Esfahbod. 2025. {``Cairo Graphics Library.''} \url{https://www.cairographics.org/}.
+
 \leavevmode\vadjust pre{\hypertarget{ref-pkg-marquee}{}}%
 Pedersen, Thomas Lin, and Martin Mitáš. 2024. \emph{Marquee: Markdown Parser and Renderer for r Graphics}. \url{https://CRAN.R-project.org/package=marquee}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg:ragg}{}}%
+Pedersen, Thomas Lin, and Maxim Shemanarev. 2024. \emph{Ragg: Graphic Devices Based on AGG}. \url{https://CRAN.R-project.org/package=ragg}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-rahlf}{}}%
+Rahlf, Thomas. 2017. \emph{Data Visualisation with r: 100 Examples}. 1st ed. Springer Publishing Company, Incorporated.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-lattice}{}}%
+Sarkar, Deepayan. 2008. \emph{Lattice: Multivariate Data Visualization with r}. New York: Springer. \url{http://lmdvr.r-forge.r-project.org}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg:latticeExtra}{}}%
+Sarkar, Deepayan, and Felix Andrews. 2022. \emph{latticeExtra: Extra Graphical Utilities Based on Lattice}. \url{https://CRAN.R-project.org/package=latticeExtra}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-schneider2023}{}}%
+Schneider, W. Joel. 2023. {``Annotated Equations in Ggplot2.''} \url{https://wjschne.github.io/posts/2023-07-23-latex-equation-in-ggplot2/}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg-ggplot2}{}}%
+Wickham, Hadley. 2016. \emph{Ggplot2: Elegant Graphics for Data Analysis}. Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-pkg-ggtext}{}}%
 Wilke, Claus O., and Brenton M. Wiernik. 2022a. \emph{Ggtext: Improved Text Rendering Support for 'Ggplot2'}. \url{https://CRAN.R-project.org/package=ggtext}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-pkg-gridtext}{}}%
 ---------. 2022b. \emph{Gridtext: Improved Text Rendering Support for 'Grid' Graphics}. \url{https://CRAN.R-project.org/package=gridtext}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg:tinytex}{}}%
+Xie, Yihui. 2024. \emph{Tinytex: Helper Functions to Install and Maintain TeX Live, and Compile LaTeX Documents}. \url{https://github.com/rstudio/tinytex}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pkg:rmarkdown}{}}%
+Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. \emph{R Markdown: The Definitive Guide}. Boca Raton, Florida: Chapman; Hall/CRC. \url{https://bookdown.org/yihui/rmarkdown}.
 
 \end{CSLReferences}
 
