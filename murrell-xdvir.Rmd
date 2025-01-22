@@ -176,8 +176,7 @@ label <- function(data, coords) {
               x=max(coords$x), 
               y=max(coords$y),
               hjust="right", vjust="top", 
-              gp=NULL,
-              texFile="typesetting.tex")
+              gp=NULL)
 }
 
 ggIntro + 
@@ -869,8 +868,7 @@ markTeX <- function(data, coords) {
               x=max(coords$x), 
               y=max(coords$y),
               hjust="right", vjust="top", 
-              gp=NULL,
-              texFile="typesetting.tex")
+              gp=NULL)
 }
 
 makeContent.markCurve <- function(x) {
