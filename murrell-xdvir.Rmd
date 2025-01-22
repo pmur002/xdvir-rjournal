@@ -2,7 +2,19 @@
 title: "Rendering LaTeX in R"
 date: "2024-12-31"
 abstract: >
-  An abstract of less than 150 words.
+  The `xdvir` package provides functions for rendering 
+  LaTeX code as labels, annotations, and
+  data symbols in R plots.  There are convenient high-level
+  functions for rendering simple LaTeX fragments, including
+  as labels on `ggplot2` plots, plus lower-level
+  functions for more fine control over the authoring,
+  typesetting, and rendering of LaTeX code.
+  There is support for making use of LaTeX packages,
+  including TikZ graphics. 
+  The rendered
+  LaTeX output is fully integrated with R graphics output
+  in the sense that LaTeX output 
+  can be positioned relative to R graphics output and vice versa.
 draft: true
 author:  
   - name: Paul Murrell
@@ -956,6 +968,69 @@ grid.latex(muDot, packages="tikz")
 
 We will see a more complex example of TikZ output in a later section.
 
+# Customisation and debugging
+ 
+Most of the examples in this article take a fragment of LaTeX code
+and feed it to the `grid.latex()` function, which performs an
+authoring step, a typesetting step, and a rendering step.
+
+We saw in a previous section that there are functions
+`author()`, `typeset()`, and `render()`
+that allow us to perform these steps separately
+(see Figure 
+\@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
+
+```{r diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
+knitr::include_graphics("diagram/diag.pdf")
+```
+
+```{r diagsvg, eval=knitr::is_html_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
+## Create the sort of structure that knitr::include_graphics() returns
+structure("diagram/diag.svg", 
+          class= c("knit_image_paths", "knit_asis"), 
+          dpi=NULL)
+```
+The `author()` function transforms a LaTeX fragment into a 
+complete LaTeX document.  Although there are arguments to the `author()`
+function that allow some control over that transformation,
+e.g., the `packages` argument, it does not allow full control
+over the composition of the LaTeX document.
+However, a LaTeX document within R is essentially just a character vector,
+so another way to author a LaTeX document is to create an external text file
+and read that into R.  This allows complete control over the content
+of the LaTeX document.
+Another possibility is that we want to use a LaTeX document that
+we did not create, for example, if we write Markdown code and 
+convert it to LaTeX code.  We will see an example of this in a later section.
+
+The `typeset()` function transforms a LaTeX document into a `"DVI"` object
+that contains a set of typeset glyphs.  There is limited control over this
+process as well, with only the `engine` argument allowing us to select between
+`"xetex"` or `"luatex"`.  Again, one option to 
+obtain greater control is to 
+performing this step outside of R by running
+a TeX engine, e.g., `xelatex`, on an external text file to produce a DVI
+file.  The `xdvir` package provides the `readDVI()` function
+to read external DVI files into R and these can then be passed to
+the `render()` function for drawing.
+
+One important caveat is that a `"LaTeXdocument"` object that is produced by
+the `author()` function, and a `"DVI"` object that is produced by the 
+`typeset()` function, contains information about how it was created,
+for example, the TeX `engine` that was specified.
+The `typeset()` function checks this information and warns if we ask
+to typeset a `"LaTeXdocument"` that was produced for a different TeX engine.
+Similarly, the `render()` function, which also has an `engine` argument,
+checks and warns if we ask to render a
+`"DVI"` object that was produced using a different TeX engine.
+
+External LaTeX documents and DVI files do not (explicitly) contain this
+information so it is up to the user to ensure that the TeX engine,
+and any LaTeX packages, are consistent with the arguments provided
+to the functions `typeset()` and `render()`.
+In some situations, even with the appropriate level of care,
+it will be impossible to avoid warnings.
+
 # Example 1
 
 ```{r echo=FALSE}
@@ -1248,7 +1323,7 @@ requires integrating the LaTeX output with the
 output with the top of the density curve and we want to align the right side
 of the LaTeX output with the right edge of the label "160" on the x-axis.
 
-We saw in Section \@ref(userinterface) 
+We saw in an earlier section
 how to use `element_latex()` to draw LaTeX text
 in labels such as the plot title on a \CRANpkg{ggplot2} plot
 and how to use `geom_latex()` to draw LaTeX text
@@ -1271,7 +1346,7 @@ the output relative to the plot.
 <<anneq>>
 ```
 
-The final result is shown in Figure \@ref(schneider).
+The final result is shown in Figure \@ref(fig:schneider).
 
 # Example 3
 
@@ -1410,89 +1485,277 @@ The final result is shown in Figure \@ref(fig:anzjs).
 
 # Example 4
 
-generate table with xtable and include in lattice plot.
+This section provides an example of using other software to generate
+LaTeX code, rather than writing it directly.  
+It also demonstrates integrating `grid.latex()` output
+with a \CRANpkg{lattice} plot [@pkg-lattice].
+The final image is shown in \@ref(fig:latticemd).
 
-# RTL or Vertical layout example?
-
-# Customisation and debugging
-
-Most of the examples in this article take a fragment of LaTeX code
-and feed it to the `grid.latex()` function, which performs an
-authoring step, a typesetting step, and a rendering step.
-We saw in a previous section that there are functions
-`author()`, `typeset()`, and `render()`
-that allow us to perform these steps separately
-(see Figure 
-\@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
-
-The `author()` function transforms a LaTeX fragment into a 
-complete LaTeX document.  Although there are arguments to the `author()`
-function that allow some control over that transformation,
-e.g., the `packages` argument, it does not allow full control
-over the composition of the LaTeX document.
-However, a LaTeX document within R is essentially just a character vector,
-so another way to author a LaTeX document is to create an external text file
-and read that into R.  This allows complete control over the content
-of the LaTeX document.
-
-The `typeset()` function transforms a LaTeX document into a `"DVI"` object
-that contains a set of typeset glyphs.  There is limited control over this
-process as well, with only the `engine` argument allowing us to select between
-`"xetex"` or `"luatex"`.  Again, one option to 
-obtain greater control is to 
-performing this step outside of R by running
-a TeX engine, e.g., `xelatex`, on an external text file to produce a DVI
-file.  The `xdvir` package provides the `readDVI()` function
-
-
-
-
-```{r diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
-knitr::include_graphics("diagram/diag.pdf")
+```{r echo=FALSE}
+library(lattice)
+library(latticeExtra)
 ```
 
-```{r diagsvg, eval=knitr::is_html_output(), results="asis", echo=FALSE, fig.cap="The design of the `xdvir` package."}
-## Create the sort of structure that knitr::include_graphics() returns
-structure("diagram/diag.svg", class= c("knit_image_paths", "knit_asis"), dpi=NULL)
+```{r yaml, echo=FALSE}
+yaml <- "
+---
+mainfont: TeX Gyre Heros
+header-includes:
+- \\pagestyle{empty}
+- \\usepackage{geometry}
+- \\geometry{textwidth=1.8in}
+---
+"
 ```
 
+```{r mdleft, echo=FALSE}
+mdLeft <- "
+1. New Zealand closes its borders to *almost* all travellers
+   at **23:59, 19 March 2020 (NZDT)**.
+"
+```
 
+```{r mdright, echo=FALSE}
+mdRight <- "
+2. New Zealand's international border opens to all visitors
+   from **11:59PM, 31 July 2022**.
+"
+```
 
-For example ... use option [gray] for grayscale version ???
+```{r pandocleft, echo=FALSE}
+oldwd <- setwd("Markdown")
+writeLines(c(yaml, mdLeft), "labelLeft.md")
+rmarkdown::pandoc_convert("labelLeft.md", 
+                          output="labelLeft.tex",
+                          options="--standalone")
+latexLeft <- readLines("labelLeft.tex")
+setwd(oldwd)
+```
 
-Skip the authoring step by writing LaTeX document yourself
+```{r pandocright, echo=FALSE}
+oldwd <- setwd("Markdown")
+writeLines(c(yaml, mdRight), "labelRight.md")
+rmarkdown::pandoc_convert("labelRight.md", 
+                          output="labelRight.tex",
+                          options="--standalone")
+latexRight <- readLines("labelRight.tex")
+setwd(oldwd)
+```
 
-Skip the typesetting step by generating DVI output yourself
+```{r typesetleft, echo=FALSE}
+dviLeft <- typeset(latexLeft)
+```
 
-Experts only!
+```{r typesetright, echo=FALSE}
+dviRight <- typeset(latexRight)
+```
+
+```{r lattice, echo=FALSE}
+latticeFlights <- 
+    xyplot(total ~ date, flights, type="l", 
+           main=list(label="Total flights into and out of Auckland",
+                     x=0, hjust=0),
+           xlab="", ylab=NULL,
+           ylim=c(0, 1800000), family="Lato Light", 
+           scales=list(y=list(at=c(0, 500000, 1000000),
+                              labels=c("0", "500,000", "1,000,000"))),
+           panel=function(...) {
+                     panel.xyplot(...)
+                     panel.abline(v=c(borderClosed, borderOpen), lty="dashed")
+                 })
+```
+
+```{r latticeflights, echo=FALSE, eval=FALSE}
+latticeFlights + 
+    latticeExtra::layer(render(dviLeft, 
+                               x=unit(borderClosed, "native") - unit(2, "mm"),
+                               y=unit(1, "npc") - unit(2, "mm"),
+                               hjust="right", vjust="top"))
+```
+
+```{r latticefinal, echo=FALSE}
+temp <- 
+<<latticeflights>>
+latticeFinal <- temp + 
+    latticeExtra::layer(grid.dvi(dviRight, 
+                   x=unit(borderOpen, "native") + unit(2, "mm"),
+                   y=unit(1, "npc") - unit(2, "mm"),
+                   hjust="left", vjust="top"))
+```
+
+(ref:latticemdFigCap) A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.
+
+```{r, latticemd, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'}
+latticeFinal
+```
+
+The main plot is a \CRANpkg{lattice} plot, with some annotations
+already in place.  The details of the code for this plot are not
+relevant to this article, so the main plot is described in the object
+`latticeFlights`, which is defined in the supplementary material.
+The main plot produced by `latticeFlights` is shown in 
+Figure \@ref(fig:latticemdplain).
+ 
+(ref:latticemdplainFigCap) The main plot from Figure \@ref(fig:latticemd).  This plot is produced using the \CRANpkg{lattice} package.
+
+```{r, latticemdplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'}
+latticeFlights
+```
+
+The annotations in Figure \@ref(fig:latticemd) are enumerated list items,
+similar to those in Figure \@ref(fig:anzjs).  However, in this plot
+instead of writing explicit LaTeX code, we use the arguably-simpler
+Markdown syntax to 
+describe the list item.  We will just focus on the left annotation;
+the right annotation is added in a very similar fashion.
+
+```{r echo=FALSE}
+cat(mdLeft)
+```
+
+We can
+use `pandoc_convert()` from the \CRANpkg{rmarkdown} package [@pkg:rmarkdown]
+to convert the Markdown to LaTeX code.
+Because we want the enumerated list to be constrained to a narrow width
+and because we want the font to match the main plot font, we
+have to add a YAML header to the markdown.
+
+```{r echo=FALSE}
+cat(yaml)
+```
+
+The following code combines the YAML header with the Markdown code,
+writes the result to a file, converts the Markdown to LaTeX, and
+reads the resulting LaTeX back into R.
+
+```{r eval=FALSE}
+<<pandocleft>>
+```
+
+These extra steps
+somewhat undermine the relative simplicity of using Markdown code,
+but the example still demonstrates the general idea of 
+generating LaTeX code from other sources rather than writing
+it explicitly ourselves.
+
+We now have LaTeX code to render in R, but a further complication
+is that this is a complete 
+LaTeX document rather than just a LaTeX fragment.
+We cannot pass a complete document to `grid.latex()`;
+instead, 
+we pass the LaTeX document to `typeset()` to generate
+a `"DVI"` object.
+
+```{r eval=FALSE}
+<<typesetleft>>
+```
+
+The following code demonstrates that we can render
+this `"DVI"` object within the \CRANpkg{lattice} plot
+using the `layer()` function from the 
+\CRANpkg{latticeExtra} package [@pkg:latticeExtra],
+to which we provide a call to the `render()` function
+from the `xdvir` package.
+Similar code is used to generate and add the second list item.
+
+```{r eval=FALSE}
+<<latticeflights>>
+```
+
+The final result is shown in Figure \@ref(fig:latticemd).
 
 # Discussion
 
-Must acknowledge tikzDevice package !!!
+The `xdvir` package provides convenient high-level functions for 
+rendering LaTeX fragments as labels, annotations, or data symbols on
+R plots.  The package also provides lower-level functions that
+allow more fine control over the authoring, typesetting, and
+rendering of LaTeX code in R.
 
-Comparison to importing (e.g., the import-svg approach of schneider).
-Can refer way back to including pngs of tex in html!?
+The benefit of the `xdvir` package is access to the typesetting capabilities
+of LaTeX.  This ranges from relatively simple features like changes in
+font family, font weight, and font style, and automatic line breaks,
+to intermediate features like full justification, hyphenation, and high-quality
+mathematical formulas and equations, and more advanced features like
+enumerated lists, multiple columns, and TikZ graphics.
 
-Limitations:  speed (as always), only some devices, only some TeX engines
+One limitation of the `xdvir` package is that rendering LaTeX
+fragments is noticeably slower than rendering simple character values.
+This is mainly because the typesetting 
+step requires running a TeX engine to produce a DVI file.
+The `xdvir` package performs some caching in order to minimise the problem,
+but the time cost can still be quite large.
 
-Future work:  look at what `marquee` is doing and try to keep up with that :)
+Another limitation of the `xdvir` package is that it requires a
+graphics device that can render typeset glyphs.  This currently includes
+the `pdf()` and `quartz()` devices, plus all devices based on the 
+Cairo graphics library [@cairo], and graphics devices 
+provided by the `ragg` package [@pkg:ragg].
+
+A final major limitation of `xdvir` is that it only currently supports two
+TeX engines:  XeTeX and recent LuaTeX.  The package start-up message 
+reports on whether these are available.  An implicit limitation is that
+`xdvir` requires a TeX installation, though that is simplified 
+through a dependency on the `tinytex` package [@pkg:tinytex].
+
+Given these limitations, it is worth discussing alternative approaches.
+The first section of this article mentioned \CRANpkg{gridtext},
+\CRANpkg{ggtext}, and \CRANpkg{marquee}.  These packages
+provide alternative ways to render non-trivial text labels, but 
+do so through Markdown and/or HTML rather than LaTeX.
+The advantage of `xdvir` by comparison is that it is possible to
+produce more advanced typesetting results with LaTeX.
+
+The \CRANpkg{tikzDevice} package [@pkg:tikzDevice] is an interesting
+alternative because, where `xdvir` integrates LaTeX text with R graphics, 
+\CRANpkg{tikzDevice} integrates R graphics with LaTeX.
+The \CRANpkg{tikzDevice} package provides an R graphics device that
+converts R plots into TikZ pictures so that R plots can include labels with 
+LaTeX fragments and R plots can be 
+deeply integrated with LaTeX documents.
+The main difference with this package is the destination:
+where `xdvir` ends up with LaTeX output within an R plot, 
+\CRANpkg{tikzDevice} ends up with an R plot within LaTeX output.
+If the final destination is a LaTeX document, 
+then the \CRANpkg{tikzDevice} may provide more convenience
+and greater control. However, if the final destination is 
+more general, or unknown, then `xdvir` may be the more appropriate
+solution.
+
+Another alternative approach to including LaTeX output in R plots
+is to import an image of the LaTeX output.
+This approach harks back to early solutions for including 
+LaTeX mathematical expressions in web pages by generating PNG images
+from LaTeX fragments.
+However, more modern technologies, such as SVG mean that this
+approach can yield a much higher-quality result, as 
+demonstrated by @schneider.
+One simple advantage of the `xdvir` approach is the level of convenience
+that it provides by automating the authoring and typesetting steps.
+The `xdvir` package also provides more possibilities to integrate
+LaTeX output with other drawing in R through anchors and saved positions.
+
+Some of the limitations of `xdvir` may also be overcome by further 
+development.  For example, it may be possible to extend support
+to more TeX engines and to more graphics devices.  Providing support
+for more LaTeX packages is another area for
+future work.
 
 # Acknowledgements
 
-Owe big debt to the \CRANpkg{tinytex} package,
-which simplifies the calling of TeX engines, installation
-of TeX packages (and TeX itself),
-and running TeX multiple times when necessary (e.g., for TikZ
-position tracking).
+The `xdvir` package depends on the \CRANpkg{tinytex} package
+for the typesetting step.  This package makes it much
+simpler make use of TeX engines, 
+including performing multiple runs when necessary, and much easier
+to install
+LaTeX packages (and TeX itself).
 
-Thanks to Marc-Olivier Beausoleil for permission to base the visualisation
-in Figure \@ref(fig:typesetting) on his work.
+The author owes a debt of gratitude to Marc-Olivier Beausoleil 
+(Figure \@ref(fig:typesetting)), 
+Thomas Rahlf (Figure \@ref(fig:rahlf)), 
+and Joel Schneider (Figure \@ref(fig:schneider))
+for sharing their work and for
+for permission to base several of the examples in this article
+on their work.
 
-Thanks to Thomas Rahlf for permission to base the visualisation in 
-Figure \@ref(fig:rahlf) on Figure 4.1 from his book
-"Data Visualisation with R".
-
-Thanks to Joel Schneider for publishing his work in an open format.
-
-# Summary
 
