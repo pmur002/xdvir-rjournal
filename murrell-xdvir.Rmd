@@ -965,6 +965,8 @@ grid.latex(muDot, packages="tikz")
 ```
 
 We will see a more complex example of TikZ output in a later section.
+Figure \@ref(fig:diag) is also a TikZ picture that has been rendered
+in R.
 
 # Customisation and debugging
  
@@ -973,25 +975,28 @@ and pass it to the `grid.latex()` function, which performs an
 authoring step, a typesetting step, and a rendering step.
 We saw in a previous section that there are functions
 `author()`, `typeset()`, and `render()`
-that allow us to perform these steps separately
-(see Figure 
-\@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
+that allow us to perform these steps separately (see Figure \@ref(fig:diag)).
 This provides more control over the individual steps and allows
 us to inspect the results of the individual steps, which can be
 useful for debugging.
 In this section, we explore further options for controlling the 
 authoring, typesetting, and rendering steps.
 
-```{r diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
-knitr::include_graphics("diagram/diag.pdf")
+```{r diag, eval=knitr::is_html_output(), echo=FALSE, fig.width=8, fig.height=3, fig.cap="The design of the `xdvir` package."}
+diagTeX <- readLines("diagram/diag.tex")
+## Have to add the {xdvir} pgfsys-driver
+diagTeX <- c(diagTeX[1], 
+             paste0("\\def\\pgfsysdriver{'",
+                    system.file("tikz", "pgfsys-xdvir.def",
+                                package="xdvir"),
+                    "'}"),
+             diagTeX[-1])
+diagDVI <- typeset(diagTeX)
+## Have to load the TikZ package
+grid.newpage()
+grid.dvi(diagDVI, packages="tikz")
 ```
 
-```{r diagsvg, eval=knitr::is_html_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."}
-## Create the sort of structure that knitr::include_graphics() returns
-structure("diagram/diag.svg", 
-          class= c("knit_image_paths", "knit_asis"), 
-          dpi=NULL)
-```
 The `author()` function transforms a LaTeX fragment into a 
 complete LaTeX document.  Although there are arguments to the `author()`
 function that allow some control over that transformation,
@@ -1652,8 +1657,7 @@ LaTeX document rather than just a LaTeX fragment.
 We cannot pass a complete document to `grid.latex()`;
 instead, 
 we pass the LaTeX document to `typeset()` to generate
-a `"DVI"` object (see Figure 
-\@ref(fig:`r ifelse(knitr::is_html_output(), 'diagsvg', 'diagpdf')`)).
+a `"DVI"` object (see Figure \@ref(fig:diag)).
 
 ```{r eval=FALSE}
 <<typesetleft>>
