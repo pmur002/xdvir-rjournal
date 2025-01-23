@@ -6,6 +6,14 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(xdvir.engine="xetex")
 
 
+## ----pdf-graphics, echo=FALSE, eval=knitr::is_latex_output()------------------
+knitr::opts_chunk$set(dev="cairo_pdf")
+
+
+## ----html-graphics, echo=FALSE, eval=knitr::is_html_output()------------------
+# knitr::opts_chunk$set(dev="png", dev.args=list(type="cairo-png"))
+
+
 ## ----echo=FALSE---------------------------------------------------------------
 ## Parameter for plotting
 ## Set x variable for the fitness function 
@@ -82,7 +90,7 @@ to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 
 
-## ----typesetting, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."----
+## ----typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."----
 
 library(xdvir)
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
@@ -104,8 +112,7 @@ label <- function(data, coords) {
               x=max(coords$x), 
               y=max(coords$y),
               hjust="right", vjust="top", 
-              gp=NULL,
-              texFile="typesetting.tex")
+              gp=NULL)
 }
 
 ggIntro + 
@@ -126,7 +133,7 @@ simpleTeX <- r"(We move the original mean to $\bar z_i$)"
 ## ----gridlatex, eval=FALSE----------------------------------------------------
 # grid.latex(simpleTeX)
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(simpleTeX)
 
@@ -137,7 +144,7 @@ plotmath <- expression("We move the original mean to "*bar(italic(z))[i])
 ## ----plotmathexpr, eval=FALSE-------------------------------------------------
 # grid.text(plotmath)
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.text(plotmath)
 
@@ -145,7 +152,7 @@ grid.text(plotmath)
 ## ----width, eval=FALSE--------------------------------------------------------
 # grid.latex(simpleTeX, width=.5)
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(simpleTeX, width=.5)
 
@@ -154,7 +161,7 @@ grid.latex(simpleTeX, width=.5)
 library(ggplot2)
 
 
-## ----elementlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:elementlatexFigCap)'----
+## ----elementlatex, fig.width=7, fig.height=4.5, out.width="100%", fig.cap='(ref:elementlatexFigCap)'----
 ggIntro +
     labs(title=simpleTeX) +
     theme(plot.title=element_latex())
@@ -194,7 +201,7 @@ ggGeom <- ggplot(samples) +
           panel.grid.minor.y=element_blank())
 
 
-## ----geomlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=3.5, dpi=300, fig.cap="A `ggplot2` plot with text labels drawn using `geom_latex()`."----
+## ----geomlatex, fig.width=7, fig.height=3.5, out.width="100%", fig.cap='(ref:geomlatexFigCap)'----
 ggGeom +
     geom_point(aes(x, sample), data=means, colour=2, size=4) +
     geom_latex(aes(x, sample, label=label), data=means, 
@@ -234,7 +241,7 @@ cat(c(output[1:firstDown],
 ## ----simpledvi, eval=FALSE----------------------------------------------------
 # render(simpleDVI)
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 render(simpleDVI)
 
@@ -246,7 +253,7 @@ colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
 ## ----colourtex, eval=FALSE----------------------------------------------------
 # grid.latex(colourTeX, packages="xcolor")
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(colourTeX, packages="xcolor")
 
@@ -282,7 +289,7 @@ cat(c(output[1:3],
 ## ----colourdvi, eval=FALSE----------------------------------------------------
 # render(colourDVI, packages="xcolor")
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 render(colourDVI, packages="xcolor")
 
@@ -293,7 +300,7 @@ render(colourDVI, packages="xcolor")
 ## ----justcentre, eval=FALSE---------------------------------------------------
 # grid.latex(simpleTeX, y=.5)
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
 grid.latex(simpleTeX, y=.5)
@@ -303,7 +310,7 @@ grid.latex(simpleTeX, y=.5)
 # grid.latex(simpleTeX, y=.5, vjust="bottom")
 
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
 grid.latex(simpleTeX, y=.5, vjust="bottom")
@@ -312,7 +319,7 @@ grid.latex(simpleTeX, y=.5, vjust="bottom")
 ## ----justbaseline, eval=FALSE-------------------------------------------------
 # grid.latex(simpleTeX, y=.5, vjust="baseline")
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
 grid.latex(simpleTeX, y=.5, vjust="baseline")
@@ -326,7 +333,7 @@ rightBearingTeX <- paste0(simpleTeX, "$|$")
 #     labs(title=rightBearingTeX) +
 #     theme(plot.title=element_latex(size=20, hjust="right"))
 
-## ----echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300----
+## ----echo=FALSE, fig.width=7, fig.height=1, out.width="100%"------------------
 pushViewport(viewport(height=100, y=1, just="top"))
 gg1 <- 
 ggIntro + 
@@ -339,7 +346,7 @@ print(gg1, newpage=FALSE)
 #     labs(title=rightBearingTeX) +
 #     theme(plot.title=element_latex(size=20, hjust="bbright"))
 
-## ----echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300----
+## ----echo=FALSE, fig.width=7, fig.height=1, out.width="100%"------------------
 pushViewport(viewport(height=100, y=1, just="top"))
 gg2 <- 
 ggIntro + 
@@ -357,7 +364,7 @@ zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
 # grid.latex(zrefTeX, packages="zref")
 
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(zrefTeX, packages="zref")
 
@@ -367,7 +374,7 @@ grid.latex(zrefTeX, packages="zref")
 # grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
 
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(zrefTeX, packages="zref")
 a <- getMark("a")
@@ -382,7 +389,7 @@ grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
 #              arrow=arrow(length=unit(2, "mm"), type="closed"))
 
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(zrefTeX, packages="zref")
 a <- getMark("a")
@@ -400,7 +407,7 @@ grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
 ## ----vert, echo=FALSE, eval=FALSE---------------------------------------------
 # grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
 grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
@@ -420,14 +427,13 @@ to get the
 \end{minipage})"
 
 
-## ----zref, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:zrefFigCap)'----
+## ----zref, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.cap='(ref:zrefFigCap)'----
 markTeX <- function(data, coords) {
     latexGrob(markStr, packages=list(adventor, "xcolor", "zref"),
               x=max(coords$x), 
               y=max(coords$y),
               hjust="right", vjust="top", 
-              gp=NULL,
-              texFile="typesetting.tex")
+              gp=NULL)
 }
 
 makeContent.markCurve <- function(x) {
@@ -469,7 +475,7 @@ tikzTeX <- r"(%
 ## ----tikzpicture, eval=FALSE--------------------------------------------------
 # grid.latex(tikzTeX, packages="tikzPicture")
 
-## ----echo=FALSE, fig.width=3, fig.height=1------------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=1, out.width="40%"-------------------
 grid.rect()
 grid.latex(tikzTeX, packages="tikzPicture")
 
@@ -484,20 +490,24 @@ muDot <- r"(%
 ## ----tikz, eval=FALSE---------------------------------------------------------
 # grid.latex(muDot, packages="tikz")
 
-## ----echo=FALSE, fig.width=3, fig.height=.5-----------------------------------
+## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(muDot, packages="tikz")
 
 
-## ----diagpdf, eval=knitr::is_latex_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."----
-knitr::include_graphics("diagram/diag.pdf")
-
-
-## ----diagsvg, eval=knitr::is_html_output(), echo=FALSE, fig.cap="The design of the `xdvir` package."----
-# ## Create the sort of structure that knitr::include_graphics() returns
-# structure("diagram/diag.svg",
-#           class= c("knit_image_paths", "knit_asis"),
-#           dpi=NULL)
+## ----diag, echo=FALSE, fig.width=8, fig.height=3, out.width="100%", fig.cap="The design of the `xdvir` package."----
+diagTeX <- readLines("diagram/diag.tex")
+## Have to add the {xdvir} pgfsys-driver
+diagTeX <- c(diagTeX[1], 
+             paste0("\\def\\pgfsysdriver{'",
+                    system.file("tikz", "pgfsys-xdvir.def",
+                                package="xdvir"),
+                    "'}"),
+             diagTeX[-1])
+diagDVI <- typeset(diagTeX)
+## Have to load the TikZ package
+grid.newpage()
+grid.dvi(diagDVI, packages="tikz")
 
 
 ## ----echo=FALSE---------------------------------------------------------------
@@ -533,7 +543,7 @@ rahlfTeX <- paste(readLines("TeX/rahlf.tex"), collapse="\n")
 #            hjust="left", vjust="top")
 
 
-## ----rahlf, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfFigCap)', fig.keep="last"----
+## ----rahlf, echo=FALSE, fig.width=12, fig.height=9, out.width="100%", fig.cap='(ref:rahlfFigCap)', fig.keep="last"----
 rahlfPlot()
 library(gridGraphics)
 grid.echo()
@@ -551,7 +561,7 @@ grid.latex(rahlfTeX,
 # rahlfPlot()
 
 
-## ----rahlfplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfplainFigCap)'----
+## ----rahlfplain, echo=FALSE, fig.width=12, fig.height=9, out.width="100%", fig.cap='(ref:rahlfplainFigCap)'----
 rahlfPlot()
 
 
@@ -629,7 +639,7 @@ schneiderTeX <- paste(schneiderLines, collapse="\n")
 #                data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
 
 
-## ----schneider, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderFigCap)'----
+## ----schneider, echo=FALSE, fig.cap='(ref:schneiderFigCap)'-------------------
 annotateEquations <-
     LaTeXpackage(name="annotate",
                  preamble="\\usepackage{TeX/annotate-equations}")
@@ -660,7 +670,7 @@ ggSchneider +
 # ggSchneider
 
 
-## ----schneiderplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderplainFigCap)'----
+## ----schneiderplain, echo=FALSE, fig.cap='(ref:schneiderplainFigCap)'---------
 ggSchneider
 
 
@@ -773,7 +783,7 @@ closeTeX <- r"(%
 #                data=data.frame(borders=c(borderClosed, borderOpen)))
 
 
-## ----anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsFigCap)'----
+## ----anzjs, echo=FALSE, fig.width=8, fig.height=4.5, out.width="100%", fig.cap='(ref:anzjsFigCap)'----
 labelLeft <- function(data, coords) {
     x1 <- coords$x[1]
     x2 <- coords$x[2]
@@ -822,7 +832,7 @@ ggANZJS +
 # ggANZJS
 
 
-## ----anzjsplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsplainFigCap)'----
+## ----anzjsplain, echo=FALSE, fig.width=8, fig.height=4.5, out.width="100%", fig.cap='(ref:anzjsplainFigCap)'----
 ggANZJS
 
 
@@ -950,11 +960,15 @@ latticeFinal <- temp +
                    hjust="left", vjust="top"))
 
 
-## ----latticemd, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'----
+## ----latticemd, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'----
 latticeFinal
 
 
-## ----latticemdplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'----
+## ----eval=FALSE---------------------------------------------------------------
+# latticeFlights
+
+
+## ----latticemdplain, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'----
 latticeFlights
 
 

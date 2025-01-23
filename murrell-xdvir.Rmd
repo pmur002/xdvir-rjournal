@@ -27,16 +27,25 @@ author:
     orcid: 0000-0002-3224-8858
 type: package
 output: 
+  rjtools::rjournal_pdf_article:
+    toc: no
   rjtools::rjournal_web_article:
     self_contained: yes
     toc: no
 bibliography: murrell-xdvir.bib
-
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 options(xdvir.engine="xetex")
+```
+
+```{r pdf-graphics, echo=FALSE, eval=knitr::is_latex_output()}
+knitr::opts_chunk$set(dev="cairo_pdf")
+```
+
+```{r html-graphics, echo=FALSE, eval=knitr::is_html_output()}
+knitr::opts_chunk$set(dev="png", dev.args=list(type="cairo-png"))
 ```
 
 # Introduction
@@ -154,7 +163,7 @@ to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 ```
 
-```{r, typesetting, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."}
+```{r, typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."}
 
 library(xdvir)
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
@@ -297,7 +306,7 @@ grid.rect()
 ```{r gridlatex, eval=FALSE}
 grid.latex(simpleTeX)
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<gridlatex>>
 ```
@@ -315,7 +324,7 @@ plotmath <- expression("We move the original mean to "*bar(italic(z))[i])
 ```{r plotmathexpr, eval=FALSE}
 grid.text(plotmath)
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<plotmathexpr>>
 ```
@@ -329,7 +338,7 @@ the width of the image.
 ```{r width, eval=FALSE}
 grid.latex(simpleTeX, width=.5)
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<width>>
 ```
@@ -379,7 +388,7 @@ library(ggplot2)
 
 (ref:elementlatexFigCap) The `ggplot2` plot from Figure \@ref(fig:typesetting), without the text annotation, but with a title that was specified using a LaTeX fragment and the function `element_latex()`.
 
-```{r, elementlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:elementlatexFigCap)'}
+```{r, elementlatex, fig.width=7, fig.height=4.5, out.width="100%", fig.cap='(ref:elementlatexFigCap)'}
 ggIntro +
     labs(title=simpleTeX) +
     theme(plot.title=element_latex())
@@ -441,7 +450,9 @@ The code for generating
 `ggGeom` is not shown in order to keep the code below readable,
 but it is available in the supplementary materials for this article.
 
-```{r, geomlatex, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=3.5, dpi=300, fig.cap="A `ggplot2` plot with text labels drawn using `geom_latex()`."}
+(ref:geomlatexFigCap) A `ggplot2` plot with text labels drawn using `geom_latex()`.
+
+```{r, geomlatex, fig.width=7, fig.height=3.5, out.width="100%", fig.cap='(ref:geomlatexFigCap)'}
 ggGeom +
     geom_point(aes(x, sample), data=means, colour=2, size=4) +
     geom_latex(aes(x, sample, label=label), data=means, 
@@ -527,7 +538,7 @@ cat(c(output[1:firstDown],
 ```{r simpledvi, eval=FALSE}
 render(simpleDVI)
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<simpledvi>>
 ```
@@ -568,7 +579,7 @@ colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
 ```{r colourtex, eval=FALSE}
 grid.latex(colourTeX, packages="xcolor")
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<colourtex>>
 ```
@@ -624,7 +635,7 @@ same change in colour for the last two words.
 ```{r colourdvi, eval=FALSE}
 render(colourDVI, packages="xcolor")
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<colourdvi>>
 ```
@@ -650,7 +661,7 @@ grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
 ```{r justcentre, eval=FALSE}
 grid.latex(simpleTeX, y=.5)
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<horiz>>
 <<justcentre>>
@@ -666,7 +677,7 @@ of the text, so the bottom of the text is the bottom of the subscript "i".
 grid.latex(simpleTeX, y=.5, vjust="bottom")
 ```
 
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<horiz>>
 <<justbottom>>
@@ -678,7 +689,7 @@ justify text relative to the text baseline, as shown by the following code.
 ```{r justbaseline, eval=FALSE}
 grid.latex(simpleTeX, y=.5, vjust="baseline")
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<horiz>>
 <<justbaseline>>
@@ -714,7 +725,7 @@ ggIntro +
     labs(title=rightBearingTeX) +
     theme(plot.title=element_latex(size=20, hjust="right"))
 ```
-```{r echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300}
+```{r echo=FALSE, fig.width=7, fig.height=1, out.width="100%"}
 pushViewport(viewport(height=100, y=1, just="top"))
 gg1 <- 
 <<justright>>
@@ -725,7 +736,7 @@ ggIntro +
     labs(title=rightBearingTeX) +
     theme(plot.title=element_latex(size=20, hjust="bbright"))
 ```
-```{r echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=1, dpi=300}
+```{r echo=FALSE, fig.width=7, fig.height=1, out.width="100%"}
 pushViewport(viewport(height=100, y=1, just="top"))
 gg2 <- 
 <<justbbright>>
@@ -779,7 +790,7 @@ so we must load that package.
 grid.latex(zrefTeX, packages="zref")
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=.5}
+```{r, echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<zreftex>>
 ```
@@ -795,7 +806,7 @@ a <- getMark("a")
 grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=.5}
+```{r, echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<zreftex>>
 <<geta>>
@@ -813,7 +824,7 @@ grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
              arrow=arrow(length=unit(2, "mm"), type="closed"))
 ```
 
-```{r, echo=FALSE, fig.width=3, fig.height=.5}
+```{r, echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<zreftex>>
 <<geta>>
@@ -831,7 +842,7 @@ grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
 ```{r vert, echo=FALSE, eval=FALSE}
 grid.segments(.5, 0, .5, 1, gp=gpar(col="grey"))
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<horiz>>
 <<vert>>
@@ -862,7 +873,7 @@ to get the
 
 (ref:zrefFigCap) The `ggplot2` plot from Figure \@ref(fig:typesetting), including the LaTeX annotation, with a line added relative to marked locations within the LaTeX annotation (and relative to the thick red line).
 
-```{r, zref, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=7, fig.height=4.5, dpi=300, fig.cap='(ref:zrefFigCap)'}
+```{r, zref, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.cap='(ref:zrefFigCap)'}
 markTeX <- function(data, coords) {
     latexGrob(markStr, packages=list(adventor, "xcolor", "zref"),
               x=max(coords$x), 
@@ -932,7 +943,7 @@ output in the rendering step.
 ```{r tikzpicture, eval=FALSE}
 grid.latex(tikzTeX, packages="tikzPicture")
 ```
-```{r echo=FALSE, fig.width=3, fig.height=1}
+```{r echo=FALSE, fig.width=3, fig.height=1, out.width="40%"}
 <<rect>>
 <<tikzpicture>>
 ```
@@ -959,7 +970,7 @@ This time, we just specify `packages="tikz"`.
 ```{r tikz, eval=FALSE}
 grid.latex(muDot, packages="tikz")
 ```
-```{r echo=FALSE, fig.width=3, fig.height=.5}
+```{r echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"}
 <<rect>>
 <<tikz>>
 ```
@@ -982,7 +993,7 @@ useful for debugging.
 In this section, we explore further options for controlling the 
 authoring, typesetting, and rendering steps.
 
-```{r diag, eval=knitr::is_html_output(), echo=FALSE, fig.width=8, fig.height=3, fig.cap="The design of the `xdvir` package."}
+```{r diag, echo=FALSE, fig.width=8, fig.height=3, out.width="100%", fig.cap="The design of the `xdvir` package."}
 diagTeX <- readLines("diagram/diag.tex")
 ## Have to add the {xdvir} pgfsys-driver
 diagTeX <- c(diagTeX[1], 
@@ -1089,7 +1100,7 @@ a LaTeX package that has no predefined support in `xdvir`.
 
 (ref:rahlfFigCap) A plot with a two-column text annoation. This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book "Data Visualisation with R" [@rahlf].
 
-```{r, rahlf, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfFigCap)', fig.keep="last"}
+```{r, rahlf, echo=FALSE, fig.width=12, fig.height=9, out.width="100%", fig.cap='(ref:rahlfFigCap)', fig.keep="last"}
 <<rahlfplot>>
 <<gridgraphics>>
 <<downvp>>
@@ -1110,7 +1121,7 @@ Figure \@ref(fig:rahlfplain).
 
 (ref:rahlfplainFigCap) The main plot from Figure \@ref(fig:rahlf) without the two columns of text annotation.  This plot is drawn using functions from the `graphics` package.
 
-```{r, rahlfplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=12, fig.height=9, dpi=300, fig.cap='(ref:rahlfplainFigCap)'}
+```{r, rahlfplain, echo=FALSE, fig.width=12, fig.height=9, out.width="100%", fig.cap='(ref:rahlfplainFigCap)'}
 <<rahlfplot>>
 ```
 
@@ -1244,7 +1255,7 @@ ggSchneider +
 
 (ref:schneiderFigCap) A plot with annotated mathematical equation. This plot is an adaptation of the plot in @schneider2023.
 
-```{r, schneider, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderFigCap)'}
+```{r, schneider, echo=FALSE, fig.cap='(ref:schneiderFigCap)'}
 <<annotateequations>>
 <<tikznobbox>>
 <<roboto>>
@@ -1272,7 +1283,7 @@ ggSchneider
 
 (ref:schneiderplainFigCap) The main plot from Figure \@ref(fig:schneider) without the annotated mathematical equation. This plot is produced using the packages \CRANpkg{ggplot2} and \CRANpkg{ggtext}.
 
-```{r, schneiderplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), dpi=300, fig.cap='(ref:schneiderplainFigCap)'}
+```{r, schneiderplain, echo=FALSE, fig.cap='(ref:schneiderplainFigCap)'}
 ggSchneider
 ```
 
@@ -1433,7 +1444,7 @@ ggANZJS +
 
 (ref:anzjsFigCap) A plot with numbered list items as annotations. This plot is an adaptation of Figure 10 from @anzjs2025.
 
-```{r, anzjs, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsFigCap)'}
+```{r, anzjs, echo=FALSE, fig.width=8, fig.height=4.5, out.width="100%", fig.cap='(ref:anzjsFigCap)'}
 <<labelLeft>>
 <<labelRight>>
 <<ggenumlist>>
@@ -1456,7 +1467,7 @@ ggANZJS
 
 (ref:anzjsplainFigCap) The main plot from Figure \@ref(fig:anzjs) without the numbered list items as annotations.  This plot is produced using the \CRANpkg{ggplot2} package.
 
-```{r, anzjsplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, fig.height=4.5, dpi=300, fig.cap='(ref:anzjsplainFigCap)'}
+```{r, anzjsplain, echo=FALSE, fig.width=8, fig.height=4.5, out.width="100%", fig.cap='(ref:anzjsplainFigCap)'}
 ggANZJS
 ```
 
@@ -1593,7 +1604,7 @@ latticeFinal <- temp +
 
 (ref:latticemdFigCap) A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.
 
-```{r, latticemd, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'}
+```{r, latticemd, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'}
 latticeFinal
 ```
 
@@ -1610,7 +1621,7 @@ latticeFlights
 
 (ref:latticemdplainFigCap) The main plot from Figure \@ref(fig:latticemd).  This plot is produced using the \CRANpkg{lattice} package.
 
-```{r, latticemdplain, echo=FALSE, dev="png", dev.args=list(type="cairo"), fig.width=8, dpi=300, fig.cap='(ref:latticemdFigCap)'}
+```{r, latticemdplain, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'}
 latticeFlights
 ```
 
