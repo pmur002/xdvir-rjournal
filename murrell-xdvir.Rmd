@@ -1,12 +1,12 @@
 ---
 title: "Rendering LaTeX in R"
-date: "2024-12-31"
+date: "2025-01-23"
 abstract: >
-  The `xdvir` package provides functions for rendering 
+  The xdvir package provides functions for rendering 
   LaTeX code as labels, annotations, and
   data symbols in R plots.  There are convenient high-level
   functions for rendering simple LaTeX fragments, including
-  labels on `ggplot2` plots, plus lower-level
+  labels on ggplot2 plots, plus lower-level
   functions for more fine control over the authoring,
   typesetting, and rendering of LaTeX code.
   There is support for making use of LaTeX packages,
@@ -51,11 +51,11 @@ knitr::opts_chunk$set(dev="png", dev.args=list(type="cairo-png"))
 # Introduction
 
 Text labels, titles, and annotations are essential components of 
-any data visualisation.  Viewers focus a lot of their attention
+any data visualization.  Viewers focus a lot of their attention
 on text [@massvis], 
 text is the most effective way to communicate some types of 
 information [@hearst],
-and the message obtained from a data visualisation can be
+and the message obtained from a data visualization can be
 heavily influenced by text [@kong].
 
 R provides relatively flexible tools for adding text labels to plots.
@@ -74,7 +74,7 @@ The \CRANpkg{gridtext} [@pkg-gridtext] and \CRANpkg{ggtext} [@pkg-ggtext]
 packages greatly improved the situation by allowing text labels
 to include a small subset of
 markdown and HTML (plus CSS).  This allowed changes in font face
-and colour within text labels.
+and color within text labels.
 
 More recently, the \CRANpkg{marquee} package [@pkg-marquee]
 improved things a great deal further by providing full support for
@@ -163,7 +163,7 @@ to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 ```
 
-```{r, typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation."}
+```{r, typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in color; and automated line-breaks with full justification and hyphenation."}
 
 library(xdvir)
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
@@ -194,7 +194,7 @@ ggIntro +
 
 The annotation in Figure \@ref(fig:typesetting)
 may not appear to be particularly special nor particularly complicated 
-at first glance, but it harbours several important details:
+at first glance, but it harbors several important details:
 
 * The text is a mixture of plain text and mathematical expressions (like
   $\bar{z}_i$). Furthermore, the mathematical expressions use a different font
@@ -207,15 +207,15 @@ at first glance, but it harbours several important details:
   that the typesetting of mathematical expressions in R graphics is not
   of a very high quality.
 
-* The text is not all the same colour; the final two words (but not the full
+* The text is not all the same color; the final two words (but not the full
   stop) are red.  Furthermore, the final two words are **bold**;
   they have a different
   font face compared to the rest of the text.
 
-  The R graphics system can only draw a character value with a single colour
+  The R graphics system can only draw a character value with a single color
   and a single font face.
   The \CRANpkg{gridtext} and 
-  \CRANpkg{ggtext} packages make it possible to change colour within
+  \CRANpkg{ggtext} packages make it possible to change color within
   a character value, but they do not allow a mixture of plain text and
   mathematical expressions.
 
@@ -444,7 +444,7 @@ ggGeom <- ggplot(samples) +
 ```
 
 The `ggGeom` object in the code below describes the 
-main plot, consisting of grey dots, horizontal and vertical lines,
+main plot, consisting of gray dots, horizontal and vertical lines,
 and y-axis labels.
 The code for generating 
 `ggGeom` is not shown in order to keep the code below readable,
@@ -459,7 +459,7 @@ ggGeom +
                size=6, vjust=-.4, colour=2)    
 ```
 
-# Under the Hood {#underhood}
+# Under the hood {#underhood}
 
 The previous section showed that simple usage of the `xdvir` package
 only requires specifying a LaTeX fragment as the text to draw.
@@ -553,7 +553,7 @@ in the authoring step, respects the font family and
 font size that are in effect when the text is rendered.
 By contrast, the `render()` call is drawing typeset information 
 from a LaTeX document that just makes use of the default LaTeX font,
-Computer Modern (or to be more precise, a modernised version called
+Computer Modern (or to be more precise, a modernized version called
 Latin Modern) at 10pt.
 
 # LaTeX packages {#packages}
@@ -565,7 +565,7 @@ what is possible with
 LaTeX code.
 
 Many additional effects can be obtained with LaTeX code by loading
-LaTeX packages.  As a simple example, changes in text colour
+LaTeX packages.  As a simple example, changes in text color
 requires loading the LaTeX package `xcolor`.
 These LaTeX packages can be loaded using the `packages` argument of the 
 `grid.latex()` function (or the `element_latex()` or `geom_latex()` functions).
@@ -595,10 +595,10 @@ colourDoc
 ```
 
 This in turn affects the typesetting step:  without the `xcolor` package, the
-`\color` command would not be recognised;  with the `xcolor` package, 
-the `\color` command produces instructions to change colour 
+`\color` command would not be recognized;  with the `xcolor` package, 
+the `\color` command produces instructions to change color 
 in the `"DVI"` output.  This is demonstrated below with an
-explicit call to the `typeset()` function.  An example of the colour-change
+explicit call to the `typeset()` function.  An example of the color-change
 instructions is the line containing `color push` in the output below the code.
 
 ```{r colortypeset, echo=FALSE}
@@ -627,10 +627,10 @@ cat(c(output[1:3],
 The argument `packages="xcolor"` is also 
 used in the rendering step because, without it,
 the rendering would not take any notice of the instructions to
-change colour.  This is demonstrated below with an explicit
+change color.  This is demonstrated below with an explicit
 call to the `render()` function.  The resulting image differs from
 the previous one because it uses the default LaTeX font, but we can see the
-same change in colour for the last two words.
+same change in color for the last two words.
 
 ```{r colourdvi, eval=FALSE}
 render(colourDVI, packages="xcolor")
@@ -642,7 +642,7 @@ render(colourDVI, packages="xcolor")
 
 There are several LaTeX packages with predefined support in the
 `xdvir` package, including 
-`xcolor` for changes in colour and `fontspec` for changes in font.
+`xcolor` for changes in color and `fontspec` for changes in font.
 Support can be added for other LaTeX packages with the
 `LaTeXpackage()` function.  We will see other predefined packages
 and an example of defining a new LaTeX
@@ -651,9 +651,9 @@ package in later sections.
 # Justifying text
 
 By default, the LaTeX text drawn by `grid.latex()`
-is centred upon a specified location.
-For example, the following code draws the `tex` fragment vertically centred
-at a location half-way up the image (as indicated by the grey line).
+is centered upon a specified location.
+For example, the following code draws the `tex` fragment vertically centered
+at a location half-way up the image (as indicated by the gray line).
 
 ```{r horiz, echo=FALSE, eval=FALSE}
 grid.segments(0, .5, 1, .5, gp=gpar(col="grey"))
@@ -834,7 +834,7 @@ grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
 The exported locations also produce "anchors" for justifying 
 the LaTeX text.  For example, the following code
 draws the simple LaTeX fragment with position `"a"` at 
-the centre of the image (which is indicated by grey lines).
+the center of the image (which is indicated by gray lines).
 
 ```{r justanchor, eval=FALSE}
 grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
@@ -950,7 +950,7 @@ grid.latex(tikzTeX, packages="tikzPicture")
 
 The label on the x-axis of Figure \@ref(fig:geomlatex) 
 is another simple `TikZ` picture that
-uses `TikZ` commands to draw the greek letter mu
+uses `TikZ` commands to draw the Greek letter mu
 within a circle.
 This example is not completely trivial because it uses the
 LaTeX concept of "phantom" text to make the circle large enough to fit
@@ -979,7 +979,7 @@ We will see a more complex example of TikZ output in a later section.
 Figure \@ref(fig:diag) is also a TikZ picture that has been rendered
 in R.
 
-# Customisation and debugging
+# Customization and debugging
  
 Most of the examples in this article take a fragment of LaTeX code
 and pass it to the `grid.latex()` function, which performs an
@@ -1267,8 +1267,8 @@ The details of the code that generates the main plot
 are not particularly relevant to this article, so the
 main plot is described in the object `ggSchneider`, which
 is defined in the supplementary materials for the article.
-One point worth noting is that the labelling on the x-axis, which
-combines italic greek letters with upright digits and signs, is produced
+One point worth noting is that the labeling on the x-axis, which
+combines italic Greek letters with upright digits and signs, is produced
 using the \CRANpkg{ggtext} package.
 In other words, this example combines two levels of text annotation:
 labels on the x-axis that are relatively simple, but still beyond the
@@ -1289,7 +1289,7 @@ ggSchneider
 
 The start of the LaTeX code for the annotated equation is shown below
 (the full code is included in the supplementary materials for this article).
-This is arranged in three blocks: the first block of code defines some colours;
+This is arranged in three blocks: the first block of code defines some colors;
 the second block describes the main mathematical equation, but includes
 some `\eqnmark` commands to save locations within the equation;
 and the third block shows one of the additional equation annotations, which
@@ -1504,6 +1504,13 @@ The final result is shown in Figure \@ref(fig:anzjs).
 
 # Example 4
 
+**TODO**
+Go back to panel function for lattice example.
+Bundle main plot panel into its own 
+function so that panel function is still simple.
+Also point out that a lattice label (like title and xlab/ylab) can be any grob.
+Can we do example that shows both of these ?
+
 This section provides an example, shown in
 Figure \@ref(fig:latticemd), of using other software to generate
 LaTeX code, rather than writing it directly.
@@ -1709,7 +1716,7 @@ One limitation of the `xdvir` package is that rendering LaTeX
 fragments is noticeably slower than rendering simple character values.
 This is mainly because the typesetting 
 step requires running a TeX engine to produce a DVI file.
-The `xdvir` package performs some caching in order to minimise the problem,
+The `xdvir` package performs some caching in order to minimize the problem,
 but the time cost can still be quite large.
 
 Another limitation of the `xdvir` package is that it requires a
@@ -1783,7 +1790,7 @@ to more TeX engines and to more graphics devices.  Providing support
 for more LaTeX packages is another area for
 future work.
 
-# Acknowledgements
+# Acknowledgments
 
 The `xdvir` package depends on the \CRANpkg{tinytex} package
 for the typesetting step.  This package makes it much

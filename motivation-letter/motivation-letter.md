@@ -10,14 +10,20 @@ Editor
 The R Journal  
 \bigskip
 
-Dear Professor Cook,
+Dear Editor,
 \bigskip
 
-Please consider our article titled "ToOoOlTiPs: An R Package for Customizable Tooltips in Interactive Graphics" for publication in the R Journal.
+Please consider the article titled "Rendering LaTeX in R" for publication in the
+R Journal.
 
-The manuscript introduces the new package called `ToOoOlTiPs` which provides examples on how to use interactive graphics in journal articles, and general tips for making an interesting contribution.
+The manuscript introduces the new package called `xdvir` which allows users to
+render LaTeX fragments in R plots, including labels and 
+data symbols for `ggplot` plots.
 
-We believe the readers of the R Journal will find this article helpful for their work because it provides generally useful instructions that will work for many purposes. 
+We believe the readers of the R Journal will find this article helpful for their
+work because it provides access to the sophisticated typesetting capabilities
+of LaTeX for drawing text labels and annotations on R plots, for example
+the ability to render high-quality mathematical equations.
 
 \bigskip
 \bigskip
@@ -26,16 +32,11 @@ Regards,
     
     
     
-    
-Quietest Quokka  
-Department of Letter Q  
-University of Little Mates  
-Somewhere, Australia  
-qquo@ulm.edu
+Paul Murrell  
+Department of Statistics  
+The University of Auckland  
+Auckland, New Zealand  
+paul@stat.auckland.ac.nz    
 
 \bigskip
 
-NOTES: Modify this file with information about your article. 
-
-1. It may be invisible to you, so be aware that after each address line there are two spaces, this makes the line break correctly.
-2. It is also reasonable to submit an .md format of your motivating letter instead of a pdf. 

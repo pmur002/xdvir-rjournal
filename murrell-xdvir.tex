@@ -7,18 +7,18 @@
 \maketitle
 
 \abstract{%
-The \texttt{xdvir} package provides functions for rendering LaTeX code as labels, annotations, and data symbols in R plots. There are convenient high-level functions for rendering simple LaTeX fragments, including labels on \texttt{ggplot2} plots, plus lower-level functions for more fine control over the authoring, typesetting, and rendering of LaTeX code. There is support for making use of LaTeX packages, including TikZ graphics. The rendered LaTeX output is fully integrated with R graphics output in the sense that LaTeX output can be positioned relative to R graphics output and vice versa.
+The xdvir package provides functions for rendering LaTeX code as labels, annotations, and data symbols in R plots. There are convenient high-level functions for rendering simple LaTeX fragments, including labels on ggplot2 plots, plus lower-level functions for more fine control over the authoring, typesetting, and rendering of LaTeX code. There is support for making use of LaTeX packages, including TikZ graphics. The rendered LaTeX output is fully integrated with R graphics output in the sense that LaTeX output can be positioned relative to R graphics output and vice versa.
 }
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
 Text labels, titles, and annotations are essential components of
-any data visualisation. Viewers focus a lot of their attention
+any data visualization. Viewers focus a lot of their attention
 on text (Borkin et al. 2016),
 text is the most effective way to communicate some types of
 information (Hearst 2023),
-and the message obtained from a data visualisation can be
+and the message obtained from a data visualization can be
 heavily influenced by text (Kong, Liu, and Karahalios 2018).
 
 R provides relatively flexible tools for adding text labels to plots.
@@ -37,7 +37,7 @@ The \CRANpkg{gridtext} (Wilke and Wiernik 2022b) and \CRANpkg{ggtext} (Wilke and
 packages greatly improved the situation by allowing text labels
 to include a small subset of
 markdown and HTML (plus CSS). This allowed changes in font face
-and colour within text labels.
+and color within text labels.
 
 More recently, the \CRANpkg{marquee} package (Pedersen and Mitáš 2024)
 improved things a great deal further by providing full support for
@@ -51,12 +51,12 @@ a combination of features that cannot be produced using the
 available text-drawing tools.
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/typesetting-1} \caption{A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in colour; and automated line-breaks with full justification and hyphenation.}\label{fig:typesetting}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/typesetting-1} \caption{A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in color; and automated line-breaks with full justification and hyphenation.}\label{fig:typesetting}
 \end{figure}
 
 The annotation in Figure \ref{fig:typesetting}
 may not appear to be particularly special nor particularly complicated
-at first glance, but it harbours several important details:
+at first glance, but it harbors several important details:
 
 \begin{itemize}
 \item
@@ -71,15 +71,15 @@ at first glance, but it harbours several important details:
   that the typesetting of mathematical expressions in R graphics is not
   of a very high quality.
 \item
-  The text is not all the same colour; the final two words (but not the full
+  The text is not all the same color; the final two words (but not the full
   stop) are red. Furthermore, the final two words are \textbf{bold};
   they have a different
   font face compared to the rest of the text.
 
-  The R graphics system can only draw a character value with a single colour
+  The R graphics system can only draw a character value with a single color
   and a single font face.
   The \CRANpkg{gridtext} and
-  \CRANpkg{ggtext} packages make it possible to change colour within
+  \CRANpkg{ggtext} packages make it possible to change color within
   a character value, but they do not allow a mixture of plain text and
   mathematical expressions.
 \item
@@ -280,7 +280,7 @@ means$label
 \end{verbatim}
 
 The \texttt{ggGeom} object in the code below describes the
-main plot, consisting of grey dots, horizontal and vertical lines,
+main plot, consisting of gray dots, horizontal and vertical lines,
 and y-axis labels.
 The code for generating
 \texttt{ggGeom} is not shown in order to keep the code below readable,
@@ -300,7 +300,7 @@ ggGeom +
 \end{figure}
 
 \hypertarget{underhood}{%
-\section{Under the Hood}\label{underhood}}
+\section{Under the hood}\label{underhood}}
 
 The previous section showed that simple usage of the \texttt{xdvir} package
 only requires specifying a LaTeX fragment as the text to draw.
@@ -413,7 +413,7 @@ in the authoring step, respects the font family and
 font size that are in effect when the text is rendered.
 By contrast, the \texttt{render()} call is drawing typeset information
 from a LaTeX document that just makes use of the default LaTeX font,
-Computer Modern (or to be more precise, a modernised version called
+Computer Modern (or to be more precise, a modernized version called
 Latin Modern) at 10pt.
 
 \hypertarget{packages}{%
@@ -426,7 +426,7 @@ what is possible with
 LaTeX code.
 
 Many additional effects can be obtained with LaTeX code by loading
-LaTeX packages. As a simple example, changes in text colour
+LaTeX packages. As a simple example, changes in text color
 requires loading the LaTeX package \texttt{xcolor}.
 These LaTeX packages can be loaded using the \texttt{packages} argument of the
 \texttt{grid.latex()} function (or the \texttt{element\_latex()} or \texttt{geom\_latex()} functions).
@@ -464,10 +464,10 @@ colourDoc
 \end{verbatim}
 
 This in turn affects the typesetting step: without the \texttt{xcolor} package, the
-\texttt{\textbackslash{}color} command would not be recognised; with the \texttt{xcolor} package,
-the \texttt{\textbackslash{}color} command produces instructions to change colour
+\texttt{\textbackslash{}color} command would not be recognized; with the \texttt{xcolor} package,
+the \texttt{\textbackslash{}color} command produces instructions to change color
 in the \texttt{"DVI"} output. This is demonstrated below with an
-explicit call to the \texttt{typeset()} function. An example of the colour-change
+explicit call to the \texttt{typeset()} function. An example of the color-change
 instructions is the line containing \texttt{color\ push} in the output below the code.
 
 \begin{verbatim}
@@ -501,10 +501,10 @@ colourDVI
 The argument \texttt{packages="xcolor"} is also
 used in the rendering step because, without it,
 the rendering would not take any notice of the instructions to
-change colour. This is demonstrated below with an explicit
+change color. This is demonstrated below with an explicit
 call to the \texttt{render()} function. The resulting image differs from
 the previous one because it uses the default LaTeX font, but we can see the
-same change in colour for the last two words.
+same change in color for the last two words.
 
 \begin{verbatim}
 render(colourDVI, packages="xcolor")
@@ -514,7 +514,7 @@ render(colourDVI, packages="xcolor")
 
 There are several LaTeX packages with predefined support in the
 \texttt{xdvir} package, including
-\texttt{xcolor} for changes in colour and \texttt{fontspec} for changes in font.
+\texttt{xcolor} for changes in color and \texttt{fontspec} for changes in font.
 Support can be added for other LaTeX packages with the
 \texttt{LaTeXpackage()} function. We will see other predefined packages
 and an example of defining a new LaTeX
@@ -524,9 +524,9 @@ package in later sections.
 \section{Justifying text}\label{justifying-text}}
 
 By default, the LaTeX text drawn by \texttt{grid.latex()}
-is centred upon a specified location.
-For example, the following code draws the \texttt{tex} fragment vertically centred
-at a location half-way up the image (as indicated by the grey line).
+is centered upon a specified location.
+For example, the following code draws the \texttt{tex} fragment vertically centered
+at a location half-way up the image (as indicated by the gray line).
 
 \begin{verbatim}
 grid.latex(simpleTeX, y=.5)
@@ -677,7 +677,7 @@ grid.xspline(unit.c(a$devx, .5*(a$devx + b$devx), b$devx),
 The exported locations also produce ``anchors'' for justifying
 the LaTeX text. For example, the following code
 draws the simple LaTeX fragment with position \texttt{"a"} at
-the centre of the image (which is indicated by grey lines).
+the center of the image (which is indicated by gray lines).
 
 \begin{verbatim}
 grid.latex(zrefTeX, packages="zref", hjust="a", vjust="a")
@@ -739,7 +739,7 @@ grid.latex(tikzTeX, packages="tikzPicture")
 
 The label on the x-axis of Figure \ref{fig:geomlatex}
 is another simple \texttt{TikZ} picture that
-uses \texttt{TikZ} commands to draw the greek letter mu
+uses \texttt{TikZ} commands to draw the Greek letter mu
 within a circle.
 This example is not completely trivial because it uses the
 LaTeX concept of ``phantom'' text to make the circle large enough to fit
@@ -769,8 +769,8 @@ We will see a more complex example of TikZ output in a later section.
 Figure \ref{fig:diag} is also a TikZ picture that has been rendered
 in R.
 
-\hypertarget{customisation-and-debugging}{%
-\section{Customisation and debugging}\label{customisation-and-debugging}}
+\hypertarget{customization-and-debugging}{%
+\section{Customization and debugging}\label{customization-and-debugging}}
 
 Most of the examples in this article take a fragment of LaTeX code
 and pass it to the \texttt{grid.latex()} function, which performs an
@@ -986,8 +986,8 @@ The details of the code that generates the main plot
 are not particularly relevant to this article, so the
 main plot is described in the object \texttt{ggSchneider}, which
 is defined in the supplementary materials for the article.
-One point worth noting is that the labelling on the x-axis, which
-combines italic greek letters with upright digits and signs, is produced
+One point worth noting is that the labeling on the x-axis, which
+combines italic Greek letters with upright digits and signs, is produced
 using the \CRANpkg{ggtext} package.
 In other words, this example combines two levels of text annotation:
 labels on the x-axis that are relatively simple, but still beyond the
@@ -1010,7 +1010,7 @@ ggSchneider
 
 The start of the LaTeX code for the annotated equation is shown below
 (the full code is included in the supplementary materials for this article).
-This is arranged in three blocks: the first block of code defines some colours;
+This is arranged in three blocks: the first block of code defines some colors;
 the second block describes the main mathematical equation, but includes
 some \texttt{\textbackslash{}eqnmark} commands to save locations within the equation;
 and the third block shows one of the additional equation annotations, which
@@ -1217,6 +1217,13 @@ The final result is shown in Figure \ref{fig:anzjs}.
 \hypertarget{example-4}{%
 \section{Example 4}\label{example-4}}
 
+\textbf{TODO}
+Go back to panel function for lattice example.
+Bundle main plot panel into its own
+function so that panel function is still simple.
+Also point out that a lattice label (like title and xlab/ylab) can be any grob.
+Can we do example that shows both of these ?
+
 This section provides an example, shown in
 Figure \ref{fig:latticemd}, of using other software to generate
 LaTeX code, rather than writing it directly.
@@ -1350,7 +1357,7 @@ One limitation of the \texttt{xdvir} package is that rendering LaTeX
 fragments is noticeably slower than rendering simple character values.
 This is mainly because the typesetting
 step requires running a TeX engine to produce a DVI file.
-The \texttt{xdvir} package performs some caching in order to minimise the problem,
+The \texttt{xdvir} package performs some caching in order to minimize the problem,
 but the time cost can still be quite large.
 
 Another limitation of the \texttt{xdvir} package is that it requires a
@@ -1424,8 +1431,8 @@ to more TeX engines and to more graphics devices. Providing support
 for more LaTeX packages is another area for
 future work.
 
-\hypertarget{acknowledgements}{%
-\section{Acknowledgements}\label{acknowledgements}}
+\hypertarget{acknowledgments}{%
+\section{Acknowledgments}\label{acknowledgments}}
 
 The \texttt{xdvir} package depends on the \CRANpkg{tinytex} package
 for the typesetting step. This package makes it much
@@ -1494,7 +1501,7 @@ Pedersen, Thomas Lin, and Martin Mitáš. 2024. \emph{Marquee: Markdown Parser a
 Pedersen, Thomas Lin, and Maxim Shemanarev. 2024. \emph{Ragg: Graphic Devices Based on AGG}. \url{https://CRAN.R-project.org/package=ragg}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-rahlf}{}}%
-Rahlf, Thomas. 2017. \emph{Data Visualisation with r: 100 Examples}. 1st ed. Springer Publishing Company, Incorporated.
+Rahlf, Thomas. 2017. \emph{Data Visualisation with r: 100 Examples}. 1st ed. Springer Publishing Company, Incorporated. \url{https://link.springer.com/book/10.1007/978-3-030-28444-2}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-pkg-lattice}{}}%
 Sarkar, Deepayan. 2008. \emph{Lattice: Multivariate Data Visualization with r}. New York: Springer. \url{http://lmdvr.r-forge.r-project.org}.
