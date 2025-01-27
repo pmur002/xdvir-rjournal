@@ -7,7 +7,7 @@
 \maketitle
 
 \abstract{%
-The xdvir package provides functions for rendering LaTeX code as labels, annotations, and data symbols in R plots. There are convenient high-level functions for rendering simple LaTeX fragments, including labels on ggplot2 plots, plus lower-level functions for more fine control over the authoring, typesetting, and rendering of LaTeX code. There is support for making use of LaTeX packages, including TikZ graphics. The rendered LaTeX output is fully integrated with R graphics output in the sense that LaTeX output can be positioned relative to R graphics output and vice versa.
+The xdvir package provides functions for rendering LaTeX code as labels, annotations, and data symbols in R plots. There are convenient high-level functions for rendering LaTeX fragments, including labels on ggplot2 plots, plus lower-level functions for more fine control over the authoring, typesetting, and rendering of LaTeX code. There is support for making use of LaTeX packages, including TikZ graphics. The rendered LaTeX output is fully integrated with R graphics output in the sense that LaTeX output can be positioned relative to R graphics output and vice versa.
 }
 
 \hypertarget{introduction}{%
@@ -19,11 +19,11 @@ on text (Borkin et al. 2016),
 text is the most effective way to communicate some types of
 information (Hearst 2023),
 and the message obtained from a data visualization can be
-heavily influenced by text (Kong, Liu, and Karahalios 2018).
+heavily influenced by the text on a plot (Kong, Liu, and Karahalios 2018).
 
 R provides relatively flexible tools for adding text labels to plots.
 For example, in the \texttt{graphics} package, we can specify an
-overall title and axis titles via the \texttt{main},
+overall plot title and axis titles via the \texttt{main},
 \texttt{xlab}, and \texttt{ylab} arguments to the \texttt{plot()} function
 and we can add text at arbitrary locations on the plot with the \texttt{text()}
 and \texttt{mtext()} functions.
@@ -40,9 +40,9 @@ markdown and HTML (plus CSS). This allowed changes in font face
 and color within text labels.
 
 More recently, the \CRANpkg{marquee} package (Pedersen and Mitáš 2024)
-improved things a great deal further by providing full support for
+improved the situation a great deal further by providing full support for
 markdown within text labels. This made it possible to layout more
-complex arrangements of text and graphical content within ``text'' labels.
+complex arrangements of text and graphical content within text labels.
 
 However, despite these advances, there are still some text formatting tasks that
 remain out of reach. For example, Figure \ref{fig:typesetting}
@@ -62,11 +62,15 @@ at first glance, but it harbors several important details:
 \item
   The text is a mixture of plain text and mathematical expressions (like
   \(\bar{z}_i\)). Furthermore, the mathematical expressions use a different font
-  (Latin Modern) than the plain text (TeX Gyre Adventor).
+  (Latin Modern) than the plain text (TeX Gyre Adventor)
+  and the mixture is broken across multiple lines.
 
   The R graphics system can draw mathematical expressions (Murrell and Ihaka 2000)
-  and that includes a mixture of plain text and mathematical expressions,
-  but it can only use the same font for the entire mixture.
+  and that includes a mixture of plain text and mathematical expressions.
+  Furthermore, the R graphics system uses a separate symbol font
+  for mathematical expressions compared to plain text. However,
+  further changes in font within the plain text is not possible and line
+  breaks are not supported.
   There is also the problem
   that the typesetting of mathematical expressions in R graphics is not
   of a very high quality.
@@ -126,7 +130,7 @@ result is rendered in R.
 The benefit of the \texttt{xdvir} package is that it provides access to the
 typesetting capabilities of LaTeX, which includes hyphenation,
 fully justified text, mixtures of plain text and mathematical equations---all
-of the features demonstrated in Figure \ref{fig:typesetting} and much more.
+of the features demonstrated in Figure \ref{fig:typesetting}---and much more.
 
 The next section describes the basic usage of the \texttt{xdvir} package.
 This is followed by a section that breaks down the
@@ -628,12 +632,12 @@ The following code provides a simple example.
 The LaTeX fragment is the simple one from previous examples with
 two additions: there are \texttt{\textbackslash{}savepos} commands to mark specific locations
 within the text and associate them with labels (\texttt{"a"} and \texttt{"b"});
-and there are \texttt{\textbackslash{}xdvirzmark} commands to export those
+and there are \texttt{\textbackslash{}Rzmark} commands to export those
 locations for R to see.
 
 \begin{verbatim}
 zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
-\xdvirzmark{a}\xdvirzmark{b})"
+\Rzmark{a}\Rzmark{b})"
 \end{verbatim}
 
 If we render this LaTeX fragment, we just get the familiar output.
@@ -1434,12 +1438,16 @@ future work.
 \hypertarget{acknowledgments}{%
 \section{Acknowledgments}\label{acknowledgments}}
 
-The \texttt{xdvir} package depends on the \CRANpkg{tinytex} package
+The \texttt{xdvir} package depends on Yihui Xie's \CRANpkg{tinytex} package
 for the typesetting step. This package makes it much
 simpler to make use of TeX engines,
 including performing multiple runs when necessary, and much easier
 to install
 LaTeX packages (and TeX itself).
+
+Claus O. Wilke's \CRANpkg{ggtext} package and Thomas Lin Pedersen's
+\CRANpkg{marquee} package provided excellent templates for the integration
+of improved text-drawing facilities with \CRANpkg{ggplot2}.
 
 The author owes a debt of gratitude to Marc-Olivier Beausoleil
 (Figure \ref{fig:typesetting}),

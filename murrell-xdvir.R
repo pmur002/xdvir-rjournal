@@ -357,7 +357,7 @@ print(gg2, newpage=FALSE)
 
 ## -----------------------------------------------------------------------------
 zrefTeX <- r"(We move the original\zsavepos{a} mean to \zsavepos{b}$\bar z_i$
-\xdvirzmark{a}\xdvirzmark{b})"
+\Rzmark{a}\Rzmark{b})"
 
 
 ## ----zreftex, eval=FALSE------------------------------------------------------
@@ -423,7 +423,7 @@ of the population to get the adaptive landscape, $\bar W_i$,
 then we combine the population mean and the average fitness 
 to get the 
 \textcolor{Rred}{\bf \zsavepos{left}fitness function\zsavepos{right}}.
-\xdvirzmark{left}\xdvirzmark{right}
+\Rzmark{left}\Rzmark{right}
 \end{minipage})"
 
 
