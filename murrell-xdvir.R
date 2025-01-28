@@ -466,8 +466,8 @@ grid.lines(unit.c(curve$devx, left$devx, right$devx),
 
 ## ----tikztex------------------------------------------------------------------
 tikzTeX <- r"(%
-\path (0, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (x) {\sffamily{R}} 
-       (3, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (y) {Ti{\it k}Z!};
+\path (0, 0) node[circle,minimum size=.5in,draw,thick] (x) {\sffamily{R}} 
+       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti{\it k}Z!};
 \draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
 \draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
 
@@ -493,6 +493,10 @@ muDot <- r"(%
 ## ----echo=FALSE, fig.width=3, fig.height=.5, out.width="40%"------------------
 grid.rect()
 grid.latex(muDot, packages="tikz")
+
+
+## -----------------------------------------------------------------------------
+paste0("$\\bar x_", 1:5, "$")
 
 
 ## ----diag, echo=FALSE, fig.width=8, fig.height=3, out.width="100%", fig.cap="The design of the `xdvir` package."----
@@ -864,140 +868,142 @@ cat(closeTeX)
 #                data=data.frame(borders=c(borderClosed, borderOpen)))
 
 
-## ----echo=FALSE---------------------------------------------------------------
+## ----latticesetup, echo=FALSE-------------------------------------------------
+crime <- read.csv("youth-crime.csv")
+crime$Month <- as.Date(crime$Month)
+monthFirst <- subset(crime, Month == "2014-07-01" & Sex == "Male")
+monthLevels <- monthFirst$Type[order(monthFirst$Count, decreasing=TRUE)]
+monthLabels <- unlist(lapply(strwrap(monthLevels, width=30, simplify=FALSE),
+                             function(x) {
+                                 if (length(x) < 3)
+                                     x <- c(x, rep(" ", 3 - length(x)))
+                                 paste(x, collapse="\n")
+                             }))
+crime$Type <- factor(crime$Type, levels=monthLevels)
 library(lattice)
-library(latticeExtra)
+darkGrey <- grey(.1)
+lightGrey <- grey(.5)
+trellis.par.set(theme=list(background=list(col=darkGrey),
+                           axis.text=list(col=lightGrey, cex=2/3),
+                           axis.line=list(col=NA)))
+mainPanel <- function(x, y, subscripts, groups, ...) {
+    panel.superpose(x, y, subscripts, groups, ...)
+    panel.abline(h=0, col=lightGrey)
+}
+latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
+       as.table=TRUE, strip=FALSE, xlab="", ylab="",
+       scales=list(alternating=FALSE, axs="i",
+                   y=list(limits=c(0, 1500), at=seq(0, 900, 300))),
+       between=list(x=1),
+       panel=mainPanel)
+
+## ----adjustYticks, echo=FALSE, eval=FALSE-------------------------------------
+# grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 
 
-## ----yaml, echo=FALSE---------------------------------------------------------
-yaml <- "
----
-mainfont: TeX Gyre Heros
-header-includes:
-- \\pagestyle{empty}
-- \\usepackage{geometry}
-- \\geometry{textwidth=1.8in}
----
-"
+## ----echo=FALSE, eval=FALSE---------------------------------------------------
+# ## Colours come from ...
+# ## col2rgb(trellis.par.get("superpose.symbol")$col[1:2])
 
 
-## ----mdleft, echo=FALSE-------------------------------------------------------
-mdLeft <- "
-1. New Zealand closes its borders to *almost* all travellers
-   at **23:59, 19 March 2020 (NZDT)**.
-"
+## ----latticetitletex, echo=FALSE----------------------------------------------
+titleTeX <- r"(%
+\definecolor{lightGrey}{RGB}{128,128,128}
+\definecolor{lattice1}{RGB}{0,114,178}
+\definecolor{lattice2}{RGB}{230,159,0}
+\color{lightGrey}
+Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+)"
 
 
-## ----mdright, echo=FALSE------------------------------------------------------
-mdRight <- "
-2. New Zealand's international border opens to all visitors
-   from **11:59PM, 31 July 2022**.
-"
+## ----latticepanel, echo=FALSE-------------------------------------------------
+latexPanel <- function(x, y, subscripts, groups, ...) {
+    type <- crime$Type[subscripts][1]
+    labelY <- y[groups == "Male"][1]
+    panelTeX <- paste0(
+"\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+type, 
+"\\end{minipage}")
+    grid.latex(panelTeX, 
+               x=0, hjust="left",
+               y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",
+               gp=gpar(col=lightGrey, fontsize=8))
+    mainPanel(x, y, subscripts, groups, ...)
+}
 
 
-## ----pandocleft, echo=FALSE---------------------------------------------------
-oldwd <- setwd("Markdown")
-writeLines(c(yaml, mdLeft), "labelLeft.md")
-rmarkdown::pandoc_convert("labelLeft.md", 
-                          output="labelLeft.tex",
-                          options="--standalone")
-latexLeft <- readLines("labelLeft.tex")
-setwd(oldwd)
+## ----titlegrob, echo=FALSE----------------------------------------------------
+latexTitle <- latexGrob(titleTeX, x=unit(.7, "in"), hjust="left", 
+                        packages="xcolor")
 
 
-## ----pandocright, echo=FALSE--------------------------------------------------
-oldwd <- setwd("Markdown")
-writeLines(c(yaml, mdRight), "labelRight.md")
-rmarkdown::pandoc_convert("labelRight.md", 
-                          output="labelRight.tex",
-                          options="--standalone")
-latexRight <- readLines("labelRight.tex")
-setwd(oldwd)
+## ----echo=FALSE, eval=FALSE---------------------------------------------------
+# ## latexGrob(x) comes from ...
+# ## downViewport("plot_01.toplevel.vp")
+# ## convertWidth(sum(current.viewport()$layout$widths[1:6]), "in")
 
 
-## ----typesetleft, echo=FALSE--------------------------------------------------
-dviLeft <- typeset(latexLeft)
+## ----latticefinal, echo=FALSE, eval=FALSE-------------------------------------
+# update(latticeCrime,
+#        panel=latexPanel,
+#        main=latexTitle)
 
 
-## ----typesetright, echo=FALSE-------------------------------------------------
-dviRight <- typeset(latexRight)
-
-
-## ----lattice, echo=FALSE------------------------------------------------------
-latticeFlights <- 
-    xyplot(total ~ date, flights, type="l", 
-           main=list(label="Total flights into and out of Auckland",
-                     x=0, hjust=0),
-           xlab="", ylab=NULL,
-           ylim=c(0, 1800000), family="Lato Light", 
-           scales=list(y=list(at=c(0, 500000, 1000000),
-                              labels=c("0", "500,000", "1,000,000"))),
-           panel=function(...) {
-                     panel.xyplot(...)
-                     panel.abline(v=c(borderClosed, borderOpen), lty="dashed")
-                 })
-
-
-## ----latticeflights, echo=FALSE, eval=FALSE-----------------------------------
-# latticeFlights +
-#     latticeExtra::layer(render(dviLeft,
-#                                x=unit(borderClosed, "native") - unit(2, "mm"),
-#                                y=unit(1, "npc") - unit(2, "mm"),
-#                                hjust="right", vjust="top"))
-
-
-## ----latticefinal, echo=FALSE-------------------------------------------------
-temp <- 
-latticeFlights + 
-    latticeExtra::layer(render(dviLeft, 
-                               x=unit(borderClosed, "native") - unit(2, "mm"),
-                               y=unit(1, "npc") - unit(2, "mm"),
-                               hjust="right", vjust="top"))
-latticeFinal <- temp + 
-    latticeExtra::layer(grid.dvi(dviRight, 
-                   x=unit(borderOpen, "native") + unit(2, "mm"),
-                   y=unit(1, "npc") - unit(2, "mm"),
-                   hjust="left", vjust="top"))
-
-
-## ----latticemd, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'----
-latticeFinal
+## ----lattice, echo=FALSE, fig.width=7, fig.height=7, fig.keep="last", out.width="100%", fig.cap='(ref:latticeFigCap)'----
+update(latticeCrime,
+       panel=latexPanel,
+       main=latexTitle)
+grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 
 
 ## ----eval=FALSE---------------------------------------------------------------
-# latticeFlights
+# latticeCrime
 
 
-## ----latticemdplain, echo=FALSE, fig.width=8, out.width="100%", fig.cap='(ref:latticemdFigCap)'----
-latticeFlights
-
-
-## ----echo=FALSE---------------------------------------------------------------
-cat(mdLeft)
-
-
-## ----echo=FALSE---------------------------------------------------------------
-cat(yaml)
+## ----latticeplain, echo=FALSE, fig.width=7, fig.height=7, fig.keep="last", out.width="100%", fig.cap='(ref:latticeplainFigCap)'----
+latticeCrime
+grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 
 
 ## ----eval=FALSE---------------------------------------------------------------
-# oldwd <- setwd("Markdown")
-# writeLines(c(yaml, mdLeft), "labelLeft.md")
-# rmarkdown::pandoc_convert("labelLeft.md",
-#                           output="labelLeft.tex",
-#                           options="--standalone")
-# latexLeft <- readLines("labelLeft.tex")
-# setwd(oldwd)
+# latexPanel <- function(x, y, subscripts, groups, ...) {
+#     type <- crime$Type[subscripts][1]
+#     labelY <- y[groups == "Male"][1]
+#     panelTeX <- paste0(
+# "\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+# type,
+# "\\end{minipage}")
+#     grid.latex(panelTeX,
+#                x=0, hjust="left",
+#                y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",
+#                gp=gpar(col=lightGrey, fontsize=8))
+#     mainPanel(x, y, subscripts, groups, ...)
+# }
 
 
 ## ----eval=FALSE---------------------------------------------------------------
-# dviLeft <- typeset(latexLeft)
+# titleTeX <- r"(%
+# \definecolor{lightGrey}{RGB}{128,128,128}
+# \definecolor{lattice1}{RGB}{0,114,178}
+# \definecolor{lattice2}{RGB}{230,159,0}
+# \color{lightGrey}
+# Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+# )"
 
 
 ## ----eval=FALSE---------------------------------------------------------------
-# latticeFlights +
-#     latticeExtra::layer(render(dviLeft,
-#                                x=unit(borderClosed, "native") - unit(2, "mm"),
-#                                y=unit(1, "npc") - unit(2, "mm"),
-#                                hjust="right", vjust="top"))
+# latexTitle <- latexGrob(titleTeX, x=unit(.7, "in"), hjust="left",
+#                         packages="xcolor")
+
+
+## ----eval=FALSE---------------------------------------------------------------
+# update(latticeCrime,
+#        panel=latexPanel,
+#        main=latexTitle)
+
+
+## ----trellisundo, echo=FALSE--------------------------------------------------
+trellis.par.set(theme=list(background=list(col="white"),
+                           axis.text=list(col="black", cex=.8),
+                           axis.line=list(col="black")))
 

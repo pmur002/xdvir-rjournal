@@ -221,7 +221,7 @@ Instead, for now, we will demonstrate a more common scenario:
 drawing LaTeX text labels on a \CRANpkg{ggplot2} plot (Wickham 2016).
 For this purpose, the \texttt{xdvir} package provides the
 \texttt{element\_latex()} function. This allows us to specify a LaTeX fragment
-as a plot label and indicate the special nature of the label
+as a plot label and we can indicate the special nature of the label
 via the \texttt{ggplot2::theme()} function.
 
 For example, the following code uses the same LaTeX fragment
@@ -717,13 +717,13 @@ The \texttt{xdvir} package provides support for the LaTeX package \texttt{TikZ},
 so we are able to render \texttt{TikZ} graphics in R.
 
 For example, the following LaTeX code describes a \texttt{TikZ} picture
-consisting of two text labels enclosed within blue circles, with
+consisting of two text labels enclosed within circles, with
 arrows connecting the circles.
 
 \begin{verbatim}
 tikzTeX <- r"(%
-\path (0, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (x) {\sffamily{R}} 
-       (3, 0) node[circle,minimum size=.5in,fill=blue!20,draw,thick] (y) {Ti{\it k}Z!};
+\path (0, 0) node[circle,minimum size=.5in,draw,thick] (x) {\sffamily{R}} 
+       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti{\it k}Z!};
 \draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
 \draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
 \end{verbatim}
@@ -772,6 +772,32 @@ grid.latex(muDot, packages="tikz")
 We will see a more complex example of TikZ output in a later section.
 Figure \ref{fig:diag} is also a TikZ picture that has been rendered
 in R.
+
+\hypertarget{programmatic-generation-of-latex}{%
+\section{Programmatic generation of LaTeX}\label{programmatic-generation-of-latex}}
+
+Although LaTeX fragments
+for text labels tends to be more complex than
+plain text labels, thanks to the additional markup that is required,
+LaTeX code is still
+just text. This means that all of the text-generating tools in R
+are available to help with authoring LaTeX fragments.
+For example, the labels used to render text data symbols in
+Figure 3 could be generated via a simple call to the \texttt{paste0()} function,
+as shown below.
+
+\begin{verbatim}
+paste0("$\\bar x_", 1:5, "$")
+\end{verbatim}
+
+\begin{verbatim}
+#> [1] "$\\bar x_1$" "$\\bar x_2$" "$\\bar x_3$" "$\\bar x_4$" "$\\bar x_5$"
+\end{verbatim}
+
+There are also packages that can generate larger fragments of
+LaTeX code. For example, there are packages like \CRANpkg{xtable} (Dahl et al. 2019)
+for generating LaTeX tables and the \CRANpkg{rmarkdown} package (Xie, Allaire, and Grolemund 2018)
+can generate LaTeX documents from Markdown input.
 
 \hypertarget{customization-and-debugging}{%
 \section{Customization and debugging}\label{customization-and-debugging}}
@@ -1229,117 +1255,105 @@ Also point out that a lattice label (like title and xlab/ylab) can be any grob.
 Can we do example that shows both of these ?
 
 This section provides an example, shown in
-Figure \ref{fig:latticemd}, of using other software to generate
-LaTeX code, rather than writing it directly.
-It also demonstrates integrating \texttt{grid.latex()} output
+Figure \ref{fig:lattice} of integrating \texttt{grid.latex()} output
 with a \CRANpkg{lattice} plot (Sarkar 2008).
 
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/latticemd-1} \caption{A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.}\label{fig:latticemd}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/lattice-1} \caption{A \CRANpkg{lattice} plot with LaTeX text used for the plot title and for annotations in each panel.}\label{fig:lattice}
 \end{figure}
 
-The main plot is a \CRANpkg{lattice} plot, with some annotations
-already in place. The details of the code for this plot are not
-relevant to this article, so the main plot is described in the object
-\texttt{latticeFlights}, which is defined in the supplementary material.
-The main plot produced by \texttt{latticeFlights} is shown in
-Figure \ref{fig:latticemdplain}.
+The main plot is a \CRANpkg{lattice} plot consisting of multiple panels,
+with separate lines for males and females.
+The details of the code for generating the main plot are not relevant
+to this article, so it is described in the object \texttt{latticeCrime}, which
+is defined in the supplementary material.
+The main plot produced by \texttt{latticeCrime} is shown in
+Figure \ref{fig:latticeplain}.
 
 \begin{verbatim}
-latticeFlights
+latticeCrime
 \end{verbatim}
 
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/latticemdplain-1} \caption{A plot with numbered list items as annotations. The list items in this plot are specified using Markdown rather than LaTeX.}\label{fig:latticemdplain}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/latticeplain-1} \caption{The main plot from Figure \ref{fig:lattice} without the title and annotations in each panel. This plot is produced using the \CRANpkg{lattice} package.}\label{fig:latticeplain}
 \end{figure}
 
-The annotations in Figure \ref{fig:latticemd} are enumerated list items,
-similar to those in Figure \ref{fig:anzjs}. However, in this plot
-instead of writing explicit LaTeX code, we use
-Markdown syntax to
-describe the list item, as shown below.
-We will just focus on the left annotation;
-the right annotation is added in a very similar fashion.
+We can add drawing to each panel of a \CRANpkg{lattice} plot by providing
+a \emph{panel function}. The panel function is passed the
+relevant data for the panel, and the code within the panel function is run
+in the panel viewport, which means that the appropriate axis scales are
+available. This means that we can include a call to \texttt{grid.latex()}
+within a panel function in order to add LaTeX text to each panel.
+For example, the following code defines the panel function for
+Figure \ref{fig:lattice}.
+This function calculates the appropriate label for the panel
+and encloses that within a LaTeX \texttt{minipage} environment
+that is the width of the panel. This means that the label is typeset
+to be fully-justified within the panel (unless it is a single line that is
+narrower than the panel).
+It then calls \texttt{grid.latex()} to draw
+that LaTeX fragment, placing the label slightly above the first data value
+for males. The call to the \texttt{mainPanel()} function draws the yellow and
+blue lines in the main plot.
 
 \begin{verbatim}
-#> 
-#> 1. New Zealand closes its borders to *almost* all travellers
-#>    at **23:59, 19 March 2020 (NZDT)**.
+latexPanel <- function(x, y, subscripts, groups, ...) {
+    type <- crime$Type[subscripts][1]
+    labelY <- y[groups == "Male"][1]
+    panelTeX <- paste0(
+"\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+type, 
+"\\end{minipage}")
+    grid.latex(panelTeX, 
+               x=0, hjust="left",
+               y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",
+               gp=gpar(col=lightGrey, fontsize=8))
+    mainPanel(x, y, subscripts, groups, ...)
+}
 \end{verbatim}
 
-We can
-use \texttt{pandoc\_convert()} from the \CRANpkg{rmarkdown} package (Xie, Allaire, and Grolemund 2018)
-to convert the Markdown to LaTeX code, as shown below.
-Because we want the enumerated list to be constrained to a narrow width
-and because we want the font to match the main plot font, we
-have to add a YAML header to the markdown.
+The title of a \CRANpkg{lattice} plot can be specified as a \texttt{grid}
+grob. This means that we can call \texttt{latexGrob()} to generate a
+title for the plot in Figure \ref{fig:lattice}.
+The LaTeX fragment below describes the label, first defining
+three colours, and then giving the title text, with the words
+``Male'' and ``Female'' coloured differently.
 
 \begin{verbatim}
-#> 
-#> ---
-#> mainfont: TeX Gyre Heros
-#> header-includes:
-#> - \pagestyle{empty}
-#> - \usepackage{geometry}
-#> - \geometry{textwidth=1.8in}
-#> ---
+titleTeX <- r"(%
+\definecolor{lightGrey}{RGB}{128,128,128}
+\definecolor{lattice1}{RGB}{0,114,178}
+\definecolor{lattice2}{RGB}{230,159,0}
+\color{lightGrey}
+Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+)"
 \end{verbatim}
 
-The following code combines the YAML header with the Markdown code,
-writes the result to a file, converts the Markdown to LaTeX, and
-reads the resulting LaTeX back into R.
+The following code calls \texttt{latexGrob()} to define the title.
+We pass the LaTeX fragment \texttt{titleTeX}, we position the title
+a little way in from the left edge of the plot (to line up with
+the left edge of the first column of panels), and we
+load the LaTeX package \texttt{xcolor} so that the colours work.
 
 \begin{verbatim}
-oldwd <- setwd("Markdown")
-writeLines(c(yaml, mdLeft), "labelLeft.md")
-rmarkdown::pandoc_convert("labelLeft.md", 
-                          output="labelLeft.tex",
-                          options="--standalone")
-latexLeft <- readLines("labelLeft.tex")
-setwd(oldwd)
+latexTitle <- latexGrob(titleTeX, x=unit(.7, "in"), hjust="left", 
+                        packages="xcolor")
 \end{verbatim}
 
-These extra steps
-somewhat undermine the relative simplicity of using Markdown code,
-but the example still demonstrates the general idea of
-generating LaTeX code from other sources rather than writing
-it explicitly ourselves.
-
-We now have LaTeX code to render in R, but a further complication
-is that this is a complete
-LaTeX document rather than just a LaTeX fragment.
-We cannot pass a complete document to \texttt{grid.latex()};
-instead,
-we pass the LaTeX document to \texttt{typeset()} to generate
-a \texttt{"DVI"} object (see Figure \ref{fig:diag}).
+The following code creates the final plot by adding the panel function
+\texttt{latexPanel} and the title \texttt{latexTitle} to the main plot \texttt{latticeCrime}.
 
 \begin{verbatim}
-dviLeft <- typeset(latexLeft)
+update(latticeCrime,
+       panel=latexPanel,
+       main=latexTitle)
 \end{verbatim}
 
-The following code demonstrates that we can render
-this \texttt{"DVI"} object within the \CRANpkg{lattice} plot
-using the \texttt{layer()} function from the
-\CRANpkg{latticeExtra} package (Sarkar and Andrews 2022).
-The first argument to that function is code that produces
-output to add to the \CRANpkg{lattice} plot.
-We provide a call to the \texttt{render()} function
-from the \texttt{xdvir} package to draw the output described in \texttt{dviLeft}.
-Similar code is used to generate and add the second list item.
-
-\begin{verbatim}
-latticeFlights + 
-    latticeExtra::layer(render(dviLeft, 
-                               x=unit(borderClosed, "native") - unit(2, "mm"),
-                               y=unit(1, "npc") - unit(2, "mm"),
-                               hjust="right", vjust="top"))
-\end{verbatim}
-
-The final result is shown in Figure \ref{fig:latticemd}.
+The final result is shown in Figure \ref{fig:lattice}.
 
 \hypertarget{discussion}{%
 \section{Discussion}\label{discussion}}
@@ -1469,6 +1483,9 @@ Borkin, Michelle A., Zoya Bylinskii, Nam Wook Kim, Constance May Bainbridge, Che
 \leavevmode\vadjust pre{\hypertarget{ref-pkg:geomtextpath}{}}%
 Cameron, Allan, and Teun van den Brand. 2025. \emph{Geomtextpath: Curved Text in 'Ggplot2'}. \url{https://CRAN.R-project.org/package=geomtextpath}.
 
+\leavevmode\vadjust pre{\hypertarget{ref-pkg:xtable}{}}%
+Dahl, David B., David Scott, Charles Roosen, Arni Magnusson, and Jonathan Swinton. 2019. \emph{Xtable: Export Tables to LaTeX or HTML}. \url{https://CRAN.R-project.org/package=xtable}.
+
 \leavevmode\vadjust pre{\hypertarget{ref-hearst}{}}%
 Hearst, Marti A. 2023. {``Show It or Tell It? Text, Visualization, and Their Combination.''} \emph{Commun. ACM} 66 (10): 68--75. \url{https://doi.org/10.1145/3593580}.
 
@@ -1513,9 +1530,6 @@ Rahlf, Thomas. 2017. \emph{Data Visualisation with r: 100 Examples}. 1st ed. Spr
 
 \leavevmode\vadjust pre{\hypertarget{ref-pkg-lattice}{}}%
 Sarkar, Deepayan. 2008. \emph{Lattice: Multivariate Data Visualization with r}. New York: Springer. \url{http://lmdvr.r-forge.r-project.org}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:latticeExtra}{}}%
-Sarkar, Deepayan, and Felix Andrews. 2022. \emph{latticeExtra: Extra Graphical Utilities Based on Lattice}. \url{https://CRAN.R-project.org/package=latticeExtra}.
 
 \leavevmode\vadjust pre{\hypertarget{ref-schneider2023}{}}%
 Schneider, W. Joel. 2023. {``Annotated Equations in Ggplot2.''} \url{https://wjschne.github.io/posts/2023-07-23-latex-equation-in-ggplot2/}.
