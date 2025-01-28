@@ -10,20 +10,20 @@ Editor
 The R Journal  
 \bigskip
 
-Dear Editor,
+Dear Professor Hurley,
 \bigskip
 
 Please consider the article titled "Rendering LaTeX in R" for publication in the
 R Journal.
 
-The manuscript introduces the new package called `xdvir` which allows users to
-render LaTeX fragments in R plots, including labels and 
-data symbols for `ggplot` plots.
+The manuscript introduces a new package called `xdvir` which allows users to
+render LaTeX fragments in R plots, including labels and data symbols for
+`ggplot2` plots.
 
-We believe the readers of the R Journal will find this article helpful for their
-work because it provides access to the sophisticated typesetting capabilities
-of LaTeX for drawing text labels and annotations on R plots, for example
-the ability to render high-quality mathematical equations.
+I believe the readers of the R Journal will find this article helpful for their
+work because it provides access to the sophisticated typesetting capabilities of
+LaTeX for drawing text labels and annotations on R plots, for example the
+ability to render high-quality mathematical equations.
 
 \bigskip
 \bigskip
