@@ -1006,9 +1006,7 @@ to produce an annotated mathematical equation.
 
 
 \begin{figure}
-\centering
-\includegraphics{murrell-xdvir_files/figure-latex/schneider-1.pdf}
-\caption{\label{fig:schneider}A plot with annotated mathematical equation. This plot is an adaptation of the plot in Schneider (2023).}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/schneider-1} \caption{A plot with annotated mathematical equation. This plot is an adaptation of the plot in Schneider (2023).}\label{fig:schneider}
 \end{figure}
 
 The main plot in this example is a \CRANpkg{ggplot2} plot.
@@ -1033,9 +1031,7 @@ ggSchneider
 
 
 \begin{figure}
-\centering
-\includegraphics{murrell-xdvir_files/figure-latex/schneiderplain-1.pdf}
-\caption{\label{fig:schneiderplain}The main plot from Figure \ref{fig:schneider} without the annotated mathematical equation. This plot is produced using the packages \CRANpkg{ggplot2} and \CRANpkg{ggtext}.}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/schneiderplain-1} \caption{The main plot from Figure \ref{fig:schneider} without the annotated mathematical equation. This plot is produced using the packages \CRANpkg{ggplot2} and \CRANpkg{ggtext}.}\label{fig:schneiderplain}
 \end{figure}
 
 The start of the LaTeX code for the annotated equation is shown below
@@ -1167,7 +1163,7 @@ list items, as shown in Figure \ref{fig:anzjs}.
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/anzjs-1} \caption{A plot with numbered list items as annotations. This plot is an adaptation of Figure 10 from Murrell (2025).}\label{fig:anzjs}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/anzjs-1} \caption{A plot with numbered list items as annotations below the plot. This plot is an adaptation of Figure 10 from Murrell (2025).}\label{fig:anzjs}
 \end{figure}
 
 The main plot is a \CRANpkg{ggplot2} plot with a number of relatively
@@ -1247,13 +1243,6 @@ The final result is shown in Figure \ref{fig:anzjs}.
 \hypertarget{example-4}{%
 \section{Example 4}\label{example-4}}
 
-\textbf{TODO}
-Go back to panel function for lattice example.
-Bundle main plot panel into its own
-function so that panel function is still simple.
-Also point out that a lattice label (like title and xlab/ylab) can be any grob.
-Can we do example that shows both of these ?
-
 This section provides an example, shown in
 Figure \ref{fig:lattice} of integrating \texttt{grid.latex()} output
 with a \CRANpkg{lattice} plot (Sarkar 2008).
@@ -1304,8 +1293,9 @@ blue lines in the main plot.
 latexPanel <- function(x, y, subscripts, groups, ...) {
     type <- crime$Type[subscripts][1]
     labelY <- y[groups == "Male"][1]
+    labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
     panelTeX <- paste0(
-"\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+"\\begin{minipage}{", labelWidth, "in}",
 type, 
 "\\end{minipage}")
     grid.latex(panelTeX, 
@@ -1326,8 +1316,8 @@ three colours, and then giving the title text, with the words
 \begin{verbatim}
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{0,114,178}
-\definecolor{lattice2}{RGB}{230,159,0}
+\definecolor{lattice1}{RGB}{230,159,0}
+\definecolor{lattice2}{RGB}{0,114,178}
 \color{lightGrey}
 Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 )"

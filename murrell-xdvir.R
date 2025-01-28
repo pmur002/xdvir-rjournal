@@ -643,7 +643,7 @@ schneiderTeX <- paste(schneiderLines, collapse="\n")
 #                data=data.frame(x=160, y=dnorm(100, mean=100, sd=15)))
 
 
-## ----schneider, echo=FALSE, fig.cap='(ref:schneiderFigCap)'-------------------
+## ----schneider, echo=FALSE, out.width="100%", fig.cap='(ref:schneiderFigCap)'----
 annotateEquations <-
     LaTeXpackage(name="annotate",
                  preamble="\\usepackage{TeX/annotate-equations}")
@@ -674,7 +674,7 @@ ggSchneider +
 # ggSchneider
 
 
-## ----schneiderplain, echo=FALSE, fig.cap='(ref:schneiderplainFigCap)'---------
+## ----schneiderplain, echo=FALSE, out.width="100%", fig.cap='(ref:schneiderplainFigCap)'----
 ggSchneider
 
 
@@ -869,7 +869,7 @@ cat(closeTeX)
 
 
 ## ----latticesetup, echo=FALSE-------------------------------------------------
-crime <- read.csv("youth-crime.csv")
+crime <- read.csv("data/youth-crime.csv")
 crime$Month <- as.Date(crime$Month)
 monthFirst <- subset(crime, Month == "2014-07-01" & Sex == "Male")
 monthLevels <- monthFirst$Type[order(monthFirst$Count, decreasing=TRUE)]
@@ -884,6 +884,7 @@ library(lattice)
 darkGrey <- grey(.1)
 lightGrey <- grey(.5)
 trellis.par.set(theme=list(background=list(col=darkGrey),
+                           layout.heights=list(top.padding=4),
                            axis.text=list(col=lightGrey, cex=2/3),
                            axis.line=list(col=NA)))
 mainPanel <- function(x, y, subscripts, groups, ...) {
@@ -909,8 +910,8 @@ latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
 ## ----latticetitletex, echo=FALSE----------------------------------------------
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{0,114,178}
-\definecolor{lattice2}{RGB}{230,159,0}
+\definecolor{lattice1}{RGB}{230,159,0}
+\definecolor{lattice2}{RGB}{0,114,178}
 \color{lightGrey}
 Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 )"
@@ -920,8 +921,9 @@ Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 latexPanel <- function(x, y, subscripts, groups, ...) {
     type <- crime$Type[subscripts][1]
     labelY <- y[groups == "Male"][1]
+    labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
     panelTeX <- paste0(
-"\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+"\\begin{minipage}{", labelWidth, "in}",
 type, 
 "\\end{minipage}")
     grid.latex(panelTeX, 
@@ -969,8 +971,9 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 # latexPanel <- function(x, y, subscripts, groups, ...) {
 #     type <- crime$Type[subscripts][1]
 #     labelY <- y[groups == "Male"][1]
+#     labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
 #     panelTeX <- paste0(
-# "\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+# "\\begin{minipage}{", labelWidth, "in}",
 # type,
 # "\\end{minipage}")
 #     grid.latex(panelTeX,
@@ -984,8 +987,8 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 ## ----eval=FALSE---------------------------------------------------------------
 # titleTeX <- r"(%
 # \definecolor{lightGrey}{RGB}{128,128,128}
-# \definecolor{lattice1}{RGB}{0,114,178}
-# \definecolor{lattice2}{RGB}{230,159,0}
+# \definecolor{lattice1}{RGB}{230,159,0}
+# \definecolor{lattice2}{RGB}{0,114,178}
 # \color{lightGrey}
 # Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 # )"

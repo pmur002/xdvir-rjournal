@@ -1467,7 +1467,7 @@ ggANZJS +
                data=data.frame(borders=c(borderClosed, borderOpen)))
 ```
 
-(ref:anzjsFigCap) A plot with numbered list items as annotations. This plot is an adaptation of Figure 10 from @anzjs2025.
+(ref:anzjsFigCap) A plot with numbered list items as annotations below the plot. This plot is an adaptation of Figure 10 from @anzjs2025.
 
 ```{r, anzjs, echo=FALSE, fig.width=8, fig.height=4.5, out.width="100%", fig.cap='(ref:anzjsFigCap)'}
 <<labelLeft>>
@@ -1529,13 +1529,6 @@ The final result is shown in Figure \@ref(fig:anzjs).
 
 # Example 4
 
-**TODO**
-Go back to panel function for lattice example.
-Bundle main plot panel into its own 
-function so that panel function is still simple.
-Also point out that a lattice label (like title and xlab/ylab) can be any grob.
-Can we do example that shows both of these ?
-
 This section provides an example, shown in
 Figure \@ref(fig:lattice) of integrating `grid.latex()` output
 with a \CRANpkg{lattice} plot [@pkg-lattice].
@@ -1556,6 +1549,7 @@ library(lattice)
 darkGrey <- grey(.1)
 lightGrey <- grey(.5)
 trellis.par.set(theme=list(background=list(col=darkGrey),
+                           layout.heights=list(top.padding=4),
                            axis.text=list(col=lightGrey, cex=2/3),
                            axis.line=list(col=NA)))
 mainPanel <- function(x, y, subscripts, groups, ...) {
@@ -1581,8 +1575,8 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 ```{r latticetitletex, echo=FALSE}
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{0,114,178}
-\definecolor{lattice2}{RGB}{230,159,0}
+\definecolor{lattice1}{RGB}{230,159,0}
+\definecolor{lattice2}{RGB}{0,114,178}
 \color{lightGrey}
 Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 )"
@@ -1592,8 +1586,9 @@ Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
 latexPanel <- function(x, y, subscripts, groups, ...) {
     type <- crime$Type[subscripts][1]
     labelY <- y[groups == "Male"][1]
+    labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
     panelTeX <- paste0(
-"\\begin{minipage}{", convertWidth(unit(1, "npc"), "in", valueOnly=TRUE), "in}",
+"\\begin{minipage}{", labelWidth, "in}",
 type, 
 "\\end{minipage}")
     grid.latex(panelTeX, 
