@@ -15,6 +15,12 @@ knitr::opts_chunk$set(dev="cairo_pdf")
 
 
 ## ----echo=FALSE---------------------------------------------------------------
+LaTeX <- ifelse(knitr::is_html_output(), 'LaTeX', '\\LaTeX{}')
+TeX <- ifelse(knitr::is_html_output(), 'TeX', '\\TeX{}')
+TikZ <- ifelse(knitr::is_html_output(), 'TikZ', 'Ti\\textit{k}Z')
+
+
+## ----echo=FALSE---------------------------------------------------------------
 ## Parameter for plotting
 ## Set x variable for the fitness function 
 x <- seq(-1, 7.5, by = .01)
@@ -214,7 +220,13 @@ simpleTeX
 
 ## -----------------------------------------------------------------------------
 simpleDoc <- author(simpleTeX)
-simpleDoc
+
+## ----eval=FALSE---------------------------------------------------------------
+# simpleDoc
+
+## ----echo=FALSE---------------------------------------------------------------
+output <- substring(capture.output(simpleDoc), 1, 84)
+cat(output, sep="\n")
 
 
 ## ----typeset, echo=FALSE------------------------------------------------------
@@ -228,7 +240,7 @@ simpleDVI <- typeset(simpleDoc)
 # simpleDVI
 
 ## ----echo=FALSE---------------------------------------------------------------
-output <- capture.output(simpleDVI)
+output <- substring(capture.output(simpleDVI), 1, 84)
 firstDown <- grep("^down", output)[1]
 firstDef <- grep("^x_fnt_def", output)[1]
 firstGlyph <- grep("^x_glyph", output)[1]
@@ -260,7 +272,13 @@ grid.latex(colourTeX, packages="xcolor")
 
 ## -----------------------------------------------------------------------------
 colourDoc <- author(colourTeX, packages="xcolor")
-colourDoc
+
+## ----eval=FALSE---------------------------------------------------------------
+# colourDoc
+
+## ----echo=FALSE---------------------------------------------------------------
+output <- substring(capture.output(colourDoc), 1, 84)
+cat(output, sep="\n")
 
 
 ## ----colortypeset, echo=FALSE-------------------------------------------------
@@ -274,7 +292,7 @@ colourDVI <- typeset(colourDoc)
 # colourDVI
 
 ## ----echo=FALSE---------------------------------------------------------------
-output <- capture.output(colourDVI)
+output <- substring(capture.output(colourDVI), 1, 84)
 firstDef <- grep("^x_fnt_def", output)[1]
 firstRGB <- grep("rgb", output)[1]
 cat(c(output[1:3], 
@@ -934,8 +952,12 @@ type,
 }
 
 
+## ----titleX, echo=FALSE-------------------------------------------------------
+titleX <- unit(ifelse(knitr::is_html_output(), 0.673, 0.653), "in")
+
+
 ## ----titlegrob, echo=FALSE----------------------------------------------------
-latexTitle <- latexGrob(titleTeX, x=unit(.7, "in"), hjust="left", 
+latexTitle <- latexGrob(titleTeX, x=titleX, hjust="left", 
                         packages="xcolor")
 
 
@@ -995,7 +1017,7 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 
 
 ## ----eval=FALSE---------------------------------------------------------------
-# latexTitle <- latexGrob(titleTeX, x=unit(.7, "in"), hjust="left",
+# latexTitle <- latexGrob(titleTeX, x=titleX, hjust="left",
 #                         packages="xcolor")
 
 
