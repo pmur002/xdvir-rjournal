@@ -582,7 +582,7 @@ what is possible with
 `r LaTeX` code.
 
 Many additional effects can be obtained with `r LaTeX` code by loading
-`r LaTeX` packages.  As a simple example, changing the colour of text
+`r LaTeX` packages.  As a simple example, changing the color of text
 requires loading the `r LaTeX` package `xcolor`.
 These `r LaTeX` packages can be loaded using the `packages` argument of the 
 `grid.latex()` function (or the `element_latex()` or `geom_latex()` functions).
@@ -1711,8 +1711,8 @@ The title of a \CRANpkg{lattice} plot can be specified as a `grid`
 grob.  This means that we can call `latexGrob()` to generate a
 title for the plot in Figure \@ref(fig:lattice).
 The `r LaTeX` fragment below describes the label, first defining
-three colours, and then giving the title text, with the words
-"Male" and "Female" coloured differently.
+three colors, and then giving the title text, with the words
+"Male" and "Female" colored differently.
 
 ```{r eval=FALSE}
 <<latticetitletex>>
@@ -1722,7 +1722,7 @@ The following code calls `latexGrob()` to define the title.
 We pass the `r LaTeX` fragment `titleTeX`, we position the title
 a little way in from the left edge of the plot (to line up with
 the left edge of the first column of panels), and we
-load the `r LaTeX` package `xcolor` so that the colours work.
+load the `r LaTeX` package `xcolor` so that the colors work.
 
 ```{r eval=FALSE}
 <<titlegrob>>

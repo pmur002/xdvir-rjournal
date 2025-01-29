@@ -5,21 +5,27 @@ all:
 	Rscript -e 'rjtools::initial_check_article(".", pkg="xdvir")'
 	rm initial_checks.log
 
+.PHONY: submission
 submission:
-	zip submission/murrell-xdvir.zip \
-	# output
+	zip -r submission/murrell-xdvir.zip \
 	murrell-xdvir.html \
 	murrell-xdvir.pdf \
-	# motivating letter
 	motivation-letter/motivation-letter.pdf \
-	# source
 	murrell-xdvir.Rmd \
 	murrell-xdvir.bib \
-	# reproducibility
 	murrell-xdvir.R \
-	data/ \
-	annotate-equations/ \
-	diagram/ \
-	Fonts/ \
-	scripts/ \
-	TeX/
+	data \
+	diagram/*.tex \
+	Fonts/*.ttf \
+	scripts \
+	TeX/*.tex \
+	TeX/*.sty
+
+.PHONY: submission-test
+submission-test:
+	rm -r submission-test/*
+	cp submission/murrell-xdvir.zip submission-test/
+	cd submission-test
+	Rscript -e 'pandoc::pandoc_activate(version = "3.1.6");	rmarkdown::render("murrell-xdvir.Rmd", output_format = "all")'
+	rm *.log
+	Rscript -e 'rjtools::initial_check_article(".", pkg="xdvir")'
