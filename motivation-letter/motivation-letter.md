@@ -25,6 +25,10 @@ work because it provides access to the sophisticated typesetting capabilities of
 LaTeX for drawing text labels and annotations on R plots, for example the
 ability to render high-quality mathematical equations.
 
+NOTE: The font TeX Gyre Adventor (regular) 
+[(https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)](https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)
+will need to be installed in order to build this article.
+
 \bigskip
 \bigskip
 
