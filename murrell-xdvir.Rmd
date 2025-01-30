@@ -183,7 +183,7 @@ ggIntro <- ggplot(data.frame(x, y)) +
     xlab("Phenotypes") +
     ylab("Fitness") +
     theme_bw() +
-    theme(text=element_text(family="TeX Gyre Adventor", size=12),
+    theme(text=element_text(family="TeXGyreAdventor", size=12),
           panel.grid=element_blank())
 
 label <- function(data, coords) {
