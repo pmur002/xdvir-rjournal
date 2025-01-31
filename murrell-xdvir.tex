@@ -342,7 +342,7 @@ simpleDoc
 \end{verbatim}
 
 \begin{verbatim}
-#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.99999
+#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: XeTeX 3.14159265-2.6-0
 #> \documentclass[varwidth]{standalone}
 #> \usepackage{unicode-math}
 #> \begin{document}
@@ -374,7 +374,7 @@ simpleDVI
 
 \begin{verbatim}
 #> pre          version=7, num=25400000, den=473628672, mag=1000,
-#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14
+#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: XeTe
 #> bop          counters=1 0 0 0 0 0 0 0 0 0, p=-1
 #> xxx1         k=47
 #>              x=pdf:pagesize width 143.26802pt height 9.48027pt
@@ -434,7 +434,7 @@ what is possible with
 \LaTeX{} code.
 
 Many additional effects can be obtained with \LaTeX{} code by loading
-\LaTeX{} packages. As a simple example, changing the colour of text
+\LaTeX{} packages. As a simple example, changing the color of text
 requires loading the \LaTeX{} package \texttt{xcolor}.
 These \LaTeX{} packages can be loaded using the \texttt{packages} argument of the
 \texttt{grid.latex()} function (or the \texttt{element\_latex()} or \texttt{geom\_latex()} functions).
@@ -465,7 +465,7 @@ colourDoc
 \end{verbatim}
 
 \begin{verbatim}
-#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14159265-2.6-0.99999
+#> %% R package xdvir_0.1.0; engine name: XeTeX; engine version: XeTeX 3.14159265-2.6-0
 #> \documentclass[varwidth]{standalone}
 #> \usepackage{unicode-math}
 #> \usepackage{xcolor}
@@ -488,7 +488,7 @@ colourDVI
 
 \begin{verbatim}
 #> pre          version=7, num=25400000, den=473628672, mag=1000,
-#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: 3.14
+#>              comment=R package xdvir_0.1.0; engine name: XeTeX; engine version: XeTe
 #> bop          counters=1 0 0 0 0 0 0 0 0 0, p=-1
 #> 
 #> ...
@@ -1337,8 +1337,8 @@ The title of a \CRANpkg{lattice} plot can be specified as a \texttt{grid}
 grob. This means that we can call \texttt{latexGrob()} to generate a
 title for the plot in Figure \ref{fig:lattice}.
 The \LaTeX{} fragment below describes the label, first defining
-three colours, and then giving the title text, with the words
-``Male'' and ``Female'' coloured differently.
+three colors, and then giving the title text, with the words
+``Male'' and ``Female'' colored differently.
 
 \begin{verbatim}
 titleTeX <- r"(%
@@ -1354,7 +1354,7 @@ The following code calls \texttt{latexGrob()} to define the title.
 We pass the \LaTeX{} fragment \texttt{titleTeX}, we position the title
 a little way in from the left edge of the plot (to line up with
 the left edge of the first column of panels), and we
-load the \LaTeX{} package \texttt{xcolor} so that the colours work.
+load the \LaTeX{} package \texttt{xcolor} so that the colors work.
 
 \begin{verbatim}
 latexTitle <- latexGrob(titleTeX, x=titleX, hjust="left", 
