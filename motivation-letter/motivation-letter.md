@@ -42,14 +42,18 @@ from `rjtools::initial_check_article()`:
 
 The only requirement for building the article 
 (beyond a TeX installation) is that 
-the font TeX Gyre Adventor 
+the fonts TeX Gyre Adventor 
 [(https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)](https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)
+and Lato Light 
+[(
 must be installed:
 
-* On Linux, this should be just a package, e.g., `tex-gyre` on Ubuntu.  
+* On Linux, there should be just a package, e.g., `tex-gyre` and `fonts-lato`
+  on Ubuntu.  
 
 * On Windows, the fonts can be downloaded from 
-  [https://online-fonts.com/fonts/tex-gyre-adventor](https://online-fonts.com/fonts/tex-gyre-adventor)
+  [https://online-fonts.com/fonts/tex-gyre-adventor](https://online-fonts.com/fonts/tex-gyre-adventor) and
+  [https://fonts.google.com/specimen/Lato](https://fonts.google.com/specimen/Lato)
   and then double-click your heart out 
   until you see an "install" button and click that.
   Be sure to install all fonts, e.g., the bold and italic variants, as well
@@ -57,18 +61,18 @@ must be installed:
   Also make sure that MikTeX knows about the new fonts by refreshing its
   font map (under the Tools menu in the MikTeX Console).
 
-* On Mac OS ...
+* On Mac OS, download the fonts and install as for Windows.
 
 For a smooth build, please ensure that the following R packages are installed:
 `ggplot2`, `gridGraphics`, `gggrid`, `gridBezier`, `ggtext`, `signs`, plus of
-course `xdvir` itself and its dependencies (including `systemfonts` >= 1.1.0).
+course `xdvir` itself and its dependencies.
 
 As recommended in the `rjtools` documentation, the best recipe for 
 building is:
 
 ```
 pandoc::pandoc_activate(version = '3.1.6')
-rmarkdown::render("quokka-bilby.Rmd", output_format = "all")
+rmarkdown::render("murrell-xdvir.Rmd", output_format = "all")
 ```
 
 
