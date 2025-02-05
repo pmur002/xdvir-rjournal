@@ -3,6 +3,10 @@
 
 ## ----setup, include=FALSE-----------------------------------------------------
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+
+
+## ----loadxdvir, include=FALSE-------------------------------------------------
+library(xdvir)
 options(xdvir.engine="xetex")
 
 
@@ -98,10 +102,15 @@ to get the \textcolor{Rred}{\bf fitness function}.
 
 ## ----typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in color; and automated line-breaks with full justification and hyphenation."----
 
-library(xdvir)
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
 
 library(gggrid)
+
+if (.Platform$OS.type == "windows") {
+    TeXGyreR <- "TeXGyreAdventor"
+} else {
+    TeXGyreR <- "TeX Gyre Adventor"
+}
 
 ggIntro <- ggplot(data.frame(x, y)) +
     geom_line(aes(x, y), linewidth=2, colour=2) +
@@ -110,7 +119,7 @@ ggIntro <- ggplot(data.frame(x, y)) +
     xlab("Phenotypes") +
     ylab("Fitness") +
     theme_bw() +
-    theme(text=element_text(family="TeXGyreAdventor", size=12),
+    theme(text=element_text(family=TeXGyreR, size=12),
           panel.grid=element_blank())
 
 label <- function(data, coords) {
