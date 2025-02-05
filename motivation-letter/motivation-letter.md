@@ -45,7 +45,7 @@ The only requirement for building the article
 the fonts TeX Gyre Adventor 
 [(https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)](https://www.gust.org.pl/projects/e-foundry/tex-gyre/adventor)
 and Lato Light 
-[(
+[(https://fonts.google.com/specimen/Lato)](https://fonts.google.com/specimen/Lato)
 must be installed:
 
 * On Linux, there should be just a package, e.g., `tex-gyre` and `fonts-lato`
@@ -65,7 +65,9 @@ must be installed:
 
 For a smooth build, please ensure that the following R packages are installed:
 `ggplot2`, `gridGraphics`, `gggrid`, `gridBezier`, `ggtext`, `signs`, plus of
-course `xdvir` itself and its dependencies.
+course `xdvir` itself and its dependencies.  The TikZ examples may also
+require a full TeX install (e.g., TeX Live, MikTeX, or MacTeX)
+rather than just TinyTeX.
 
 As recommended in the `rjtools` documentation, the best recipe for 
 building is:
