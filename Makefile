@@ -25,7 +25,8 @@ submission:
 submission-test:
 	rm -r submission-test/*
 	cp submission/murrell-xdvir.zip submission-test/
-	cd submission-test
-	Rscript -e 'pandoc::pandoc_activate(version = "3.1.6");	rmarkdown::render("murrell-xdvir.Rmd", output_format = "all")'
-	rm *.log
-	Rscript -e 'rjtools::initial_check_article(".", pkg="xdvir")'
+	cd submission-test && \
+	unzip murrell-xdvir.zip && \
+	Rscript -e 'pandoc::pandoc_activate(version = "3.1.6");	rmarkdown::render("murrell-xdvir.Rmd", output_format = "all")' && \
+	rm *.log && \
+	Rscript -e 'rjtools::initial_check_article(".", pkg="xdvir", logfile=tempfile())'
