@@ -31,11 +31,13 @@ when drawing text labels and annotations on R plots.
 
 I have successfully built the article on Linux (Ubuntu), 
 Windows, and Mac OS.
-There is one remaining ERROR and one remaining NOTE
+There is one remaining ERROR, one remaining WARNING, and one remaining NOTE
 from `rjtools::initial_check_article()`:
 
 * Some section titles are not in sentence case because they contain proper nouns
   (e.g., "R").  
+
+* The `anzj2025` citation has no link because it is "in press".
 
 * There are "spelling errors" because there are several software
   and symbol names that are not English words.
