@@ -21,6 +21,8 @@ knitr::opts_chunk$set(dev="cairo_pdf")
 ## ----echo=FALSE---------------------------------------------------------------
 LaTeX <- ifelse(knitr::is_html_output(), 'LaTeX', '\\LaTeX{}')
 TeX <- ifelse(knitr::is_html_output(), 'TeX', '\\TeX{}')
+XeTeX <- ifelse(knitr::is_html_output(), 'XeTeX', '\\XeTeX{}')
+LuaTeX <- ifelse(knitr::is_html_output(), 'LuaTeX', 'Lua\\TeX{}')
 TikZ <- ifelse(knitr::is_html_output(), 'TikZ', 'Ti\\textit{k}Z')
 
 
@@ -360,7 +362,7 @@ rightBearingTeX <- paste0(simpleTeX, "$|$")
 #     labs(title=rightBearingTeX) +
 #     theme(plot.title=element_latex(size=20, hjust="right"))
 
-## ----echo=FALSE, fig.width=7, fig.height=1, out.width="100%"------------------
+## ----echo=FALSE, fig.width=7, fig.height=1, out.width="95%"-------------------
 pushViewport(viewport(height=100, y=1, just="top"))
 gg1 <- 
 ggIntro + 
@@ -373,7 +375,7 @@ print(gg1, newpage=FALSE)
 #     labs(title=rightBearingTeX) +
 #     theme(plot.title=element_latex(size=20, hjust="bbright"))
 
-## ----echo=FALSE, fig.width=7, fig.height=1, out.width="100%"------------------
+## ----echo=FALSE, fig.width=7, fig.height=1, out.width="95%"-------------------
 pushViewport(viewport(height=100, y=1, just="top"))
 gg2 <- 
 ggIntro + 
@@ -926,7 +928,7 @@ latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
        panel=mainPanel)
 
 ## ----adjustYticks, echo=FALSE, eval=FALSE-------------------------------------
-# grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
+# grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 
 
 ## ----echo=FALSE, eval=FALSE---------------------------------------------------
@@ -949,10 +951,9 @@ latexPanel <- function(x, y, subscripts, groups, ...) {
     type <- crime$Type[subscripts][1]
     labelY <- y[groups == "Male"][1]
     labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
-    panelTeX <- paste0(
-"\\begin{minipage}{", labelWidth, "in}",
-type, 
-"\\end{minipage}")
+    panelTeX <- paste0("\\begin{minipage}{", labelWidth, "in}",
+                       type, 
+                       "\\end{minipage}")
     grid.latex(panelTeX, 
                x=0, hjust="left",
                y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",
@@ -986,7 +987,7 @@ latexTitle <- latexGrob(titleTeX, x=titleX, hjust="left",
 update(latticeCrime,
        panel=latexPanel,
        main=latexTitle)
-grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
+grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 
 
 ## ----eval=FALSE---------------------------------------------------------------
@@ -995,7 +996,7 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 
 ## ----latticeplain, echo=FALSE, fig.width=7, fig.height=7, fig.keep="last", out.width="100%", fig.cap='(ref:latticeplainFigCap)'----
 latticeCrime
-grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
+grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 
 
 ## ----eval=FALSE---------------------------------------------------------------
@@ -1003,10 +1004,9 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
 #     type <- crime$Type[subscripts][1]
 #     labelY <- y[groups == "Male"][1]
 #     labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
-#     panelTeX <- paste0(
-# "\\begin{minipage}{", labelWidth, "in}",
-# type,
-# "\\end{minipage}")
+#     panelTeX <- paste0("\\begin{minipage}{", labelWidth, "in}",
+#                        type,
+#                        "\\end{minipage}")
 #     grid.latex(panelTeX,
 #                x=0, hjust="left",
 #                y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",

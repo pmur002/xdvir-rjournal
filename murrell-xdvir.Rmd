@@ -3,18 +3,18 @@ title: "Rendering LaTeX in R"
 date: "2025-01-29"
 abstract: >
   The xdvir package provides functions for rendering 
-  LaTeX code as labels, annotations, and
+  LaTeX fragments as labels, annotations, and
   data symbols in R plots.  There are convenient high-level
   functions for rendering LaTeX fragments, including
   labels on ggplot2 plots, plus lower-level
-  functions for more fine control over the authoring,
-  typesetting, and rendering of LaTeX code.
+  functions for more fine control over the separate authoring,
+  typesetting, and rendering steps.
   There is support for making use of LaTeX packages,
   including TikZ graphics. 
   The rendered
   LaTeX output is fully integrated with R graphics output
   in the sense that LaTeX output 
-  can be positioned relative to R graphics output and vice versa.
+  can be positioned and sized relative to R graphics output and vice versa.
 draft: true
 author:  
   - name: Paul Murrell
@@ -32,6 +32,8 @@ output:
   rjtools::rjournal_web_article:
     self_contained: yes
     toc: no
+header-includes:
+  - \usepackage{metalogo}
 bibliography: murrell-xdvir.bib
 ---
 
@@ -54,6 +56,8 @@ knitr::opts_chunk$set(dev="png", dev.args=list(type="cairo-png"))
 ```{r echo=FALSE}
 LaTeX <- ifelse(knitr::is_html_output(), 'LaTeX', '\\LaTeX{}')
 TeX <- ifelse(knitr::is_html_output(), 'TeX', '\\TeX{}')
+XeTeX <- ifelse(knitr::is_html_output(), 'XeTeX', '\\XeTeX{}')
+LuaTeX <- ifelse(knitr::is_html_output(), 'LuaTeX', 'Lua\\TeX{}')
 TikZ <- ifelse(knitr::is_html_output(), 'TikZ', 'Ti\\textit{k}Z')
 ```
 
@@ -82,13 +86,13 @@ a **bold** or *italic* face within a text label.
 The \CRANpkg{gridtext} [@pkg-gridtext] and \CRANpkg{ggtext} [@pkg-ggtext]
 packages greatly improved the situation by allowing text labels
 to include a small subset of
-markdown and HTML (plus CSS).  This allowed changes in font face
+markdown and HTML (plus CSS).  This allowed, for example, changes in font face
 and color within text labels.
 
 More recently, the \CRANpkg{marquee} package [@pkg-marquee]
 improved the situation a great deal further by providing full support for
 markdown within text labels.  This made it possible to layout more
-complex arrangements of text and graphical content within text labels.
+complex arrangements of text and even graphical content within text labels.
 
 However, despite these advances, there are still some text formatting tasks that
 remain out of reach.  For example, Figure \@ref(fig:typesetting) 
@@ -241,7 +245,7 @@ at first glance, but it harbors several important details:
   justified (not ragged-left or ragged-right justified) and one word
   has been split across lines and hyphenated. Although it is not
   obvious from the plot itself, the line breaks were also automatically
-  generated to fit the text into a fixed width (3 inches).
+  generated to fit the text into a fixed width.
 
   The R graphics system can draw a character value across multiple lines, but
   only if explicit newlines are embedded in the character value (i.e., the line
@@ -298,8 +302,8 @@ is to call the `grid.latex()` function.  The first argument to
 this function is a character value, which is interpreted as
 a fragment of `r LaTeX` code.
 For example, the following code draws a text label that contains
-a fragment of the larger annotation from 
-Figure \@ref(fig:typesetting).  We use just a fragment here in order
+a subset of the larger annotation from 
+Figure \@ref(fig:typesetting).  We use just a subset here in order
 to keep the code readable.
 
 Because `r LaTeX` code tends to contain 
@@ -377,7 +381,7 @@ Instead, for now, we will demonstrate a more common scenario:
 drawing `r LaTeX` text labels on a \CRANpkg{ggplot2} plot [@pkg-ggplot2].
 For this purpose, the `xdvir` package provides the
 `element_latex()` function.  This allows us to specify a `r LaTeX` fragment
-as a plot label and we can indicate the special nature of the label
+as a plot label and then we can indicate the special nature of the label
 via the `ggplot2::theme()` function.
 
 For example, the following code uses the same `r LaTeX` fragment 
@@ -424,7 +428,10 @@ The points are drawn using the standard `ggplot::geom_point()` function,
 but the labels are drawn using `geom_latex()` from the `xdvir` package.
 The red labels for the red points in Figure \@ref(fig:geomlatex)
 are small `r LaTeX` fragments that each describe 
-a simple `r LaTeX` mathematical expression, as shown below.
+a simple `r LaTeX` mathematical expression.
+The data set used for the red points and labels is stored
+in a data frame called `means` and the `r LaTeX` fragments are
+in a column called `label`, as shown below.
 
 ```{r tikzmu, echo=FALSE}
 muDot <- r"(%
@@ -461,6 +468,8 @@ ggGeom <- ggplot(samples) +
 ```
 
 The following code draws the plot in Figure \@ref(fig:geomlatex).
+A call to `ggplot2::geom_point()` draws the red points and a call
+to `geom_latex()` draws the red labels.
 The `ggGeom` object in the code below describes the 
 main plot, which consists of gray dots, horizontal and vertical lines,
 and y-axis labels.
@@ -468,7 +477,7 @@ The code for generating
 `ggGeom` is not shown in order to keep the code below readable,
 but it is available in the supplementary materials for this article.
 
-(ref:geomlatexFigCap) A `ggplot2` plot with text labels drawn using `geom_latex()`.
+(ref:geomlatexFigCap) A `ggplot2` plot with text labels specified as `r LaTeX` fragments and drawn using the `geom_latex()` function.
 
 ```{r, geomlatex, fig.width=7, fig.height=3.5, out.width="100%", fig.cap='(ref:geomlatexFigCap)'}
 ggGeom +
@@ -499,7 +508,7 @@ draw that `r LaTeX` fragment in R:
   allows us to perform this step separately.
   For example, the following code
   takes the `r LaTeX` fragment `simpleTeX` and produces a complete `r LaTeX`
-  document that is ready to typeset.
+  document, `simpleDoc`, that is ready to typeset.
   
 
 ```{r}
@@ -521,7 +530,8 @@ cat(output, sep="\n")
 : The `typeset()` function in the `xdvir` package 
   allows us to perform this step separately.
   For example, the following code takes the `r LaTeX` document `simpleDoc` and
-  produces a `"DVI"` object that contains instructions specifying the fonts to
+  produces a `"DVI"` object, `simpleDVI`,
+  that contains instructions specifying the fonts to
   use (lines that contain `x_fnt_def` and `fnt_num` in the output below), 
   the glyphs to use from those fonts (lines that contain
   `x_glyph` in the output below), and where to draw those glyphs
@@ -593,7 +603,8 @@ Many additional effects can be obtained with `r LaTeX` code by loading
 `r LaTeX` packages.  As a simple example, changing the color of text
 requires loading the `r LaTeX` package `xcolor`.
 These `r LaTeX` packages can be loaded using the `packages` argument of the 
-`grid.latex()` function (or the `element_latex()` or `geom_latex()` functions).
+`grid.latex()` function (or the `element_latex()` function
+or the `geom_latex()` function).
 For example, the following code draws text with the last two
 words in red.  
 
@@ -675,7 +686,7 @@ There are several `r LaTeX` packages with predefined support in the
 `xdvir` package, including 
 `xcolor` for changes in color and `fontspec` for changes in font.
 Support can be added for other `r LaTeX` packages with the
-``r LaTeX`package()` function.  We will see other predefined packages
+`LaTeXpackage()` function.  We will see other predefined packages
 and an example of defining a new `r LaTeX`
 package in later sections.
 
@@ -683,7 +694,8 @@ package in later sections.
 
 By default, the `r LaTeX` text drawn by `grid.latex()`
 is centered upon a specified location.
-For example, the following code draws the `tex` fragment vertically centered
+For example, the following code draws the `simpleTeX` 
+fragment vertically centered
 at a location half-way up the image (as indicated by the gray line).
 
 ```{r horiz, echo=FALSE, eval=FALSE}
@@ -699,7 +711,7 @@ grid.latex(simpleTeX, y=.5)
 ```
 
 We can specify a different justification using the `vjust` argument.
-For example, the following code draws the same `tex` fragment
+For example, the following code draws the same `simpleTeX` fragment
 at the same location, but with a bottom-justification.
 Notice that the bottom of the text is based on the bounding box 
 of the text, so the bottom of the text is the bottom of the subscript "i".
@@ -756,7 +768,7 @@ ggIntro +
     labs(title=rightBearingTeX) +
     theme(plot.title=element_latex(size=20, hjust="right"))
 ```
-```{r echo=FALSE, fig.width=7, fig.height=1, out.width="100%"}
+```{r echo=FALSE, fig.width=7, fig.height=1, out.width="95%"}
 pushViewport(viewport(height=100, y=1, just="top"))
 gg1 <- 
 <<justright>>
@@ -767,7 +779,7 @@ ggIntro +
     labs(title=rightBearingTeX) +
     theme(plot.title=element_latex(size=20, hjust="bbright"))
 ```
-```{r echo=FALSE, fig.width=7, fig.height=1, out.width="100%"}
+```{r echo=FALSE, fig.width=7, fig.height=1, out.width="95%"}
 pushViewport(viewport(height=100, y=1, just="top"))
 gg2 <- 
 <<justbbright>>
@@ -786,7 +798,7 @@ the sort of precision that we are seeking by working with `r LaTeX` typesetting.
 # Integrating text
 
 Justifying `r LaTeX` text is a simple example of a larger problem:
-integrating `r LaTeX` text.  For example,
+*integrating* `r LaTeX` text.  For example,
 the text annotation in Figure \@ref(fig:typesetting)
 is integrated with the plot in the sense that it is positioned
 relative to the plot region.  In fact, closer inspection reveals
@@ -797,13 +809,13 @@ red line and right-justified with the maximum x-value of the red line.
 Put in terms of *integration* rather than justification, 
 the text annotation in Figure \@ref(fig:typesetting)
 is integrated with the plot because the `r LaTeX` text is drawn at a location
-that is coordinated with the location of other drawing in the plot.
+that is coordinated with the location of other R graphics drawing in the plot.
 
 Another example of integration, that reverses the roles, is coordinating
-other drawing with the location of `r LaTeX` text.
+other R graphics drawing with the location of `r LaTeX` text.
 The following code provides a simple example.
 The `r LaTeX` fragment is the simple one from previous examples with
-two additions:  there are `\savepos` commands to mark specific locations
+two additions:  there are `\zsavepos` commands to mark specific locations
 within the text and associate them with labels (`"a"` and `"b"`);
 and there are `\Rzmark` commands to export those
 locations for R to see.
@@ -827,9 +839,10 @@ grid.latex(zrefTeX, packages="zref")
 <<zreftex>>
 ```
 
-However, we can now access the special locations in the `r LaTeX` output using the
+However, we can now access the special locations in the `r LaTeX` 
+output using the
 `getMark()` function from the `xdvir` package.
-For example, the following code accesses location `"a"`, just after
+For example, the following code accesses location `"a"`, which is just after
 the word "original", and draws 
 a small red dot at that location.
 
@@ -844,7 +857,7 @@ grid.circle(a$devx, a$devy, r=unit(.5, "mm"), gp=gpar(col=2, fill=2))
 <<geta>>
 ```
 
-The following code accesses location `"b"`, just before the letter "z",
+The following code accesses location `"b"`, which is just before the letter "z",
 and draws a curved arrow
 from `"a"` to `"b"`.
 
@@ -968,7 +981,7 @@ tikzTeX <- r"(%
 The following code draws this `r TikZ` picture in R.
 The argument 
 `packages="tikzPicture"` is necessary to ensure that the `r TikZ` package
-is loaded in the authoring step, that`r TikZ` output is produced in the
+is loaded in the authoring step, that `r TikZ` output is produced in the
 typesetting step, and that R takes notice of the `r TikZ`
 output in the rendering step.
 
@@ -995,9 +1008,10 @@ that access to `r LaTeX` provides.
 ```
 
 The `r LaTeX` code this time includes an explicit `\begin{tikzpicture}`
-and `\end{tikzpicture}`, which were implicitly added in the previous
+and `\end{tikzpicture}`.  Those commands were implicitly added in the previous
 example because we specified `packages="tikzPicture"`.
-This time, we just specify `packages="tikz"`.
+This time, we have explicitly provided the commands, so we
+just specify `packages="tikz"`.
 
 ```{r tikz, eval=FALSE}
 grid.latex(muDot, packages="tikz")
@@ -1007,14 +1021,14 @@ grid.latex(muDot, packages="tikz")
 <<tikz>>
 ```
 
-We will see a more complex example of`r TikZ` output in a later section.
-Figure \@ref(fig:diag) is also a`r TikZ` picture that has been rendered
+We will see a more complex example of `r TikZ` output in a later section.
+Figure \@ref(fig:diag) is also a `r TikZ` picture that has been rendered
 in R.
 
 # Programmatic generation of `r LaTeX`
 
 Although `r LaTeX` fragments
-for text labels tends to be more complex than 
+for text labels tend to be more complex than 
 plain text labels, thanks to the additional markup that is required, 
 `r LaTeX` code is still
 just text.  This means that all of the text-generating tools in R
@@ -1033,6 +1047,10 @@ There are also packages that can generate larger fragments of
 for generating `r LaTeX` tables and the \CRANpkg{rmarkdown} 
 package [@pkg:rmarkdown]
 can generate `r LaTeX` documents from Markdown input.
+These tools can be useful for generating larger chunks of `r LaTeX` code,
+although the `r LaTeX` code that is produced may consist of
+entire documents rather than just `r LaTeX` fragments.
+The next section describes how we can cope with that situation.
 
 # Customization and debugging
  
@@ -1088,13 +1106,13 @@ to read external DVI files into R and these can then be passed to
 the `render()` function for drawing.
 
 One important caveat is that both 
-a `"`r LaTeX`document"` object that is produced by
+a `"LaTeXdocument"` object that is produced by
 the `author()` function and a `"DVI"` object that is produced by the 
-`typeset()` function contain information about how they were created.
-For example, the `r TeX` `engine` that was specified and the `r LaTeX`
+`typeset()` function contain information about how they were created,
+for example, the `r TeX` `engine` that was specified and the `r LaTeX`
 packages that were loaded.
 The `typeset()` function checks this information and warns if we ask
-to typeset a `"`r LaTeX`document"` that was produced for a different `r TeX` engine.
+to typeset a `"LaTeXdocument"` that was produced for a different `r TeX` engine.
 Similarly, the `render()` function, which also has an `engine` argument,
 checks and warns if we ask to render a
 `"DVI"` object that was produced using a different `r TeX` engine.
@@ -1182,9 +1200,9 @@ Figure \@ref(fig:rahlfplain).
 <<rahlfplot>>
 ```
 
-Because the main plot is drawn with the `graphics` package, 
+Because the main plot is drawn using functions from the `graphics` package, 
 in order to integrate the output from `grid.latex()` with the plot,
-we need to convert it to an equivalent drawing that uses
+we need to convert the plot to an equivalent drawing that uses
 functions from the `grid` package.
 This can be achieved with the `grid.echo()` function from the
 \CRANpkg{gridGraphics} package [@pkg-gridgraphics], as shown below.
@@ -1193,7 +1211,8 @@ This can be achieved with the `grid.echo()` function from the
 <<gridgraphics>>
 ``` 
 
-We want to align the `r LaTeX` text with the main plot.  In particular, we want
+We want to integrate
+the `r LaTeX` text with the main plot.  In particular, we want
 the top of the text to be aligned with the value 14,000 on the y-scale
 of the plot.  There is also a 1cm gap between the left of the text 
 and the y-axis line.
@@ -1249,12 +1268,12 @@ we specify the `r LaTeX` packages that have to be loaded, including
 the `"multicol"` package that we just registered, and
 we position the text 1cm in from the left of the
 the plot viewport and at 14,000 on the y-axis.
+The final result is shown in Figure \@ref(fig:rahlf).
 
 ```{r eval=FALSE}
 <<rahlflatex>>
 ```
 
-The final result is shown in Figure \@ref(fig:rahlf).
 
 # Example 2
 
@@ -1263,6 +1282,9 @@ a `r LaTeX` annotation (Figure \@ref(fig:schneider)).  This example
 demonstrates the sophisticated effects that are possible by
 combining `r TikZ` graphics with `r LaTeX` typesetting, in this case
 to produce an annotated mathematical equation.
+This example also demonstrates a way to integrate lower-level
+`grid.latex()` output with a \CRANpkg{ggplot2} plot
+(rather than using `element_latex()` or `geom_latex()`).
 
 ```{r echo=FALSE}
 source("scripts/schneider.R")
@@ -1348,7 +1370,8 @@ ggSchneider
 
 The start of the `r LaTeX` code for the annotated equation is shown below
 (the full code is included in the supplementary materials for this article).
-This is arranged in three blocks: the first block of code defines some colors;
+The `r LaTeX` code
+is arranged in three blocks: the first block of code defines some colors;
 the second block describes the main mathematical equation, but includes
 some `\eqnmark` commands to save locations within the equation;
 and the third block shows one of the additional equation annotations, which
@@ -1377,10 +1400,10 @@ loaded from a local `TeX` directory.
 <<annotateequations>>
 ```
 
-The `r LaTeX` package `annotate-equations` is built on`r TikZ` graphics.
+The `r LaTeX` package `annotate-equations` is built on `r TikZ` graphics.
 We do not need to load the `r LaTeX` package `tikz` because `annotate-equations`
 will do that automatically.  However, `xdvir` by default makes use 
-of the bounding box information from`r TikZ` graphics and, for images with
+of the bounding box information from `r TikZ` graphics and, for images with
 saved locations like this, that bounding box is unreliable.
 The predefined support for the `r LaTeX` package `tikz` in the `xdvir` package
 includes a `tikzPackage()` function that allows us to load TikZ, but 
@@ -1413,7 +1436,7 @@ In this example, we are adding a single `r LaTeX` annotation at a specific
 position within a \CRANpkg{ggplot2} plot, so 
 we use the \CRANpkg{gggrid} package [@pkg-gggrid].
 This package provides the `grid_panel()` function, which we can 
-add to a \CRANpkg{ggplot2}, much like the standard `ggplot2::geom_point()`
+add to a \CRANpkg{ggplot2} plot, much like the standard `ggplot2::geom_point()`
 function, to add `grid` drawing to a `ggplot2` plot.
 The first argument to `grid_panel()` is a function that must
 generate a `grid` grob for \CRANpkg{ggplot2} to draw, based on the
@@ -1423,19 +1446,20 @@ calls the `xdvir` function `latexGrob()`.  The `latexGrob()` function
 is similar to 
 `grid.latex()` except that it creates a description of something to draw
 rather than immediately drawing it.
-We pass to `latexGrob()` the `r LaTeX` code to draw (`schneiderTeX`), 
+We pass to `latexGrob()` the `r LaTeX` code to draw the annotated
+equation (`schneiderTeX`), 
 a set of `packages` to load, and arguments that position
 the output relative to the plot.
+The final result is shown in Figure \@ref(fig:schneider).
 
 ```{r eval=FALSE}
 <<anneq>>
 ```
 
-The final result is shown in Figure \@ref(fig:schneider).
-
 # Example 3
 
-This provides another demonstration of the range of possibilities that is
+This section 
+provides another demonstration of the range of possibilities that is
 provided by 
 `r LaTeX` typesetting.  This
 time we add annotations that are formatted as numbered
@@ -1524,7 +1548,7 @@ article, so the main plot is described in the object `ggANZJS`,
 which is defined in the supplementary materials for the article.
 One point worth noting is that the `r LaTeX` annotations that we will
 be adding are required to fit within the lines that extend below the plot.
-In other words, we will be specifying a width for the `r LaTeX` output
+In other words, we will be specifying a fixed width for the `r LaTeX` output
 to fit into.
 The main plot produced by `ggANZJS` is shown in Figure \@ref(fig:anzjsplain).
 
@@ -1562,12 +1586,11 @@ and specifies a `width` for the output to be typeset within.
 The following code combines the left-hand label annotation,
 and a very similar right-hand label annotation, with the
 `ggANZJS` plot.
+The final result is shown in Figure \@ref(fig:anzjs).
 
 ```{r eval=FALSE}
 <<ggenumlist>>
 ```
-
-The final result is shown in Figure \@ref(fig:anzjs).
 
 # Example 4
 
@@ -1607,7 +1630,7 @@ latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
        panel=mainPanel)
 ```
 ```{r adjustYticks, echo=FALSE, eval=FALSE}
-grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just="bottom")
+grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 ```
 
 ```{r echo=FALSE, eval=FALSE}
@@ -1630,10 +1653,9 @@ latexPanel <- function(x, y, subscripts, groups, ...) {
     type <- crime$Type[subscripts][1]
     labelY <- y[groups == "Male"][1]
     labelWidth <- convertWidth(unit(1, "npc"), "in", valueOnly=TRUE)
-    panelTeX <- paste0(
-"\\begin{minipage}{", labelWidth, "in}",
-type, 
-"\\end{minipage}")
+    panelTeX <- paste0("\\begin{minipage}{", labelWidth, "in}",
+                       type, 
+                       "\\end{minipage}")
     grid.latex(panelTeX, 
                x=0, hjust="left",
                y=unit(labelY, "native") + unit(4, "mm"), vjust="bottom",
@@ -1728,8 +1750,8 @@ three colors, and then giving the title text, with the words
 
 The following code calls `latexGrob()` to define the title.
 We pass the `r LaTeX` fragment `titleTeX`, we position the title
-a little way in from the left edge of the plot (to line up with
-the left edge of the first column of panels), and we
+to line up with
+the left edge of the first column of panels, and we
 load the `r LaTeX` package `xcolor` so that the colors work.
 
 ```{r eval=FALSE}
@@ -1738,12 +1760,11 @@ load the `r LaTeX` package `xcolor` so that the colors work.
 
 The following code creates the final plot by adding the panel function 
 `latexPanel` and the title `latexTitle` to the main plot `latticeCrime`.
+The final result is shown in Figure \@ref(fig:lattice).
 
 ```{r eval=FALSE}
 <<latticefinal>>
 ```
-
-The final result is shown in Figure \@ref(fig:lattice).
 
 ```{r trellisundo, echo=FALSE}
 trellis.par.set(theme=list(background=list(col="white"),
@@ -1764,7 +1785,7 @@ of `r LaTeX`.  This ranges from relatively simple features like changes in
 font family, font weight, and font style, and automatic line breaks,
 to intermediate features like full justification, hyphenation, and high-quality
 mathematical equations, and more advanced features like
-enumerated lists, multiple columns, and`r TikZ` graphics.
+enumerated lists, multiple columns, and `r TikZ` graphics.
 
 One limitation of the `xdvir` package is that rendering `r LaTeX`
 fragments is noticeably slower than rendering simple character values.
@@ -1781,7 +1802,8 @@ Cairo graphics library [@cairo], and graphics devices
 provided by the `ragg` package [@pkg:ragg].
 
 A final major limitation of `xdvir` is that it only currently supports two
-TeX engines:  XeTeX and recent LuaTeX.  The package start-up message 
+`r TeX` engines:  `r XeTeX` and recent `r LuaTeX`.
+The package start-up message 
 reports on whether these are available.  An implicit limitation is that
 `xdvir` requires a `r TeX` installation, though that is simplified 
 through a dependency on the \CRANpkg{tinytex} package [@pkg:tinytex].
@@ -1793,14 +1815,13 @@ provide alternative ways to render non-trivial text labels, but
 do so through Markdown and/or HTML rather than `r LaTeX`.
 Although they may not be able to produce as wide a range of results
 compared to `r LaTeX` code, they will perform much faster and
-require fewer dependencies than `xdvir`
-.
+require fewer dependencies than `xdvir`.
 There are also a number of packages that perform specific
 text-placement tasks, for example \CRANpkg{geomtextpath} [@pkg:geomtextpath],
 which can arrange text along an arbitrary path, and
 \CRANpkg{directlabels} [@pkg:directlabels] and 
-\CRANpkg{ggforce} [@pkg:ggforce], which provide functions for adding
-text annotations.
+\CRANpkg{ggforce} [@pkg:ggforce], which provide functions for cleverly
+positioning text annotations, though without typesetting facilities.
 The advantage of `xdvir` by comparison with these packages
 is that it is possible to
 produce more advanced typesetting results thanks to having access to `r LaTeX`.
@@ -1809,7 +1830,7 @@ The \CRANpkg{tikzDevice} package [@pkg:tikzDevice] is an interesting
 alternative because, where `xdvir` integrates `r LaTeX` text with R graphics, 
 \CRANpkg{tikzDevice} reverses the process and integrates R graphics with `r LaTeX`.
 The \CRANpkg{tikzDevice} package provides an R graphics device that
-converts R plots into`r TikZ` pictures so that R plots can include labels with 
+converts R plots into `r TikZ` pictures so that R plots can include labels with 
 `r LaTeX` fragments and R plots can be 
 deeply integrated with `r LaTeX` documents.
 The main difference with this package is the destination:
@@ -1835,7 +1856,7 @@ is to import an image of the `r LaTeX` output.
 This approach harks back to early solutions for including 
 `r LaTeX` mathematical expressions in web pages by generating PNG images
 from `r LaTeX` fragments.
-However, more modern technologies, such as SVG mean that this
+However, more modern technologies, such as SVG, mean that this
 approach can yield a much higher-quality result, as 
 demonstrated by @schneider2023.
 One simple advantage of the `xdvir` approach is the level of convenience
@@ -1866,8 +1887,9 @@ The author owes a debt of gratitude to Marc-Olivier Beausoleil
 (Figure \@ref(fig:typesetting)), 
 Thomas Rahlf (Figure \@ref(fig:rahlf)), 
 and Joel Schneider (Figure \@ref(fig:schneider))
-for sharing their work and for
-for permission to base several of the examples in this article
+for sharing their work and
+for giving either implicit or explicit
+permission to base several of the examples in this article
 on their work.
 
 
