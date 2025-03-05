@@ -1,6 +1,6 @@
 ---
 title: "Rendering LaTeX in R"
-date: "2025-01-29"
+date: "2025-02-26"
 abstract: >
   The xdvir package provides functions for rendering 
   LaTeX fragments as labels, annotations, and
@@ -80,7 +80,7 @@ and `mtext()` functions.
 
 Unfortunately, these core tools for drawing text are quite limited
 in terms of the formatting of the text.
-For example, there is no facility for emphasising an individual word using
+For example, there is no facility for emphasizing an individual word using
 a **bold** or *italic* face within a text label.
 
 The \CRANpkg{gridtext} [@pkg-gridtext] and \CRANpkg{ggtext} [@pkg-ggtext]

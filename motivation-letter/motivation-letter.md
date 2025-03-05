@@ -81,7 +81,7 @@ rmarkdown::render("murrell-xdvir.Rmd", output_format = "all")
 \bigskip
 \bigskip
 
-Regards,
+Yours sincerely,
     
 \includegraphics{/home/pmur002/fosFiles/Admin/digitalSig.png}
     
