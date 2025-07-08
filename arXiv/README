@@ -1,0 +1,77 @@
+
++ Put R Journal submission on arXiv ?
+
+
++ Preflight Checklist for New Submissions
+  (from [logged in] https://arxiv.org/user/)
+
+  AND NOTE that the online version has links to helpful tips and advice!!!
+
+  + If your submission is written in TeX you must upload your source. PDFs
+    produced from TeX may be declined. Learn more about why TeX source is
+    required
+
+  + Experienced authors recommend putting all the files you will upload into one
+    folder before starting. Read how one author prepares a clean upload
+
+  + Common errors that slow down announcement include missing files or
+    references. Double check for missing content before uploading. Learn more
+    about common mistakes
+
+  + All announced content is archival and cannot be removed. Make sure that data
+    you do not want archived is not part of your upload, for example TeX
+    comments in your source. Read more tips from an arXiv author
+
+ 
++ Starting point was ...
+
+  ../RJournal/submission/murrell-xdvir.zip
+
+  ... which was unzipped and then removed.
+
+  + Build murrell-xdvir.tex ...
+
+    Rscript -e 'pandoc::pandoc_activate(version = "3.1.6"); rmarkdown::render("murrell-xdvir.Rmd", output_format = "all", clean=FALSE)'
+
+  + Removed files ...
+
+    rm murrell-xdvir.Rmd murrell-xdvir.html murrell-xdvir.knit.md murrell-xdvir.pdf murrell-xdvir.R murrell-xdvir.log
+    rm RJwrapper.*
+
+  + Edits to ...
+
+    ./murrell-xdvir.tex
+
+    + Copy start/end from ...
+
+      ../RJwrapper.tex 
+
+    + Remove paths for all \includegraphics{}
+    + Remove \hypertarget{}s
+    + \usepackage{RJournal}  ->  \usepackage{journal}
+
+  + Edits to ...
+
+    ./RJournal.sty
+
+    + Rename ./journal.sty
+    + Remove all identifying RJournal labelling
+
+  + Removed directories ...
+
+    ./motivation-letter/
+    ./murrell-xdvir_files/figure-html5/
+    ./diagram/
+    ./scripts/
+    ./TeX/
+    ./data/
+    ./Fonts/
+    ./annotate-equations/
+
+  + Flattened directories ...
+
+    ./murrell-xdvir_files/figure-latex/
+
+
+
+

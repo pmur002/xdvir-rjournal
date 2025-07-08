@@ -1,0 +1,193 @@
+\begin{thebibliography}{26}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Borkin et~al.(2016)Borkin, Bylinskii, Kim, Bainbridge, Yeh, Borkin,
+  Pfister, and Oliva]{massvis}
+M.~A. Borkin, Z.~Bylinskii, N.~W. Kim, C.~M. Bainbridge, C.~S. Yeh, D.~Borkin,
+  H.~Pfister, and A.~Oliva.
+\newblock Beyond memorability: Visualization recognition and recall.
+\newblock \emph{IEEE Transactions on Visualization and Computer Graphics},
+  22\penalty0 (1):\penalty0 519--528, 2016.
+\newblock \doi{10.1109/TVCG.2015.2467732}.
+
+\bibitem[Cameron and {van den Brand}(2025)]{pkg:geomtextpath}
+A.~Cameron and T.~{van den Brand}.
+\newblock \emph{{geomtextpath}: Curved Text in {'ggplot2'}}, 2025.
+\newblock URL \url{https://CRAN.R-project.org/package=geomtextpath}.
+\newblock R package version 0.1.5.
+
+\bibitem[Dahl et~al.(2019)Dahl, Scott, Roosen, Magnusson, and
+  Swinton]{pkg:xtable}
+D.~B. Dahl, D.~Scott, C.~Roosen, A.~Magnusson, and J.~Swinton.
+\newblock \emph{{xtable}: Export Tables to LaTeX or HTML}, 2019.
+\newblock URL \url{https://CRAN.R-project.org/package=xtable}.
+\newblock R package version 1.8-4.
+
+\bibitem[Hearst(2023)]{hearst}
+M.~A. Hearst.
+\newblock Show it or tell it? text, visualization, and their combination.
+\newblock \emph{Commun. ACM}, 66\penalty0 (10):\penalty0 68–75, Sept. 2023.
+\newblock ISSN 0001-0782.
+\newblock \doi{10.1145/3593580}.
+\newblock URL \url{https://doi.org/10.1145/3593580}.
+
+\bibitem[Hocking(2024)]{pkg:directlabels}
+T.~D. Hocking.
+\newblock \emph{{directlabels}: Direct Labels for Multicolor Plots}, 2024.
+\newblock URL \url{https://CRAN.R-project.org/package=directlabels}.
+\newblock R package version 2024.1.21.
+
+\bibitem[Kong et~al.(2018)Kong, Liu, and Karahalios]{kong}
+H.-K. Kong, Z.~Liu, and K.~Karahalios.
+\newblock Frames and slants in titles of visualizations on controversial
+  topics.
+\newblock In \emph{Proceedings of the 2018 CHI Conference on Human Factors in
+  Computing Systems}, CHI '18, page 1–12, New York, NY, USA, 2018.
+  Association for Computing Machinery.
+\newblock ISBN 9781450356206.
+\newblock \doi{10.1145/3173574.3174012}.
+\newblock URL \url{https://doi.org/10.1145/3173574.3174012}.
+
+\bibitem[Meschiari(2022)]{pkg:latex2exp}
+S.~Meschiari.
+\newblock \emph{{latex2exp}: Use {LaTeX} Expressions in Plots}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=latex2exp}.
+\newblock R package version 0.9.6.
+
+\bibitem[Murrell(2015)]{RJ-2015-012}
+P.~Murrell.
+\newblock The gridgraphics package.
+\newblock \emph{The R Journal}, 7:\penalty0 151--162, 2015.
+\newblock ISSN 2073-4859.
+\newblock URL \url{https://rjournal.github.io/}.
+
+\bibitem[Murrell(2022)]{pkg-gggrid}
+P.~Murrell.
+\newblock \emph{{gggrid}: Draw with {'grid'} in {'ggplot2'}}, 2022.
+\newblock URL \url{https://CRAN.R-project.org/package=gggrid}.
+\newblock R package version 0.2-0.
+
+\bibitem[Murrell(in press)]{anzjs2025}
+P.~Murrell.
+\newblock Text in {R} graphics.
+\newblock \emph{Australian \& New Zealand Journal of Statistics}, in press.
+\newblock \doi{https://doi.org/10.1111/anzs.12438}.
+\newblock URL \url{https://onlinelibrary.wiley.com/doi/abs/10.1111/anzs.12438}.
+
+\bibitem[Murrell and Ihaka(2000)]{plotmath}
+P.~Murrell and R.~Ihaka.
+\newblock An approach to providing mathematical annotation in plots.
+\newblock \emph{Journal of Computational and Graphical Statistics}, 9\penalty0
+  (3):\penalty0 582--599, 2000.
+\newblock \doi{10.1080/10618600.2000.10474900}.
+\newblock URL
+  \url{https://www.tandfonline.com/doi/abs/10.1080/10618600.2000.10474900}.
+
+\bibitem[Murrell and Wen(2020)]{pkg-gridgraphics}
+P.~Murrell and Z.~Wen.
+\newblock \emph{{gridGraphics}: Redraw Base Graphics Using {'grid'} Graphics},
+  2020.
+\newblock URL \url{https://CRAN.R-project.org/package=gridGraphics}.
+\newblock R package version 0.5-1.
+
+\bibitem[Murrell et~al.(2023)Murrell, Pedersen, and
+  Urbanek]{murrell-pedersen-urbanek-glyphs-2023}
+P.~Murrell, T.~L. Pedersen, and S.~Urbanek.
+\newblock Rendering typeset glyphs in {R} graphics.
+\newblock Technical Report 2023-01, Department of Statistics, The University of
+  Auckland, 2023.
+\newblock URL
+  \url{https://stattech.blogs.auckland.ac.nz/2023/05/06/2023-01-rendering-typeset-glyphs-in-r-graphics}.
+\newblock version 1.
+
+\bibitem[Packard et~al.(2025)Packard, Worth, and Esfahbod]{cairo}
+K.~Packard, C.~Worth, and B.~Esfahbod.
+\newblock Cairo graphics library, 2025.
+\newblock URL \url{https://www.cairographics.org/}.
+\newblock Accessed: 2025-01-20.
+
+\bibitem[Pedersen(2024)]{pkg:ggforce}
+T.~L. Pedersen.
+\newblock \emph{{ggforce}: Accelerating {'ggplot2'}}, 2024.
+\newblock URL \url{https://CRAN.R-project.org/package=ggforce}.
+\newblock R package version 0.4.2.
+
+\bibitem[Pedersen and Mitáš(2024)]{pkg-marquee}
+T.~L. Pedersen and M.~Mitáš.
+\newblock \emph{{marquee}: Markdown Parser and Renderer for {R} Graphics},
+  2024.
+\newblock URL \url{https://CRAN.R-project.org/package=marquee}.
+\newblock R package version 0.1.0.
+
+\bibitem[Pedersen and Shemanarev(2024)]{pkg:ragg}
+T.~L. Pedersen and M.~Shemanarev.
+\newblock \emph{{ragg}: Graphic Devices Based on AGG}, 2024.
+\newblock URL \url{https://CRAN.R-project.org/package=ragg}.
+\newblock R package version 1.3.3.
+
+\bibitem[Rahlf(2017)]{rahlf}
+T.~Rahlf.
+\newblock \emph{Data Visualisation with {R}: 100 Examples}.
+\newblock Springer Publishing Company, Incorporated, 1st edition, 2017.
+\newblock ISBN 3319497502.
+\newblock URL \url{https://link.springer.com/book/10.1007/978-3-030-28444-2}.
+
+\bibitem[Sarkar(2008)]{pkg-lattice}
+D.~Sarkar.
+\newblock \emph{Lattice: Multivariate Data Visualization with {R}}.
+\newblock Springer, New York, 2008.
+\newblock ISBN 978-0-387-75968-5.
+\newblock URL \url{http://lmdvr.r-forge.r-project.org}.
+
+\bibitem[Schneider()]{schneider2023}
+W.~J. Schneider.
+\newblock Annotated equations in {g}gplot2.
+\newblock URL
+  \url{https://wjschne.github.io/posts/2023-07-23-latex-equation-in-ggplot2/}.
+
+\bibitem[Sharpsteen and Bracken(2023)]{pkg:tikzDevice}
+C.~Sharpsteen and C.~Bracken.
+\newblock \emph{{tikzDevice}: {R} Graphics Output in {LaTeX} Format}, 2023.
+\newblock URL \url{https://CRAN.R-project.org/package=tikzDevice}.
+\newblock R package version 0.12.6.
+
+\bibitem[Wickham(2016)]{pkg-ggplot2}
+H.~Wickham.
+\newblock \emph{{ggplot2}: Elegant Graphics for Data Analysis}.
+\newblock Springer-Verlag New York, 2016.
+\newblock ISBN 978-3-319-24277-4.
+\newblock URL \url{https://ggplot2.tidyverse.org}.
+
+\bibitem[Wilke and Wiernik(2022{\natexlab{a}})]{pkg-ggtext}
+C.~O. Wilke and B.~M. Wiernik.
+\newblock \emph{{ggtext}: Improved Text Rendering Support for {'ggplot2'}},
+  2022{\natexlab{a}}.
+\newblock URL \url{https://CRAN.R-project.org/package=ggtext}.
+\newblock R package version 0.1.2.
+
+\bibitem[Wilke and Wiernik(2022{\natexlab{b}})]{pkg-gridtext}
+C.~O. Wilke and B.~M. Wiernik.
+\newblock \emph{{gridtext}: Improved Text Rendering Support for {'grid'}
+  Graphics}, 2022{\natexlab{b}}.
+\newblock URL \url{https://CRAN.R-project.org/package=gridtext}.
+\newblock R package version 0.1.5.
+
+\bibitem[Xie(2024)]{pkg:tinytex}
+Y.~Xie.
+\newblock \emph{{tinytex}: Helper Functions to Install and Maintain {TeX Live},
+  and Compile {LaTeX} Documents}, 2024.
+\newblock URL \url{https://github.com/rstudio/tinytex}.
+\newblock R package version 0.54.
+
+\bibitem[Xie et~al.(2018)Xie, Allaire, and Grolemund]{pkg:rmarkdown}
+Y.~Xie, J.~Allaire, and G.~Grolemund.
+\newblock \emph{R Markdown: The Definitive Guide}.
+\newblock Chapman and Hall/CRC, Boca Raton, Florida, 2018.
+\newblock ISBN 9781138359338.
+\newblock URL \url{https://bookdown.org/yihui/rmarkdown}.
+
+\end{thebibliography}
