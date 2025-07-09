@@ -15,11 +15,11 @@ The xdvir package provides functions for rendering LaTeX fragments as labels, an
 
 Text labels, titles, and annotations are essential components of
 any data visualization. Viewers focus a lot of their attention
-on text (Borkin et al. 2016),
+on text \citep{massvis},
 text is the most effective way to communicate some types of
-information (Hearst 2023),
+information \citep{hearst},
 and the message obtained from a data visualization can be
-heavily influenced by the text on a plot (Kong, Liu, and Karahalios 2018).
+heavily influenced by the text on a plot \citep{kong}.
 
 R provides relatively flexible tools for adding text labels to plots.
 For example, in the \texttt{graphics} package, we can specify an
@@ -33,13 +33,13 @@ in terms of the formatting of the text.
 For example, there is no facility for emphasizing an individual word using
 a \textbf{bold} or \emph{italic} face within a text label.
 
-The \CRANpkg{gridtext} (Wilke and Wiernik 2022b) and \CRANpkg{ggtext} (Wilke and Wiernik 2022a)
+The \CRANpkg{gridtext} \citep{pkg-gridtext} and \CRANpkg{ggtext} \citep{pkg-ggtext}
 packages greatly improved the situation by allowing text labels
 to include a small subset of
 markdown and HTML (plus CSS). This allowed, for example, changes in font face
 and color within text labels.
 
-More recently, the \CRANpkg{marquee} package (Pedersen and Mitáš 2024)
+More recently, the \CRANpkg{marquee} package \citep{pkg-marquee}
 improved the situation a great deal further by providing full support for
 markdown within text labels. This made it possible to layout more
 complex arrangements of text and even graphical content within text labels.
@@ -65,7 +65,7 @@ at first glance, but it harbors several important details:
   (Latin Modern) than the plain text (TeX Gyre Adventor)
   and the mixture is broken across multiple lines.
 
-  The R graphics system can draw mathematical expressions (Murrell and Ihaka 2000)
+  The R graphics system can draw mathematical expressions \citep{plotmath}
   and that includes a mixture of plain text and mathematical expressions.
   Furthermore, the R graphics system uses a separate symbol font
   for mathematical expressions compared to plain text. However,
@@ -112,7 +112,7 @@ multiple columns, or writing text vertically from top to bottom.
 From R 4.3.0, it has been
 possible to draw text from a set of typeset glyphs using the
 functions \texttt{grDevices::glyphInfo()} and \texttt{grid::grid.glyph()}
-(Murrell, Pedersen, and Urbanek 2023). This facility
+\citep{murrell-pedersen-urbanek-glyphs-2023}. This facility
 offers the promise of being able to render arbitrary typeset text
 in R. However, it
 presupposes that we are able to generate a set of typeset glyphs.
@@ -218,7 +218,7 @@ with a high-level plot, but we will leave those demonstrations to
 later sections.
 
 Instead, for now, we will demonstrate a more common scenario:
-drawing \LaTeX{} text labels on a \CRANpkg{ggplot2} plot (Wickham 2016).
+drawing \LaTeX{} text labels on a \CRANpkg{ggplot2} plot \citep{pkg-ggplot2}.
 For this purpose, the \texttt{xdvir} package provides the
 \texttt{element\_latex()} function. This allows us to specify a \LaTeX{} fragment
 as a plot label and then we can indicate the special nature of the label
@@ -347,7 +347,7 @@ simpleDoc
 \end{verbatim}
 
 \begin{verbatim}
-#> %% R package xdvir_0.1.2; engine name: XeTeX; engine version: XeTeX 3.14159265-2.6-0
+#> %% R package xdvir_0.1.2; engine name: XeTeX; engine version: XeTeX 3.141592653-2.6-
 #> \documentclass[varwidth]{standalone}
 #> \usepackage{unicode-math}
 #> \begin{document}
@@ -384,14 +384,14 @@ simpleDVI
 #> bop          counters=1 0 0 0 0 0 0 0 0 0, p=-1
 #> xxx1         k=47
 #>              x=pdf:pagesize width 143.26802pt height 9.48027pt
-#> down3        a=-4114988
+#> down3        a=-4736287
 #> 
 #> ...
 #> 
 #> right3       b=-4736287
-#> x_fnt_def    fontnum=24, ptsize=655360
+#> x_fnt_def    fontnum=28, ptsize=655360
 #>              fontname=/usr/share/texmf/fonts/opentype/public/lm/lmroman10-regular.ot
-#> fnt_num_24
+#> fnt_num_28
 #> x_glyph      id=113, x=0, y=0
 #> x_glyph      id=50, x=619315, y=0 
 #> w3           b=218235 
@@ -449,7 +449,7 @@ For example, the following code draws text with the last two
 words in red.
 
 \begin{verbatim}
-colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+colourTeX <- r"(We combine to get the \textcolor{red}{Fitness Function})"
 \end{verbatim}
 
 \begin{verbatim}
@@ -472,18 +472,19 @@ colourDoc
 \end{verbatim}
 
 \begin{verbatim}
-#> %% R package xdvir_0.1.2; engine name: XeTeX; engine version: XeTeX 3.14159265-2.6-0
+#> %% R package xdvir_0.1.2; engine name: XeTeX; engine version: XeTeX 3.141592653-2.6-
 #> \documentclass[varwidth]{standalone}
 #> \usepackage{unicode-math}
 #> \usepackage{xcolor}
 #> \begin{document}
-#> We combine to get the \color{red}{Fitness Function}
+#> We combine to get the \textcolor{red}{Fitness Function}
 #> \end{document}
 \end{verbatim}
 
 This in turn affects the typesetting step: without the \texttt{xcolor} package, the
-\LaTeX{} command \texttt{\textbackslash{}color} would not be recognized; with the \texttt{xcolor} package,
-the \texttt{\textbackslash{}color} command produces instructions to change color
+\LaTeX{} command \texttt{\textbackslash{}textcolor} would not be recognized;\\
+with the \texttt{xcolor} package,
+the \texttt{\textbackslash{}textcolor} command produces instructions to change color
 in the \texttt{"DVI"} output. This is demonstrated below with an
 explicit call to the \texttt{typeset()} function. An example of the color-change
 instructions is the line containing \texttt{color\ push} in the output below the code.
@@ -500,9 +501,9 @@ colourDVI
 #> 
 #> ...
 #> 
-#> x_fnt_def    fontnum=24, ptsize=655360
+#> x_fnt_def    fontnum=28, ptsize=655360
 #>              fontname=/usr/share/texmf/fonts/opentype/public/lm/lmroman10-regular.ot
-#> fnt_num_24
+#> fnt_num_28
 #> x_glyph      id=113, x=0, y=0
 #> x_glyph      id=50, x=619315, y=0 
 #> 
@@ -740,7 +741,7 @@ arrows connecting the circles.
 \begin{verbatim}
 tikzTeX <- r"(%
 \path (0, 0) node[circle,minimum size=.5in,draw,thick] (x) {\sffamily{R}} 
-       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti{\it k}Z!};
+       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti\textit{k}Z!};
 \draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
 \draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
 \end{verbatim}
@@ -814,9 +815,9 @@ paste0("$\\bar x_", 1:5, "$")
 
 There are also packages that can generate larger fragments of
 \LaTeX{} code. For example, there are packages like \CRANpkg{xtable}
-(Dahl et al. 2019)
+\citep{pkg:xtable}
 for generating \LaTeX{} tables and the \CRANpkg{rmarkdown}
-package (Xie, Allaire, and Grolemund 2018)
+package \citep{pkg:rmarkdown}
 can generate \LaTeX{} documents from Markdown input.
 These tools can be useful for generating larger chunks of \LaTeX{} code,
 although the \LaTeX{} code that is produced may consist of
@@ -905,7 +906,7 @@ a \LaTeX{} package that has no predefined support in \texttt{xdvir}.
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/rahlf-1} \caption{A plot with a two-column text annotation. This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book ``Data Visualisation with R'' (Rahlf 2017).}\label{fig:rahlf}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/rahlf-1} \caption{A plot with a two-column text annotation. This plot is an adaptation of Figure 4.1 from Thomas Rahlf's book ``Data Visualisation with R'' \citep{rahlf}.}\label{fig:rahlf}
 \end{figure}
 
 The details of the code that produces the main plot---everything except
@@ -930,7 +931,7 @@ in order to integrate the output from \texttt{grid.latex()} with the plot,
 we need to convert the plot to an equivalent drawing that uses
 functions from the \texttt{grid} package.
 This can be achieved with the \texttt{grid.echo()} function from the
-\CRANpkg{gridGraphics} package (Murrell and Wen 2020), as shown below.
+\CRANpkg{gridGraphics} package \citep{pkg-gridgraphics}, as shown below.
 
 \begin{verbatim}
 library(gridGraphics)
@@ -946,7 +947,7 @@ In order to achieve this, we can navigate to the \texttt{grid} viewport
 that corresponds to the main plot region, which also has scales
 that match the plot scales.
 The naming scheme for the \texttt{grid} viewports that \texttt{grid.echo()}
-generates is described in Murrell (2015).
+generates is described in \citet{RJ-2015-012}.
 
 \begin{verbatim}
 downViewport("graphics-window-1-1")
@@ -1037,7 +1038,7 @@ This example also demonstrates a way to integrate lower-level
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/schneider-1} \caption{A plot with annotated mathematical equation. This plot is an adaptation of the plot in Schneider (2023).}\label{fig:schneider}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/schneider-1} \caption{A plot with annotated mathematical equation. This plot is an adaptation of the plot in \citet{schneider2023}.}\label{fig:schneider}
 \end{figure}
 
 The main plot in this example is a \CRANpkg{ggplot2} plot.
@@ -1157,7 +1158,7 @@ and how to use \texttt{geom\_latex()} to draw \LaTeX{} text
 as data symbols.
 In this example, we are adding a single \LaTeX{} annotation at a specific
 position within a \CRANpkg{ggplot2} plot, so
-we use the \CRANpkg{gggrid} package (Murrell 2022).
+we use the \CRANpkg{gggrid} package \citep{pkg-gggrid}.
 This package provides the \texttt{grid\_panel()} function, which we can
 add to a \CRANpkg{ggplot2} plot, much like the standard \texttt{ggplot2::geom\_point()}
 function, to add \texttt{grid} drawing to a \texttt{ggplot2} plot.
@@ -1204,7 +1205,7 @@ list items below a plot (Figure \ref{fig:anzjs}).
 
 
 \begin{figure}
-\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/anzjs-1} \caption{A plot with numbered list items as annotations below the plot. This plot is an adaptation of Figure 10 from Murrell (in press).}\label{fig:anzjs}
+\includegraphics[width=1\linewidth]{murrell-xdvir_files/figure-latex/anzjs-1} \caption{A plot with numbered list items as annotations below the plot. This plot is an adaptation of Figure 10 from \citet{anzjs2025}.}\label{fig:anzjs}
 \end{figure}
 
 The main plot is a \CRANpkg{ggplot2} plot with a number of relatively
@@ -1238,8 +1239,8 @@ environment that creates a numbered list item.
 #> \fontsize{10}{12}
 #> \selectfont
 #> \begin{enumerate}
-#> \item New Zealand closes its borders to {\it almost} all travellers at
-#> {\bf 23:59, 19 March 2020 (NZDT)}.
+#> \item New Zealand closes its borders to \textit{almost} all travellers at
+#> \textbf{23:59, 19 March 2020 (NZDT)}.
 #> \end{enumerate}
 \end{verbatim}
 
@@ -1284,7 +1285,7 @@ ggANZJS +
 \section{Example 4}\label{example-4}}
 
 This section provides an example of integrating \texttt{grid.latex()} output
-with a multi-panel \CRANpkg{lattice} plot (Sarkar 2008).
+with a multi-panel \CRANpkg{lattice} plot \citep{pkg-lattice}.
 The plot is shown in
 Figure \ref{fig:lattice}.
 
@@ -1360,10 +1361,11 @@ three colors, and then giving the title text, with the words
 \begin{verbatim}
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{230,159,0}
-\definecolor{lattice2}{RGB}{0,114,178}
+\definecolor{lattice1}{RGB}{0,128,255}
+\definecolor{lattice2}{RGB}{255,0,255}
 \color{lightGrey}
-Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+Number of Incidents for \textcolor{lattice1}{Males} and 
+\textcolor{lattice2}{Females}
 )"
 \end{verbatim}
 
@@ -1415,15 +1417,15 @@ Figure \ref{fig:lattice} requires running a \TeX{} engine 17 times.
 Another limitation of the \texttt{xdvir} package is that it requires a
 graphics device that can render typeset glyphs. This currently includes
 the \texttt{pdf()} and \texttt{quartz()} devices, plus all devices based on the
-Cairo graphics library (Packard, Worth, and Esfahbod 2025), and graphics devices
-provided by the \texttt{ragg} package (Pedersen and Shemanarev 2024).
+Cairo graphics library \citep{cairo}, and graphics devices
+provided by the \texttt{ragg} package \citep{pkg:ragg}.
 
 A final major limitation of \texttt{xdvir} is that it only currently supports two
 \TeX{} engines: \XeTeX{} and recent Lua\TeX{}.
 The package start-up message
 reports on whether these are available. An implicit limitation is that
 \texttt{xdvir} requires a \TeX{} installation, though that is simplified
-through a dependency on the \CRANpkg{tinytex} package (Xie 2024).
+through a dependency on the \CRANpkg{tinytex} package \citep{pkg:tinytex}.
 
 Given these limitations, it is worth discussing alternative approaches.
 The first section of this article mentioned \CRANpkg{gridtext},
@@ -1434,32 +1436,37 @@ Although they may not be able to produce as wide a range of results
 compared to \LaTeX{} code, they will perform much faster and
 require fewer dependencies than \texttt{xdvir}.
 There are also a number of packages that perform specific
-text-placement tasks, for example \CRANpkg{geomtextpath} (Cameron and van den Brand 2025),
+text-placement tasks, for example \CRANpkg{geomtextpath} \citep{pkg:geomtextpath},
 which can arrange text along an arbitrary path, and
-\CRANpkg{directlabels} (Hocking 2024) and
-\CRANpkg{ggforce} (Pedersen 2024), which provide functions for cleverly
+\CRANpkg{directlabels} \citep{pkg:directlabels} and
+\CRANpkg{ggforce} \citep{pkg:ggforce}, which provide functions for cleverly
 positioning text annotations, though without typesetting facilities.
 The advantage of \texttt{xdvir} by comparison with these packages
 is that it is possible to
 produce more advanced typesetting results thanks to having access to \LaTeX{}.
 
-The \CRANpkg{tikzDevice} package (Sharpsteen and Bracken 2023) is an interesting
+The \CRANpkg{tikzDevice} package \citep{pkg:tikzDevice} is an interesting
 alternative because, where \texttt{xdvir} integrates \LaTeX{} text with R graphics,
-\CRANpkg{tikzDevice} reverses the process and integrates R graphics with \LaTeX{}.
+\CRANpkg{tikzDevice} reverses the process and integrates R graphics with
+\LaTeX{}.
 The \CRANpkg{tikzDevice} package provides an R graphics device that
 converts R plots into Ti\textit{k}Z pictures so that R plots can include labels with
 \LaTeX{} fragments and R plots can be
 deeply integrated with \LaTeX{} documents.
-The main difference with this package is the destination:
+There is also a \CRANpkg{ggtikz} package \citep{pkg:ggtikz}
+that builds on \CRANpkg{tikzDevice}
+to allow Ti\textit{k}Z annotations on \CRANpkg{ggplot2} plots.
+The main difference compared to \texttt{xdvir} is the destination:
 if we use \texttt{xdvir}, we end up with \LaTeX{} output within an R plot;
-if we use \CRANpkg{tikzDevice} we end up with an R plot within \LaTeX{} output.
+if we use \CRANpkg{tikzDevice} or \CRANpkg{ggtikz},
+we end up with an R plot within \LaTeX{} output.
 If the final destination is a \LaTeX{} document,
-then the \CRANpkg{tikzDevice} may provide more convenience
+then \CRANpkg{tikzDevice} or \CRANpkg{ggtikz} may provide more convenience
 and greater control. However, if the final destination is
 more general, or unknown, then \texttt{xdvir} may be the more appropriate
 solution.
 
-The \CRANpkg{latex2exp} package (Meschiari 2022) is another package
+The \CRANpkg{latex2exp} package \citep{pkg:latex2exp} is another package
 that works in the opposite direction to \texttt{xdvir}. This package
 takes a \LaTeX{} fragment and converts it to an R \emph{plotmath} expression.
 This allows users familiar with \LaTeX{} to access R's math-drawing facility
@@ -1475,7 +1482,7 @@ This approach harks back to early solutions for including
 from \LaTeX{} fragments.
 However, more modern technologies, such as SVG, mean that this
 approach can yield a much higher-quality result, as
-demonstrated by Schneider (2023).
+demonstrated by \citet{schneider2023}.
 One simple advantage of the \texttt{xdvir} approach is the level of convenience
 that it provides by automating the authoring and typesetting steps.
 The \texttt{xdvir} package also provides more possibilities to integrate
@@ -1510,92 +1517,7 @@ for giving either implicit or explicit
 permission to base several of the examples in this article
 on their work.
 
-\hypertarget{references}{%
-\section*{References}\label{references}}
-\addcontentsline{toc}{section}{References}
-
-\hypertarget{refs}{}
-\begin{CSLReferences}{1}{0}
-\leavevmode\vadjust pre{\hypertarget{ref-massvis}{}}%
-Borkin, Michelle A., Zoya Bylinskii, Nam Wook Kim, Constance May Bainbridge, Chelsea S. Yeh, Daniel Borkin, Hanspeter Pfister, and Aude Oliva. 2016. {``Beyond Memorability: Visualization Recognition and Recall.''} \emph{IEEE Transactions on Visualization and Computer Graphics} 22 (1): 519--28. \url{https://doi.org/10.1109/TVCG.2015.2467732}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:geomtextpath}{}}%
-Cameron, Allan, and Teun van den Brand. 2025. \emph{{geomtextpath}: Curved Text in {'ggplot2'}}. \url{https://CRAN.R-project.org/package=geomtextpath}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:xtable}{}}%
-Dahl, David B., David Scott, Charles Roosen, Arni Magnusson, and Jonathan Swinton. 2019. \emph{{xtable}: Export Tables to LaTeX or HTML}. \url{https://CRAN.R-project.org/package=xtable}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-hearst}{}}%
-Hearst, Marti A. 2023. {``Show It or Tell It? Text, Visualization, and Their Combination.''} \emph{Commun. ACM} 66 (10): 68--75. \url{https://doi.org/10.1145/3593580}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:directlabels}{}}%
-Hocking, Toby Dylan. 2024. \emph{{directlabels}: Direct Labels for Multicolor Plots}. \url{https://CRAN.R-project.org/package=directlabels}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-kong}{}}%
-Kong, Ha-Kyung, Zhicheng Liu, and Karrie Karahalios. 2018. {``Frames and Slants in Titles of Visualizations on Controversial Topics.''} In \emph{Proceedings of the 2018 CHI Conference on Human Factors in Computing Systems}, 1--12. CHI '18. New York, NY, USA: Association for Computing Machinery. \url{https://doi.org/10.1145/3173574.3174012}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:latex2exp}{}}%
-Meschiari, Stefano. 2022. \emph{{latex2exp}: Use {LaTeX} Expressions in Plots}. \url{https://CRAN.R-project.org/package=latex2exp}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-anzjs2025}{}}%
-Murrell, Paul. in press. {``Text in {R} Graphics.''} \emph{Australian \& New Zealand Journal of Statistics}, in press. https://doi.org/\url{https://doi.org/10.1111/anzs.12438}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-RJ-2015-012}{}}%
----------. 2015. {``The gridGraphics Package.''} \emph{The R Journal} 7: 151--62. \url{https://rjournal.github.io/}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-gggrid}{}}%
----------. 2022. \emph{{gggrid}: Draw with {'grid'} in {'ggplot2'}}. \url{https://CRAN.R-project.org/package=gggrid}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-plotmath}{}}%
-Murrell, Paul, and Ross Ihaka. 2000. {``An Approach to Providing Mathematical Annotation in Plots.''} \emph{Journal of Computational and Graphical Statistics} 9 (3): 582--99. \url{https://doi.org/10.1080/10618600.2000.10474900}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-murrell-pedersen-urbanek-glyphs-2023}{}}%
-Murrell, Paul, Thomas Lin Pedersen, and Simon Urbanek. 2023. {``Rendering Typeset Glyphs in {R} Graphics.''} 2023-01. Department of Statistics, The University of Auckland. \url{https://doi.org/10.17608/k6.auckland.22774079}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-gridgraphics}{}}%
-Murrell, Paul, and Zhijian Wen. 2020. \emph{{gridGraphics}: Redraw Base Graphics Using {'grid'} Graphics}. \url{https://CRAN.R-project.org/package=gridGraphics}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-cairo}{}}%
-Packard, Keith, Carl Worth, and Behdad Esfahbod. 2025. {``Cairo Graphics Library.''} \url{https://www.cairographics.org/}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:ggforce}{}}%
-Pedersen, Thomas Lin. 2024. \emph{{ggforce}: Accelerating {'ggplot2'}}. \url{https://CRAN.R-project.org/package=ggforce}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-marquee}{}}%
-Pedersen, Thomas Lin, and Martin Mitáš. 2024. \emph{{marquee}: Markdown Parser and Renderer for {R} Graphics}. \url{https://CRAN.R-project.org/package=marquee}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:ragg}{}}%
-Pedersen, Thomas Lin, and Maxim Shemanarev. 2024. \emph{{ragg}: Graphic Devices Based on AGG}. \url{https://CRAN.R-project.org/package=ragg}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-rahlf}{}}%
-Rahlf, Thomas. 2017. \emph{Data Visualisation with {R}: 100 Examples}. 1st ed. Springer Publishing Company, Incorporated. \url{https://link.springer.com/book/10.1007/978-3-030-28444-2}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-lattice}{}}%
-Sarkar, Deepayan. 2008. \emph{Lattice: Multivariate Data Visualization with {R}}. New York: Springer. \url{http://lmdvr.r-forge.r-project.org}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-schneider2023}{}}%
-Schneider, W. Joel. 2023. {``Annotated Equations in {g}gplot2.''} \url{https://wjschne.github.io/posts/2023-07-23-latex-equation-in-ggplot2/}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:tikzDevice}{}}%
-Sharpsteen, Charlie, and Cameron Bracken. 2023. \emph{{tikzDevice}: {R} Graphics Output in {LaTeX} Format}. \url{https://CRAN.R-project.org/package=tikzDevice}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-ggplot2}{}}%
-Wickham, Hadley. 2016. \emph{{ggplot2}: Elegant Graphics for Data Analysis}. Springer-Verlag New York. \url{https://ggplot2.tidyverse.org}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-ggtext}{}}%
-Wilke, Claus O., and Brenton M. Wiernik. 2022a. \emph{{ggtext}: Improved Text Rendering Support for {'ggplot2'}}. \url{https://CRAN.R-project.org/package=ggtext}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg-gridtext}{}}%
----------. 2022b. \emph{{gridtext}: Improved Text Rendering Support for {'grid'} Graphics}. \url{https://CRAN.R-project.org/package=gridtext}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:tinytex}{}}%
-Xie, Yihui. 2024. \emph{{tinytex}: Helper Functions to Install and Maintain {TeX Live}, and Compile {LaTeX} Documents}. \url{https://github.com/rstudio/tinytex}.
-
-\leavevmode\vadjust pre{\hypertarget{ref-pkg:rmarkdown}{}}%
-Xie, Yihui, J. J. Allaire, and Garrett Grolemund. 2018. \emph{R Markdown: The Definitive Guide}. Boca Raton, Florida: Chapman; Hall/CRC. \url{https://bookdown.org/yihui/rmarkdown}.
-
-\end{CSLReferences}
-
+\bibliography{murrell-xdvir.bib}
 
 \address{%
 Paul Murrell\\

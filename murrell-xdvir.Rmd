@@ -609,7 +609,7 @@ For example, the following code draws text with the last two
 words in red.  
 
 ```{r}
-colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+colourTeX <- r"(We combine to get the \textcolor{red}{Fitness Function})"
 ```
 
 ```{r colourtex, eval=FALSE}
@@ -637,8 +637,9 @@ cat(output, sep="\n")
 ```
 
 This in turn affects the typesetting step:  without the `xcolor` package, the
-`r LaTeX` command `\color` would not be recognized;  with the `xcolor` package, 
-the `\color` command produces instructions to change color 
+`r LaTeX` command `\textcolor` would not be recognized;  
+with the `xcolor` package, 
+the `\textcolor` command produces instructions to change color 
 in the `"DVI"` output.  This is demonstrated below with an
 explicit call to the `typeset()` function.  An example of the color-change
 instructions is the line containing `color push` in the output below the code.
@@ -973,7 +974,7 @@ arrows connecting the circles.
 ```{r tikztex}
 tikzTeX <- r"(%
 \path (0, 0) node[circle,minimum size=.5in,draw,thick] (x) {\sffamily{R}} 
-       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti{\it k}Z!};
+       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti\textit{k}Z!};
 \draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
 \draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
 ```
@@ -1478,8 +1479,8 @@ closeTeX <- r"(%
 \fontsize{10}{12}
 \selectfont
 \begin{enumerate}
-\item New Zealand closes its borders to {\it almost} all travellers at
-{\bf 23:59, 19 March 2020 (NZDT)}.
+\item New Zealand closes its borders to \textit{almost} all travellers at
+\textbf{23:59, 19 March 2020 (NZDT)}.
 \end{enumerate})"
 ```
 
@@ -1513,7 +1514,7 @@ labelRight <- function(data, coords) {
 \selectfont
 \begin{enumerate}\addtocounter{enumi}{1}
 \item New Zealand's international border opens to all visitors from
-{\bf 11:59PM, 31 July 2022 (NZDT)}.
+\textbf{11:59PM, 31 July 2022 (NZDT)}.
 \end{enumerate})"
     latex2 <- latexGrob(openTeX,
                         x=unit(x2, "npc") + unit(2, "mm"),
@@ -1619,7 +1620,9 @@ trellis.par.set(theme=list(background=list(col=darkGrey),
                            axis.text=list(col=lightGrey, cex=2/3),
                            axis.line=list(col=NA)))
 mainPanel <- function(x, y, subscripts, groups, ...) {
-    panel.superpose(x, y, subscripts, groups, ...)
+    panel.superpose(x, y, subscripts, groups, 
+                    col=rev(trellis.par.get("superpose.symbol")$col[1:2]),
+                    ...)
     panel.abline(h=0, col=lightGrey)
 }
 latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
@@ -1641,10 +1644,11 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 ```{r latticetitletex, echo=FALSE}
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{230,159,0}
-\definecolor{lattice2}{RGB}{0,114,178}
+\definecolor{lattice1}{RGB}{0,128,255}
+\definecolor{lattice2}{RGB}{255,0,255}
 \color{lightGrey}
-Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+Number of Incidents for \textcolor{lattice1}{Males} and 
+\textcolor{lattice2}{Females}
 )"
 ```
 
@@ -1828,16 +1832,21 @@ produce more advanced typesetting results thanks to having access to `r LaTeX`.
 
 The \CRANpkg{tikzDevice} package [@pkg:tikzDevice] is an interesting
 alternative because, where `xdvir` integrates `r LaTeX` text with R graphics, 
-\CRANpkg{tikzDevice} reverses the process and integrates R graphics with `r LaTeX`.
+\CRANpkg{tikzDevice} reverses the process and integrates R graphics with 
+`r LaTeX`.
 The \CRANpkg{tikzDevice} package provides an R graphics device that
 converts R plots into `r TikZ` pictures so that R plots can include labels with 
 `r LaTeX` fragments and R plots can be 
 deeply integrated with `r LaTeX` documents.
-The main difference with this package is the destination:
+There is also a \CRANpkg{ggtikz} package [@pkg:ggtikz]
+that builds on \CRANpkg{tikzDevice}
+to allow `r TikZ` annotations on \CRANpkg{ggplot2} plots.
+The main difference compared to `xdvir` is the destination:
 if we use `xdvir`, we end up with `r LaTeX` output within an R plot;
-if we use \CRANpkg{tikzDevice} we end up with an R plot within `r LaTeX` output.
+if we use \CRANpkg{tikzDevice} or \CRANpkg{ggtikz}, 
+we end up with an R plot within `r LaTeX` output.
 If the final destination is a `r LaTeX` document, 
-then the \CRANpkg{tikzDevice} may provide more convenience
+then \CRANpkg{tikzDevice} or \CRANpkg{ggtikz} may provide more convenience
 and greater control. However, if the final destination is 
 more general, or unknown, then `xdvir` may be the more appropriate
 solution.

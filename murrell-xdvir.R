@@ -270,7 +270,7 @@ render(simpleDVI)
 
 
 ## -----------------------------------------------------------------------------
-colourTeX <- r"(We combine to get the \color{red}{Fitness Function})"
+colourTeX <- r"(We combine to get the \textcolor{red}{Fitness Function})"
 
 
 ## ----colourtex, eval=FALSE----------------------------------------------------
@@ -496,7 +496,7 @@ grid.lines(unit.c(curve$devx, left$devx, right$devx),
 ## ----tikztex------------------------------------------------------------------
 tikzTeX <- r"(%
 \path (0, 0) node[circle,minimum size=.5in,draw,thick] (x) {\sffamily{R}} 
-       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti{\it k}Z!};
+       (3, 0) node[circle,minimum size=.5in,draw,thick] (y) {Ti\textit{k}Z!};
 \draw[-{stealth},thick] (x) .. controls (1, 1) and (2, 1).. (y);
 \draw[-{stealth},thick] (y) .. controls (2, -1) and (1, -1) .. (x);)"
 
@@ -761,8 +761,8 @@ closeTeX <- r"(%
 \fontsize{10}{12}
 \selectfont
 \begin{enumerate}
-\item New Zealand closes its borders to {\it almost} all travellers at
-{\bf 23:59, 19 March 2020 (NZDT)}.
+\item New Zealand closes its borders to \textit{almost} all travellers at
+\textbf{23:59, 19 March 2020 (NZDT)}.
 \end{enumerate})"
 
 
@@ -796,7 +796,7 @@ closeTeX <- r"(%
 # \selectfont
 # \begin{enumerate}\addtocounter{enumi}{1}
 # \item New Zealand's international border opens to all visitors from
-# {\bf 11:59PM, 31 July 2022 (NZDT)}.
+# \textbf{11:59PM, 31 July 2022 (NZDT)}.
 # \end{enumerate})"
 #     latex2 <- latexGrob(openTeX,
 #                         x=unit(x2, "npc") + unit(2, "mm"),
@@ -843,7 +843,7 @@ labelRight <- function(data, coords) {
 \selectfont
 \begin{enumerate}\addtocounter{enumi}{1}
 \item New Zealand's international border opens to all visitors from
-{\bf 11:59PM, 31 July 2022 (NZDT)}.
+\textbf{11:59PM, 31 July 2022 (NZDT)}.
 \end{enumerate})"
     latex2 <- latexGrob(openTeX,
                         x=unit(x2, "npc") + unit(2, "mm"),
@@ -917,7 +917,9 @@ trellis.par.set(theme=list(background=list(col=darkGrey),
                            axis.text=list(col=lightGrey, cex=2/3),
                            axis.line=list(col=NA)))
 mainPanel <- function(x, y, subscripts, groups, ...) {
-    panel.superpose(x, y, subscripts, groups, ...)
+    panel.superpose(x, y, subscripts, groups, 
+                    col=rev(trellis.par.get("superpose.symbol")$col[1:2]),
+                    ...)
     panel.abline(h=0, col=lightGrey)
 }
 latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
@@ -939,10 +941,11 @@ latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
 ## ----latticetitletex, echo=FALSE----------------------------------------------
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{230,159,0}
-\definecolor{lattice2}{RGB}{0,114,178}
+\definecolor{lattice1}{RGB}{0,128,255}
+\definecolor{lattice2}{RGB}{255,0,255}
 \color{lightGrey}
-Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+Number of Incidents for \textcolor{lattice1}{Males} and 
+\textcolor{lattice2}{Females}
 )"
 
 
@@ -1018,10 +1021,11 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 ## ----eval=FALSE---------------------------------------------------------------
 # titleTeX <- r"(%
 # \definecolor{lightGrey}{RGB}{128,128,128}
-# \definecolor{lattice1}{RGB}{230,159,0}
-# \definecolor{lattice2}{RGB}{0,114,178}
+# \definecolor{lattice1}{RGB}{0,128,255}
+# \definecolor{lattice2}{RGB}{255,0,255}
 # \color{lightGrey}
-# Number of Incidents for {\color{lattice1}Males} and {\color{lattice2}Females}
+# Number of Incidents for \textcolor{lattice1}{Males} and
+# \textcolor{lattice2}{Females}
 # )"
 
 
