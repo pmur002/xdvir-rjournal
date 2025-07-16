@@ -102,7 +102,7 @@ to get the \textcolor{Rred}{\bf fitness function}.
 \end{minipage})"
 
 
-## ----typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation that contains several typesetting challenges:  in-line mathematical equations; changes in color; and automated line-breaks with full justification and hyphenation."----
+## ----typesetting, echo=FALSE, fig.width=7, fig.height=4.5, out.width="100%", fig.keep="last", fig.cap="A plot with a text annotation in the top-right corner that contains several typesetting challenges:  in-line mathematical expressions like $\\bar z_i$; changes in color so that the last two words match the colour of the thicker line in the plot; and automated line-breaks with full justification and hyphenation."----
 
 adventor <- fontspecPackage(font="TeX Gyre Adventor", name="adventor")
 
@@ -661,7 +661,7 @@ schneiderTeX <- paste(schneiderLines, collapse="\n")
 # 
 # annotation <- function(data, coords) {
 #     latexGrob(schneiderTeX,
-#               packages=c("tikzNoBBox", "annotate", "roboto"),
+#               packages=c("tikzNoBBox", "annotate", "roboto", "xcolor"),
 #               x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
 #               y=coords$y, hjust=1, vjust=1)
 # }
@@ -688,7 +688,7 @@ library(gggrid)
 
 annotation <- function(data, coords) {
     latexGrob(schneiderTeX, 
-              packages=c("tikzNoBBox", "annotate", "roboto"),
+              packages=c("tikzNoBBox", "annotate", "roboto", "xcolor"),
               x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
               y=coords$y, hjust=1, vjust=1)
 }
@@ -737,7 +737,7 @@ cat(schneiderLines[1:(ann2 - 1)], sep="\n")
 # 
 # annotation <- function(data, coords) {
 #     latexGrob(schneiderTeX,
-#               packages=c("tikzNoBBox", "annotate", "roboto"),
+#               packages=c("tikzNoBBox", "annotate", "roboto", "xcolor"),
 #               x=unit(coords$x, "npc") + 0.5*stringWidth("160"),
 #               y=coords$y, hjust=1, vjust=1)
 # }
@@ -912,13 +912,16 @@ crime$Type <- factor(crime$Type, levels=monthLevels)
 library(lattice)
 darkGrey <- grey(.1)
 lightGrey <- grey(.5)
+cols <- trellis.par.get("superpose.symbol")$col[1:2]
+cols[1] <- colorspace::lighten(cols[1], amount=.4)
+cols[2] <- colorspace::darken(cols[2], amount=.2)
 trellis.par.set(theme=list(background=list(col=darkGrey),
                            layout.heights=list(top.padding=4),
                            axis.text=list(col=lightGrey, cex=2/3),
                            axis.line=list(col=NA)))
 mainPanel <- function(x, y, subscripts, groups, ...) {
     panel.superpose(x, y, subscripts, groups, 
-                    col=rev(trellis.par.get("superpose.symbol")$col[1:2]),
+                    col=rev(cols),
                     ...)
     panel.abline(h=0, col=lightGrey)
 }
@@ -935,14 +938,14 @@ latticeCrime <- xyplot(Count ~ Month | Type, crime, groups=Sex, type="l",
 
 ## ----echo=FALSE, eval=FALSE---------------------------------------------------
 # ## Colours come from ...
-# ## col2rgb(trellis.par.get("superpose.symbol")$col[1:2])
+# ## col2rgb(cols)
 
 
 ## ----latticetitletex, echo=FALSE----------------------------------------------
 titleTeX <- r"(%
 \definecolor{lightGrey}{RGB}{128,128,128}
-\definecolor{lattice1}{RGB}{0,128,255}
-\definecolor{lattice2}{RGB}{255,0,255}
+\definecolor{lattice1}{RGB}{105,169,234}
+\definecolor{lattice2}{RGB}{181,124,1}
 \color{lightGrey}
 Number of Incidents for \textcolor{lattice1}{Males} and 
 \textcolor{lattice2}{Females}
@@ -1021,8 +1024,8 @@ grid.edit("ticklabels.left", grep=TRUE, global=TRUE, just=c("right", "bottom"))
 ## ----eval=FALSE---------------------------------------------------------------
 # titleTeX <- r"(%
 # \definecolor{lightGrey}{RGB}{128,128,128}
-# \definecolor{lattice1}{RGB}{0,128,255}
-# \definecolor{lattice2}{RGB}{255,0,255}
+# \definecolor{lattice1}{RGB}{105,169,234}
+# \definecolor{lattice2}{RGB}{181,124,1}
 # \color{lightGrey}
 # Number of Incidents for \textcolor{lattice1}{Males} and
 # \textcolor{lattice2}{Females}
