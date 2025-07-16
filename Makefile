@@ -19,7 +19,8 @@ submission:
 	Fonts/*.ttf \
 	scripts \
 	TeX/*.tex \
-	TeX/*.sty
+	TeX/*.sty \
+	Review/murrell-xdvir-response.pdf
 
 .PHONY: submission-test
 submission-test:

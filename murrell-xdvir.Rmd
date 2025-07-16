@@ -1,6 +1,6 @@
 ---
 title: "Rendering LaTeX in R"
-date: "2025-07-16"
+date: "2025-07-17"
 abstract: >
   The xdvir package provides functions for rendering 
   LaTeX fragments as labels, annotations, and
